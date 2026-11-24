@@ -6,8 +6,11 @@ Description: >-
 Parameters:
   GitHubRepo:
     Type: String
-    Default: thirumald/UrbanIQ
-    Description: Repository allowed to work in this account, as owner/name.
+    Default: thirumald@34179924/UrbanIQ@1469771682
+    AllowedPattern: "^[A-Za-z0-9_.-]+(@[0-9]+)?/[A-Za-z0-9_.-]+(@[0-9]+)?$"
+    Description: >-
+      Repository allowed to work in this account, exactly as GitHub names it in its OIDC sub claim
+      (this account uses immutable claims: owner@ownerId/repo@repoId). The infra login step prints the real value.
   ExistingOidcProviderArn:
     Type: String
     Default: ""

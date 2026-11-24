@@ -20,6 +20,10 @@ ACCOUNT=$(get aws_account_id); REGION=$(get aws_region); ENVIRONMENT=$(get envir
 token=$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
   "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
 echo "::add-mask::$token"
+# Show the claims AWS checks against the role's trust policy (never the token itself).
+payload=$(cut -d. -f2 <<<"$token" | tr '_-' '/+')
+while [ $((${#payload} % 4)) -ne 0 ]; do payload="$payload="; done
+base64 -d <<<"$payload" 2>/dev/null | jq -c '{sub, aud, repository, ref}' || true
 creds=$(aws sts assume-role-with-web-identity \
   --role-arn "arn:aws:iam::$ACCOUNT:role/urbaniq-github-$KIND" \
   --role-session-name "github-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \

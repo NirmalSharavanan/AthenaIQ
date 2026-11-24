@@ -6,7 +6,7 @@ UrbanIQ is a static site, so AWS hosts it as a private S3 bucket behind CloudFro
 
 1. **Bootstrap** (AWS Console → CloudFormation → Create stack, region `ap-south-1`): upload `deploy/aws/bootstrap.cfn.yml`.
    - If the account already has a GitHub OIDC provider (it does if VisionX was deployed there), paste its ARN into `ExistingOidcProviderArn`; an account can hold only one.
-   - Creates the state bucket and the roles `urbaniq-github-infra` and `urbaniq-github-deploy`, trusted only for `repo:thirumald/UrbanIQ` on `main`.
+   - Creates the state bucket and the roles `urbaniq-github-infra` and `urbaniq-github-deploy`, trusted only for this repo on `main`. `GitHubRepo` must match the OIDC `sub` claim exactly: `thirumald@34179924/UrbanIQ@1469771682` (owner and repo IDs included; check with `gh api repos/thirumald/UrbanIQ/actions/oidc/customization/sub`).
 2. **Edit** `deploy/aws/env/prod.tfvars` (account number, alert email, optional domain) and commit to `main`.
 3. **GitHub → Actions → UrbanIQ Infra** → run with `plan`, read the summary, then run with `apply`. It prints the site address.
 4. Confirm the budget alert email from AWS.
