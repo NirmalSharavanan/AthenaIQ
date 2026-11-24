@@ -20,5 +20,5 @@ The **UrbanIQ Deploy** workflow runs on every push to `main`, and again after th
 - GitHub Pages (`jekyll-gh-pages.yml`) still works in parallel; delete it when you cut over.
 - `config.js` holds API keys in the browser, as before; AWS does not change that.
 - The `live-data` branch workflow is unchanged. If the site fetches it from GitHub, that keeps working; moving it to S3 is a later step.
-- Custom domain: request an ACM certificate in `us-east-1`, set `domain` and `certificate_arn`, apply, and point a CNAME at the CloudFront address.
+- Custom domain (`urbaniq.presight.click`): register `presight.click` in Route 53 first. Infra then creates the certificate (us-east-1), the DNS validation records and the alias records. To stop paying: turn off the domain's auto-renew and delete the hosted zone after running Infra `destroy`.
 - Remove everything: run UrbanIQ Infra with `destroy` and `DELETE-URBANIQ`.

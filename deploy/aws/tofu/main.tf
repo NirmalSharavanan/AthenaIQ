@@ -21,8 +21,81 @@ provider "aws" {
   }
 }
 
+# CloudFront certificates must live in us-east-1.
+provider "aws" {
+  alias               = "us_east_1"
+  region              = "us-east-1"
+  allowed_account_ids = [var.aws_account_id]
+  default_tags {
+    tags = {
+      Project     = "urbaniq"
+      Environment = var.environment
+    }
+  }
+}
+
 locals {
+  custom_domain = var.domain != ""
   site_bucket = "urbaniq-${var.environment}-site-${var.aws_account_id}"
+}
+
+# --- Custom domain (only when var.domain is set): certificate, DNS validation, alias record ---
+
+data "aws_route53_zone" "main" {
+  count        = local.custom_domain ? 1 : 0
+  name         = var.zone_name
+  private_zone = false
+}
+
+resource "aws_acm_certificate" "site" {
+  count             = local.custom_domain ? 1 : 0
+  provider          = aws.us_east_1
+  domain_name       = var.domain
+  validation_method = "DNS"
+  lifecycle { create_before_destroy = true }
+}
+
+resource "aws_route53_record" "validation" {
+  for_each = local.custom_domain ? {
+    for o in aws_acm_certificate.site[0].domain_validation_options : o.domain_name => o
+  } : {}
+  zone_id         = data.aws_route53_zone.main[0].zone_id
+  name            = each.value.resource_record_name
+  type            = each.value.resource_record_type
+  records         = [each.value.resource_record_value]
+  ttl             = 60
+  allow_overwrite = true
+}
+
+resource "aws_acm_certificate_validation" "site" {
+  count                   = local.custom_domain ? 1 : 0
+  provider                = aws.us_east_1
+  certificate_arn         = aws_acm_certificate.site[0].arn
+  validation_record_fqdns = [for r in aws_route53_record.validation : r.fqdn]
+}
+
+resource "aws_route53_record" "site_a" {
+  count   = local.custom_domain ? 1 : 0
+  zone_id = data.aws_route53_zone.main[0].zone_id
+  name    = var.domain
+  type    = "A"
+  alias {
+    name                   = aws_cloudfront_distribution.site.domain_name
+    zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "site_aaaa" {
+  count   = local.custom_domain ? 1 : 0
+  zone_id = data.aws_route53_zone.main[0].zone_id
+  name    = var.domain
+  type    = "AAAA"
+  alias {
+    name                   = aws_cloudfront_distribution.site.domain_name
+    zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
+    evaluate_target_health = false
+  }
 }
 
 resource "aws_s3_bucket" "site" {
@@ -62,7 +135,7 @@ resource "aws_cloudfront_distribution" "site" {
   default_root_object = "index.html"
   price_class         = "PriceClass_200" # includes India
   http_version        = "http2and3"
-  aliases             = var.domain == "" ? [] : [var.domain]
+  aliases             = local.custom_domain ? [var.domain] : []
 
   origin {
     domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
@@ -84,10 +157,10 @@ resource "aws_cloudfront_distribution" "site" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = var.certificate_arn == ""
-    acm_certificate_arn            = var.certificate_arn == "" ? null : var.certificate_arn
-    ssl_support_method             = var.certificate_arn == "" ? null : "sni-only"
-    minimum_protocol_version       = var.certificate_arn == "" ? null : "TLSv1.2_2021"
+    cloudfront_default_certificate = !local.custom_domain
+    acm_certificate_arn            = local.custom_domain ? aws_acm_certificate_validation.site[0].certificate_arn : null
+    ssl_support_method             = local.custom_domain ? "sni-only" : null
+    minimum_protocol_version       = local.custom_domain ? "TLSv1.2_2021" : null
   }
 }
 
@@ -145,5 +218,5 @@ resource "aws_budgets_budget" "monthly" {
 output "site_bucket" { value = aws_s3_bucket.site.id }
 output "distribution_id" { value = aws_cloudfront_distribution.site.id }
 output "urbaniq_url" {
-  value = var.domain == "" ? "https://${aws_cloudfront_distribution.site.domain_name}" : "https://${var.domain}"
+  value = local.custom_domain ? "https://${var.domain}" : "https://${aws_cloudfront_distribution.site.domain_name}"
 }

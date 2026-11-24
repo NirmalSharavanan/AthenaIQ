@@ -7,7 +7,7 @@ variable "domain" {
   type    = string
   default = ""
 }
-variable "certificate_arn" {
+variable "zone_name" {
   type    = string
   default = ""
 }

@@ -68,7 +68,7 @@ Resources:
             Statement:
               - Sid: Services
                 Effect: Allow
-                Action: [cloudfront:*, s3:*, budgets:*, sns:*, acm:*]
+                Action: [cloudfront:*, s3:*, budgets:*, sns:*, acm:*, route53:*]
                 Resource: "*"
 
   # Publishes the site: upload to the site bucket and clear the CloudFront cache. Nothing else.
