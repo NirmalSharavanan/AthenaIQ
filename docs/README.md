@@ -40,3 +40,23 @@ UrbanIQ is a static web application. A build pipeline downloads the OpenStreetMa
 - Microsoft Global ML Building Footprints: <https://github.com/microsoft/GlobalMLBuildingFootprints>
 - Mobility Database (GTFS catalogue): <https://mobilitydatabase.org/>
 - Geofabrik OpenStreetMap extracts: <https://download.geofabrik.de/>
+
+## Telangana use cases and interface (UrbanIQ)
+
+Added as cards inside the existing sections (no new menu); each card says whether its figures are real, estimated or synthetic.
+
+| Section | Card | Data |
+| --- | --- | --- |
+| Dashboard | Telangana cities: weather, rain, simulated trip speed and fires for all ten cities; tap to open a city | Open-Meteo, NASA FIRMS, simulation |
+| Congestion | Mixed traffic: simulated car units split into two-wheelers, cars, autos, buses and goods vehicles | Assumed shares, IRC 106 PCUs |
+| Incidents | Outer Ring Road by sector, coloured on the map (Hyderabad) | Simulation; breakdowns synthetic |
+| Fines | E-challan by violation (no helmet, triple riding, wrong side …) with sample TS challans | Synthetic; placeholder fines |
+| Transit | Hyderabad Metro lines and crowding by hour | Published line facts; crowding synthetic |
+| Planning | Festival plans: Ganesh immersion, Bonalu, Bathukamma, Sankranti exodus; areas on the map | Example templates |
+| Emergency | Monsoon waterlogging watch (with a 60 mm cloudburst exercise), heatwave operations, ambulance green corridor | Open-Meteo rain and heat; example points; route estimate |
+| Environment | Air quality in India AQI categories for all ten cities; CPCB station positions; lake and river levels | Open-Meteo CAMS particles; synthetic levels |
+
+Interface: one search box (places, roads, cameras, sites, alerts, cities); numbered bubbles group nearby cameras and sites
+until zoomed in; one alert notification at a time with a "+N more" count and none on phones; a "More" menu on phones; a
+short guided tour (Tour button in the status bar); Live runs at 1×, with a "Replay speed" for faster playback; Telugu for
+section names and card headings. Settings are in `config.js` under `alerts`, `zones`, `analytics.targets` and `telangana`.

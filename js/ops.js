@@ -115,7 +115,7 @@
     }
     // Critical sites in alert (defence, embassies, hospitals, schools …).
     if (CFG.zones && CFG.zones.alert && T.zones) {
-      T.zones.alerts().slice(0, 6).forEach(function (s) {
+      T.zones.alerts().filter(function (s) { return ((CFG.zones.types[s.type] || {}).priority || 1) >= (CFG.zones.alertMinPriority || 1); }).slice(0, 4).forEach(function (s) {
         out.push({ lay: 'showZones', at: [s.lon, s.lat], key: 'zone:' + s.id, sev: (CFG.zones.types[s.type] || {}).priority >= 3 ? 3 : 2, title: T.zones.label(s.type) + ' zone: ' + s.name, sub: s.reason,
           go: function () { T.zones.open(s); } });
       });
@@ -165,22 +165,27 @@
   }
   // Push: every alert that was not active a minute ago is shown as a notification.
   var known = null, toastCount = 0;
+  // One notification at a time: a new alert replaces the shown one and the count says how many more arrived.
+  var extra = 0;
   function toast(al) {
     var box = $('toasts');
-    while (box.children.length >= CFG.alerts.pushMaxVisible) { box.removeChild(box.firstChild); }
     box.className = 'toasts ' + (CFG.alerts.pushPosition === 'top-left' ? 'at-left' : 'at-right');
+    var max = Math.max(1, CFG.alerts.pushMaxVisible || 1);
+    if (box.children.length >= max) { extra++; while (box.children.length >= max) { box.removeChild(box.firstChild); } } else { extra = 0; }
     var t = document.createElement('div');
     t.className = 'toast sev' + al.sev; t.setAttribute('role', 'status');
     t.innerHTML = '<button type="button" class="toast-body" title="Show on the map"><strong></strong><span></span><em>' + clock(state.t) + ' · synthetic data</em></button>' +
-      '<button type="button" class="toast-close" aria-label="Close notification" title="Close">×</button>';
+      '<button type="button" class="toast-close" aria-label="Close notification" title="Close">×</button>' +
+      (extra ? '<button type="button" class="toast-more">+' + extra + ' more in Alerts</button>' : '');
     t.querySelector('strong').textContent = al.title; t.querySelector('span').textContent = al.sub;
-    t.querySelector('.toast-body').addEventListener('click', function () { act(al); t.remove(); });
-    t.querySelector('.toast-close').addEventListener('click', function () { t.remove(); });
+    t.querySelector('.toast-body').addEventListener('click', function () { act(al); t.remove(); extra = 0; });
+    t.querySelector('.toast-close').addEventListener('click', function () { t.remove(); extra = 0; });
+    if (t.querySelector('.toast-more')) { t.querySelector('.toast-more').addEventListener('click', function () { t.remove(); extra = 0; $('alertBtn').click(); }); }
     // A critical alert gets the quickest response route straight away (without moving the map).
     if (al.sev >= 3 && al.at && T.response && T.response.auto()) { T.response.routeTo(al.at[0], al.at[1], al.title, { fit: false }); }
     box.appendChild(t);
     // Auto-close after alerts.pushSeconds; 0 keeps it until it is closed by hand.
-    if (CFG.alerts.pushSeconds > 0) { setTimeout(function () { t.remove(); }, CFG.alerts.pushSeconds * 1000); }
+    if (CFG.alerts.pushSeconds > 0) { setTimeout(function () { if (t.parentNode) { t.remove(); extra = 0; } }, CFG.alerts.pushSeconds * 1000); }
     if (document.hidden && window.Notification && Notification.permission === 'granted') {
       try { new Notification('UrbanIQ alert', { body: al.title + ' — ' + al.sub + ' (synthetic data)', tag: 'itw-' + (toastCount++ % 6) }); } catch (e) { /* notifications unavailable */ }
     }
@@ -191,7 +196,12 @@
     list.forEach(function (al) { now[al.key || al.title] = 1; });
     var fresh = list.filter(function (al) { return !known || !known[al.key || al.title]; });
     // On the first pass announce only the most severe few, so the page does not open under a pile of notices.
-    (known ? fresh : fresh.slice(0, 2)).slice(0, CFG.alerts.pushMaxVisible).forEach(toast);
+    // Only alerts above the push severity pop up; on phones none do (the Alerts count still updates).
+    var phone = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    if (!(phone && CFG.alerts.pushOnPhones === false)) {
+      fresh = fresh.filter(function (al) { return al.sev >= (CFG.alerts.pushMinSeverity || 1); }).sort(function (a, b) { return b.sev - a.sev; });
+      (known ? fresh : fresh.slice(0, 1)).slice(0, 3).forEach(toast);
+    }
     known = now;
   }
   function renderAlerts(quiet) {

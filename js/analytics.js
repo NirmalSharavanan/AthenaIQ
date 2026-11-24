@@ -90,7 +90,7 @@
       g.fillText(lb === r.label ? lb : lb + '…', 0, yy + rowH / 2 - 2);
       g.fillStyle = TRACK; roundRect(g, labelW, yy + 8, c.w - labelW - pr, rowH - 18, 4); g.fill();
       g.fillStyle = r.color || COL[0]; roundRect(g, labelW, yy + 8, bw, rowH - 18, 4); g.fill();
-      g.fillStyle = INK; g.textAlign = 'right'; g.fillText(num(r.value) + (o.unit ? ' ' + o.unit : ''), c.w - 2, yy + rowH / 2 - 2); g.textAlign = 'left';
+      g.fillStyle = INK; g.textAlign = 'right'; g.fillText(r.shown || (num(r.value) + (o.unit ? ' ' + o.unit : '')), c.w - 2, yy + rowH / 2 - 2); g.textAlign = 'left';
     });
     cv.onmousemove = function (ev) {
       var r = cv.getBoundingClientRect(), i = Math.floor((ev.clientY - r.top - 4) / rowH), row = o.rows[i];
@@ -434,8 +434,15 @@
     return { label: label, value: value, unit: unit, target: target, better: better, basis: basis, status: st, ratio: ratio, text: !ok ? '–' : (fmt ? fmt(value) : num(Math.round(value * 10) / 10)) };
   }
   var ST = { good: ['✓', 'On target'], warn: ['!', 'Watch'], bad: ['✕', 'Off target'], none: ['–', 'No data'] };
+  // Targets: counts are scaled to this city's assumed trips against the Hyderabad base, so a town is not judged as a metro.
+  function targets() {
+    var G = {}, base = A.targetsBaseTrips, meta = C.meta() || {}, sc = (meta.scenarios || []).filter(function (s) { return s.id === 'base'; })[0];
+    var f = base && sc && sc.trips ? sc.trips / base : 1;
+    Object.keys(A.targets || {}).forEach(function (k) { var v = A.targets[k]; G[k] = (A.targetsScaled || []).indexOf(k) >= 0 && f !== 1 ? Math.max(1, Math.round(v * f / (v >= 100 ? 10 : 1)) * (v >= 100 ? 10 : 1)) : v; });
+    return G;
+  }
   function scorecard() {
-    var G = (A.targets || {}), t = state.t, peak = C.kpiAt(state.scenario, 8 * 3600) || {}, now = C.kpiAt(state.scenario, t) || {}, J = M.junctions, S = M.safety || {};
+    var G = targets(), t = state.t, peak = C.kpiAt(state.scenario, 8 * 3600) || {}, now = C.kpiAt(state.scenario, t) || {}, J = M.junctions, S = M.safety || {};
     var ef = J.filter(function (j) { return j.los === 'E' || j.los === 'F'; }).length, co2Day = M.co2.reduce(function (a, v) { return a + v; }, 0);
     var buses = 0, onTime = 0;
     if (T.buses) { T.buses.routes().forEach(function (r) { var l = T.buses.busesOn(r, t); buses += l.length; l.forEach(function (b) { if (b.late < ((CFG.buses || {}).onTimeWithinMin || 3)) { onTime++; } }); }); }
@@ -469,8 +476,14 @@
         kpi('Critical sites monitored', z.total, 'sites', G.sitesMonitored, 'high', 'defence, embassies, hospitals, schools and others'),
         kpi('Sites on alert now', z.total ? 100 * z.alert / z.total : null, '%', G.sitesOnAlertPct, 'low', z.alert + ' on alert, ' + z.watch + ' on watch', function (v) { return v.toFixed(1) + '%'; }),
         kpi('Cameras online', cams ? 100 * (cams - offline) / cams : null, '%', G.camerasOnlinePct, 'high', cams + ' synthetic cameras', pct)] },
-      { goal: 'Sea and air connections', note: 'Synthetic ship movements; real flights from Flightradar24 when available', kpis: (function () {
-        var se = T.sea ? T.sea.stats() : null, ai = T.air ? T.air.stats() : null;
+      { goal: (CFG.sea || {}).port ? 'Sea and air connections' : 'Air and rail connections', note: (CFG.sea || {}).port ? 'Synthetic ship movements; real flights from Flightradar24 when available' : 'Real flights from Flightradar24; railway and metro from OpenStreetMap', kpis: (function () {
+        var se = T.sea && (CFG.sea || {}).port ? T.sea.stats() : null, ai = T.air ? T.air.stats() : null;
+        if (!(CFG.sea || {}).port) {
+          return [
+            kpi('Aircraft to or from Hyderabad', ai && ai.live ? ai.inAir : null, '', null, 'high', ai && ai.updated ? 'Flightradar24 snapshot at ' + ai.updated : 'no flight data yet'),
+            kpi('Arriving at Hyderabad', ai && ai.live ? ai.arriving : null, '', null, 'high', 'in the same snapshot'),
+            kpi('Railway and metro in the area', M.railKm || null, 'km', C.region.isDefault ? G.railKm : null, 'high', 'OpenStreetMap, including Hyderabad Metro and MMTS')];
+        }
         if (ai && ai.live) {
           return [
             kpi('Aircraft to or from Hyderabad', ai.inAir, '', null, 'high', ai.updated ? 'Flightradar24 snapshot at ' + ai.updated : 'no flight data yet'),
@@ -530,7 +543,7 @@
       var sc = g.kpis.filter(function (k) { return k.target !== null && k.target !== undefined && k.status !== 'none'; }), okn = sc.filter(function (k) { return k.status === 'good'; }).length, p = sc.length ? Math.round(100 * okn / sc.length) : 0;
       return { label: g.goal, value: p, color: p >= 75 ? STATUS.good : p >= 40 ? STATUS.warning : STATUS.critical, sub: okn + ' of ' + sc.length + ' KPIs on target' };
     }) });
-    var gaps = []; goals.forEach(function (g) { g.kpis.forEach(function (k) { if (k.target !== null && k.target !== undefined && k.status === 'bad' && k.ratio && isFinite(k.ratio)) { gaps.push({ label: k.label, value: Math.round((k.ratio - 1) * 100), color: COL[0], sub: g.goal + ' · ' + k.text + ' against a target of ' + num(k.target) }); } }); });
+    var gaps = []; goals.forEach(function (g) { g.kpis.forEach(function (k) { if (k.target !== null && k.target !== undefined && k.status === 'bad' && k.ratio && isFinite(k.ratio)) { gaps.push({ label: k.label, value: Math.min(300, Math.round((k.ratio - 1) * 100)), shown: k.ratio >= 3 ? '×' + (Math.round(k.ratio * 10) / 10) : Math.round((k.ratio - 1) * 100) + '%', color: COL[0], sub: g.goal + ' · ' + k.text + ' against a target of ' + num(k.target) }); } }); });
     hbarChart('scGaps', { unit: '%', rows: gaps.sort(function (a, b) { return b.value - a.value; }).slice(0, 8) });
     $('scGapsCard').hidden = !gaps.length;
     $('scSummary').innerHTML = tile('KPIs on target', good + ' of ' + all, 'across ' + goals.length + ' goals', 'good') + tile('To watch', warn, 'within 25% of the target') + tile('Off target', bad, 'more than 25% from the target', bad ? 'bad' : '') +

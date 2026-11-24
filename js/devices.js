@@ -69,14 +69,20 @@
       });
     }
     if (show.det && ctx.zoom >= 11.5) { out.push(dots('detectors', dets, [140, 210, 190, 230], 4, detPopup)); }
-    if (show.vms && ctx.zoom >= 10.5) { out.push(dots('signs', signs, [255, 190, 60, 245], 6, vmsPopup)); }
+    if (show.vms && ctx.zoom >= 12) { out.push(dots('signs', signs, [255, 190, 60, 245], 6, vmsPopup)); }
     if (show.cams) {
       // Cameras stay visible at every zoom and are drawn larger, with a white ring, so they are easy to click.
       // A round badge with a camera pictogram on it.
-      var camLayer = dots('cameras', cams, [22, 110, 190, 255], ctx.zoom >= 13 ? 11 : 8, camPopup);
+      // Below street level nearby cameras merge into one numbered bubble (click it to zoom in).
+      var camShow = cams;
+      if (ctx.zoom < 14 && C.cluster) {
+        var cg = C.clusterLayers('cameras', C.cluster(cams, function (d) { return [d.lon, d.lat]; }, ctx.zoom, ctx.zoom < 12 ? 70 : 48), [22, 110, 190, 240]);
+        out = out.concat(cg.layers); camShow = cg.singles;
+      }
+      var camLayer = dots('cameras', camShow, [22, 110, 190, 255], ctx.zoom >= 13 ? 11 : 8, camPopup);
       out.push(camLayer.clone({ getLineColor: [255, 255, 255], getLineWidth: 2 }));
       if (deck.IconLayer && ctx.zoom >= 10.5) {
-        out.push(new deck.IconLayer({ id: 'camera-pics', data: cams, sizeUnits: 'pixels', getSize: ctx.zoom >= 13 ? 15 : 11, getIcon: function () { return CAM_PIC; }, getPosition: function (d) { return [d.lon, d.lat]; }, getColor: [255, 255, 255] }));
+        out.push(new deck.IconLayer({ id: 'camera-pics', data: camShow, sizeUnits: 'pixels', getSize: ctx.zoom >= 13 ? 15 : 11, getIcon: function () { return CAM_PIC; }, getPosition: function (d) { return [d.lon, d.lat]; }, getColor: [255, 255, 255] }));
       }
     }
     var sig = C.signals();

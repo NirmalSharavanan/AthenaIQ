@@ -103,7 +103,7 @@ window.INTELLITWIN_CONFIG = {
 
   start: {
     mode: 'live',               // 'live' = start at the Hyderabad clock and play at the rate below; 'replay' = today from now, as Historical
-    rate: 30,                   // playback speed, Live included: 1 (Live then stays locked to the clock), 30, 120 or 600
+    rate: 1,                    // playback speed, Live included: 1 (Live stays locked to the clock), 30, 120 or 600
     fullView: true,             // open with the panel, legend and site shortcuts minimised
     focus: 'most-congested-site', // select the major site (map chip) with the slowest traffic; 'most-congested' = slowest road; 'all' = whole area
     orbit: true,                // circle the camera; it stays on until the Orbit button is unclicked
@@ -162,21 +162,24 @@ sampleVideos: [
 
   /* ---- Alerts -------------------------------------------------------------------------------- */
   alerts: {
-    networkSpeedBelowKmh: 40,        // network average speed
-    roadRatioBelow: 0.45,             // road speed as a share of its limit …
-    roadMinVehicles: 80,            // … with at least this many vehicles on it
+    // Thresholds set for Telangana's mixed traffic, where roads normally run well below their limits.
+    networkSpeedBelowKmh: 15,        // network average speed
+    roadRatioBelow: 0.25,             // road speed as a share of its limit …
+    roadMinVehicles: 120,           // … with at least this many vehicles on it
     seriousAccident: true,
-    everyAccident: true,
+    everyAccident: false,           // minor accidents stay on the map and in Accidents, without an alert
     // Synthetic operational events (stopped vehicle, wrong-way driver, device fault …) raised at the
     // cameras, so the alert feed is active at any hour. 0 turns them off.
-    syntheticEventsPerHour: 14,             // also alert on each new accident, whatever its severity
+    syntheticEventsPerHour: 6,             // also alert on each new accident, whatever its severity
     maxShown: 12,
     // Push each new alert as an on-screen notification, and as a browser notification when the
     // user has allowed them and the page is in the background.
     push: true,
-    pushSeconds: 8,                         // auto-close after this many seconds; 0 = stay until closed with ×
+    pushSeconds: 7,                         // auto-close after this many seconds; 0 = stay until closed with ×
+    pushMinSeverity: 2,                     // only alerts of at least this severity pop up (1 low, 2 high, 3 critical)
+    pushOnPhones: false,                    // on narrow screens new alerts only update the Alerts count
     pushPosition: 'top-right',              // 'top-right' or 'top-left' corner of the map
-    pushMaxVisible: 3                       // most notifications on screen at once
+    pushMaxVisible: 1                       // one notification at a time; it counts the others ('+3 more')
   },
 
   /* ---- Forecast ------------------------------------------------------------------------------ */
@@ -754,10 +757,11 @@ sampleVideos: [
   // slow, and into ALERT when it is very slow or an accident or event is active inside the radius.
   zones: {
     radiusM: 500,
-    watchRatioBelow: 0.6,           // traffic speed as a share of the limit
-    alertRatioBelow: 0.4,
-    minVehicles: 25,                // ignore near-empty surroundings
-    alert: true,                    // raise an alert when a site goes into ALERT
+    watchRatioBelow: 0.4,           // traffic speed as a share of the limit
+    alertRatioBelow: 0.2,
+    minVehicles: 40,                // ignore near-empty surroundings
+    alert: true,                    // raise an alert when a high-priority site (defence, embassy …) goes into ALERT
+    alertMinPriority: 3,
     types: {
       defence: { label: 'Defence site', priority: 3 },
       embassy: { label: 'Embassy', priority: 3 },
@@ -806,20 +810,78 @@ sampleVideos: [
     co2: { baseGPerKm: 150, congestionGKmh: 2500,       // g/km = base + congestion ÷ speed (km/h)
       typeFactor: { car: 1, taxi: 1, van: 1.5, lorry: 4, bus: 4.5, moto: 0.5 } },   // emissions per km against a car
     // Example targets for the City scorecard. They are illustrations, not official targets; set your own.
+    // Example targets for Hyderabad, set against Telangana conditions (about 20 km/h at the city peak, mixed traffic).
+    // Counts (accidents, fines, delay, CO2 …) are scaled for the other cities by their assumed trips against
+    // targetsBaseTrips, so a town is not judged against a metro. They are illustrations, not official targets.
+    targetsBaseTrips: 420000,
+    targetsScaled: ['dailyDelayVehH', 'criticalRoads', 'accidentsPerDay', 'seriousAccidentsPerDay', 'accidentsWorstHour', 'finesPerDay', 'finesWorstHour',
+      'sitesMonitored', 'co2TonnesPerDay', 'futureCriticalRoads', 'cycleKm', 'delayCostMillion'],
     targets: {
-      venuesHighPct: 20, schoolZonesOkPct: 60, adaptiveCorridorsPct: 50, assetHealth: 85, planConflicts: 0, busLateMin: 3,
-      peakSpeedKmh: 45, extraTravelPct: 25, dailyDelayVehH: 120000, criticalRoads: 20, junctionsEFPct: 20, busOnTimePct: 85,
-      accidentsPerDay: 60, seriousAccidentsPerDay: 2, accidentsWorstHour: 6, criticalAlertsOpen: 0,
+      venuesHighPct: 20, schoolZonesOkPct: 60, adaptiveCorridorsPct: 30, assetHealth: 85, planConflicts: 0, busLateMin: 8,
+      peakSpeedKmh: 20, extraTravelPct: 120, dailyDelayVehH: 600000, criticalRoads: 90, junctionsEFPct: 45, busOnTimePct: 70,
+      accidentsPerDay: 70, seriousAccidentsPerDay: 6, accidentsWorstHour: 9, criticalAlertsOpen: 2,
       finesPerDay: 12000, finesWorstHour: 1000, topViolationSharePct: 50, topSitesSharePct: 25,
-      sitesMonitored: 500, sitesOnAlertPct: 2, camerasOnlinePct: 97,
-      co2TonnesPerDay: 7000, aqi: 100, noiseDb: 70,
-      flightsOnTimePct: 80, flightDelayMin: 15, berthUsePct: 85,
-      futureSpeedKmh: 40, futureCriticalRoads: 40, cycleKm: 300, delayCostMillion: 9000
+      sitesMonitored: 1500, sitesOnAlertPct: 5, camerasOnlinePct: 97,
+      co2TonnesPerDay: 12000, aqi: 100, noiseDb: 70,
+      flightsOnTimePct: 80, flightDelayMin: 15, berthUsePct: 85, railKm: 150,
+      futureSpeedKmh: 18, futureCriticalRoads: 120, cycleKm: 60, delayCostMillion: 30000
     },
     // Population: Census of India 2011 (the latest census), with districts as re-drawn in 2016. growthPerYear is the
     // 2001–2011 average for the state; projections assume it held, so treat them as rough context only.
     population: { area: 'Telangana', total: 35003674, year: 2011, source: 'Census of India 2011', growthPerYear: 0.0128, growthFrom: '2001–2011',
       partsLabel: 'Hyderabad metro districts', parts: [['Hyderabad', 3943323], ['Ranga Reddy', 2446265], ['Medchal–Malkajgiri', 2440073]] }
+  },
+
+  /* ---- Telangana use cases (js/telangana.js) ------------------------------------------------- */
+  // Example lists for Hyderabad with approximate positions; replace them with the official lists (GHMC waterlogging
+  // points, TGPCB/CPCB stations, the Traffic Police festival plans) before client use. Other cities use their site list.
+  telangana: {
+    waterlogging: {
+      watchMm6h: 15, alertMm6h: 35,          // rain forecast in the next 6 hours
+      points: [
+        { name: 'Khairatabad junction', at: [78.4600, 17.4130] }, { name: 'Lakdikapul', at: [78.4630, 17.4040], under: true }, { name: 'Masab Tank', at: [78.4540, 17.4020] },
+        { name: 'Mehdipatnam', at: [78.4390, 17.3950] }, { name: 'Tolichowki', at: [78.4150, 17.3950], low: 1.3 }, { name: 'Punjagutta', at: [78.4500, 17.4280] },
+        { name: 'Ameerpet', at: [78.4480, 17.4375] }, { name: 'Begumpet', at: [78.4670, 17.4440], under: true }, { name: 'Paradise junction', at: [78.4870, 17.4430] },
+        { name: 'Malakpet railway underbridge', at: [78.4980, 17.3750], under: true }, { name: 'Chaderghat causeway', at: [78.4880, 17.3770], low: 1.4 },
+        { name: 'Moosarambagh causeway', at: [78.5150, 17.3750], low: 1.4 }, { name: 'Raidurg', at: [78.3830, 17.4230] }, { name: 'Kukatpally Y junction', at: [78.4100, 17.4880] }
+      ]
+    },
+    lakes: [
+      { name: 'Hussain Sagar', at: [78.4740, 17.4239] }, { name: 'Osman Sagar (Gandipet)', at: [78.3000, 17.3800] }, { name: 'Himayat Sagar', at: [78.4000, 17.3200] },
+      { name: 'Durgam Cheruvu', at: [78.3880, 17.4290] }, { name: 'Musi river, Chaderghat gauge', at: [78.4880, 17.3770], river: true }
+    ],
+    festivals: [
+      { id: 'ganesh', name: 'Ganesh immersion', season: 'August–September', crowd: 300000, at: [78.4740, 17.4239], radiusM: 2200,
+        areas: [{ name: 'Tank Bund and NTR Marg', at: [78.4740, 17.4239] }, { name: 'MJ Market', at: [78.4780, 17.3860] }, { name: 'Charminar', at: [78.4747, 17.3616] }],
+        actions: ['Close Tank Bund, NTR Marg and Necklace Road to general traffic', 'Run the procession route Balapur – Charminar – MJ Market – Tank Bund with timed slots', 'Divert heavy vehicles to the Outer Ring Road from the evening before', 'Stage cranes, medical posts and lost-and-found at the immersion points', 'Extend Metro and bus services late into the night'] },
+      { id: 'bonalu', name: 'Bonalu', season: 'July–August', crowd: 100000, at: [78.4980, 17.4370], radiusM: 1500,
+        areas: [{ name: 'Ujjaini Mahankali temple, Secunderabad', at: [78.4980, 17.4370] }, { name: 'Lal Darwaza, old city', at: [78.4800, 17.3550] }],
+        actions: ['Close the temple approach roads to vehicles during the main day', 'Signed diversions around Secunderabad and the old city', 'Parking at Parade Ground with shuttle buses', 'Queue lines and medical posts at the temples'] },
+      { id: 'bathukamma', name: 'Bathukamma', season: 'September–October', crowd: 60000, at: [78.4740, 17.4100], radiusM: 1600,
+        areas: [{ name: 'Tank Bund', at: [78.4740, 17.4239] }, { name: 'LB Stadium', at: [78.4740, 17.3990] }],
+        actions: ['Evening closure of Tank Bund', 'Parking and drop-off away from the stadium', 'Extra buses from the suburbs in the evening'] },
+      { id: 'sankranti', name: 'Sankranti exodus (NH65 towards Vijayawada)', season: 'January', crowd: 0, outbound: 0.6, at: [78.5800, 17.3400], radiusM: 3500,
+        areas: [{ name: 'LB Nagar', at: [78.5520, 17.3460] }, { name: 'Hayathnagar', at: [78.6000, 17.3300] }],
+        actions: ['Open extra toll lanes and suspend roadworks on NH65', 'Hold heavy vehicles off NH65 in the morning peak', 'Advise travel windows on message signs and social media', 'Add TGSRTC special buses from LB Nagar and MGBS'] }
+    ],
+    metro: { source: 'L&T Metro Rail (Hyderabad) as published; check before client use', totalKm: 69, stations: 57, lines: [
+      { name: 'Red Line', from: 'Miyapur', to: 'LB Nagar', km: 29, colour: '#d32f2f' },
+      { name: 'Blue Line', from: 'Nagole', to: 'Raidurg', km: 27, colour: '#1e63c8' },
+      { name: 'Green Line', from: 'JBS Parade Ground', to: 'MGBS', km: 11, colour: '#2e9e47' }] },
+    // Approximate positions of continuous air-quality stations in Hyderabad (CPCB CAAQMS); not connected yet.
+    aqStations: [
+      { name: 'Sanathnagar', at: [78.4430, 17.4560] }, { name: 'Zoo Park', at: [78.4510, 17.3500] }, { name: 'Somajiguda', at: [78.4570, 17.4170] },
+      { name: 'Central University', at: [78.3350, 17.4590] }, { name: 'ICRISAT Patancheru', at: [78.2720, 17.5110] }, { name: 'IDA Pashamylaram', at: [78.1900, 17.5300] },
+      { name: 'Bollaram', at: [78.3580, 17.5420] }, { name: 'Kokapet', at: [78.3400, 17.3930] }, { name: 'Ramachandrapuram', at: [78.3050, 17.5280] }, { name: 'Nacharam', at: [78.5600, 17.4300] }
+    ],
+    // Mixed traffic: shares of moving vehicles (ASSUMED, from the dominance of two-wheelers in Telangana registrations)
+    // and passenger-car units from IRC 106-1990. The simulation counts car units; this splits them into vehicles.
+    mix: [['Two-wheelers', 0.62, 0.5], ['Cars and taxis', 0.20, 1.0], ['Auto-rickshaws', 0.08, 1.2], ['Buses', 0.02, 2.2], ['Goods vehicles', 0.08, 2.2]],
+    // E-challan violation shares (ASSUMED) applied to the synthetic fines; fine values are placeholders.
+    challan: [['No helmet, rider', 0.36, 100], ['No helmet, pillion', 0.14, 100], ['Triple riding', 0.06, 1200], ['Wrong-side driving', 0.09, 1000],
+      ['Signal jumping', 0.10, 1000], ['No seat belt', 0.08, 1000], ['Phone while driving', 0.04, 1000], ['Stop-line violation', 0.13, 100]],
+    heat: { heatC: 40, severeC: 45 },
+    signalDelaySec: 25                       // average wait a green corridor saves at each signal (assumed)
   },
 
   /* ---- What-if closure (estimated in the browser, not re-simulated) --------------------------- */

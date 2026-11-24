@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   var T = window.IntelliTwin, C = T.core, CFG = C.CFG, $ = C.$, num = C.num, state = T.state;
-  var Z = CFG.zones, sites = [], show = true, filter = '', kx = 111320 * Math.cos(24.4 * Math.PI / 180), ky = 110570;
+  var Z = CFG.zones, sites = [], show = true, filter = '', kx = 111320 * Math.cos(17.9 * Math.PI / 180), ky = 110570;
   var COLOR = { ok: [12, 163, 12], watch: [250, 178, 25], alert: [208, 59, 59] }, WORD = { ok: 'Normal', watch: 'Watch', alert: 'Alert' };
 
   function label(type) { return (Z.types[type] || {}).label || type.charAt(0).toUpperCase() + type.slice(1); }
@@ -48,15 +48,15 @@
       var busy = occ >= Z.minVehicles;
       if (acc) { s.status = 'alert'; s.reason = 'Accident within ' + Z.radiusM + ' m on ' + acc.road + ' (illustrative)'; }
       else if (op) { s.status = 'alert'; s.reason = op.type.text + ' within ' + Z.radiusM + ' m (synthetic)'; }
-      else if (busy && s.ratio < Z.alertRatioBelow) { s.status = 'alert'; s.reason = 'Traffic at ' + Math.round(s.ratio * 100) + '% of the limit, ' + num(occ) + ' vehicles nearby'; }
-      else if (busy && s.ratio < Z.watchRatioBelow) { s.status = 'watch'; s.reason = 'Traffic at ' + Math.round(s.ratio * 100) + '% of the limit, ' + num(occ) + ' vehicles nearby'; }
-      else { s.status = 'ok'; s.reason = busy ? 'Traffic at ' + Math.round(s.ratio * 100) + '% of the limit' : 'Light traffic nearby'; }
+      else if (busy && s.ratio < Z.alertRatioBelow) { s.status = 'alert'; s.reason = 'Near standstill: speed ' + Math.round(s.ratio * 100) + '% of the limit, ' + num(occ) + ' vehicles nearby'; }
+      else if (busy && s.ratio < Z.watchRatioBelow) { s.status = 'watch'; s.reason = 'Slow traffic: speed ' + Math.round(s.ratio * 100) + '% of the limit, ' + num(occ) + ' vehicles nearby'; }
+      else { s.status = 'ok'; s.reason = busy ? 'Speed ' + Math.round(s.ratio * 100) + '% of the limit' : 'Light traffic nearby'; }
     });
   }
 
   function openSite(s) {
     C.flyTo(s.lon, s.lat, 15.5);
-    C.showPopup([s.lon, s.lat], s.name, [['Type', label(s.type)], ['Status', WORD[s.status]], ['Traffic nearby', Math.round(s.ratio * 100) + '% of limit'], ['Vehicles within ' + Z.radiusM + ' m', num(s.vehicles)]],
+    C.showPopup([s.lon, s.lat], s.name, [['Type', label(s.type)], ['Status', WORD[s.status]], ['Speed nearby', Math.round(s.ratio * 100) + '% of the limit'], ['Vehicles within ' + Z.radiusM + ' m', num(s.vehicles)]],
       s.reason + ' · ' + (s.custom ? 'site from config.js' : 'site from OpenStreetMap') + ' · synthetic traffic');
   }
 
@@ -76,9 +76,17 @@
 
   C.addLayers(function (ctx) {
     if (!show || !sites.length) { return []; }
-    var data = sites.filter(function (s) { return (!filter || s.type === filter) && (ctx.zoom >= 12.5 || s.status !== 'ok' || priority(s.type) >= 3); });
-    var stamp = Math.floor(state.t / 60) + ':' + state.scenario + ':' + filter;
-    return [new deck.ScatterplotLayer({
+    // City zoom: only sites on alert or watch, merged into numbered bubbles; normal sites appear from street level.
+    var data = sites.filter(function (s) { return (!filter || s.type === filter) && (ctx.zoom >= 14 || s.status !== 'ok' || (filter && ctx.zoom >= 12)); });
+    var stamp = Math.floor(state.t / 60) + ':' + state.scenario + ':' + filter, extra = [];
+    if (ctx.zoom < 13.5 && C.cluster) {
+      var groups = C.cluster(data, function (s) { return [s.lon, s.lat]; }, ctx.zoom, 56);
+      groups.forEach(function (g) { g.alert = g.items.some(function (s) { return s.status === 'alert'; }); });
+      var cl = C.clusterLayers('zones', groups, [208, 59, 59, 225]);
+      cl.layers[0] = cl.layers[0].clone({ getFillColor: function (g) { return g.alert ? [208, 59, 59, 225] : [214, 150, 20, 225]; }, updateTriggers: { getFillColor: stamp } });
+      extra = cl.layers; data = cl.singles;
+    }
+    return extra.concat([new deck.ScatterplotLayer({
       id: 'zones', data: data, pickable: true, radiusUnits: 'pixels', stroked: true, lineWidthUnits: 'pixels',
       getPosition: function (s) { return [s.lon, s.lat]; },
       getRadius: function (s) { return s.status === 'alert' ? 9 : s.status === 'watch' ? 7 : 5; },
@@ -86,7 +94,10 @@
       getLineColor: function (s) { return s.status === 'ok' ? [40, 30, 0] : [255, 255, 255]; }, getLineWidth: function (s) { return s.status === 'ok' ? 1 : 2; },
       updateTriggers: { getRadius: stamp, getFillColor: stamp, getLineColor: stamp, getLineWidth: stamp },
       onClick: function (info) { if (info.object) { openSite(info.object); } }
-    })];
+    })]).concat(deck.TextLayer ? [new deck.TextLayer({ id: 'zones-mark', data: data.filter(function (s) { return s.status === 'alert'; }), getPosition: function (s) { return [s.lon, s.lat]; },
+      // Not colour alone: alert sites carry "!".
+      getText: function (s) { return s.status === 'alert' ? '!' : ''; }, getSize: function (s) { return s.status === 'alert' ? 12 : 14; }, getColor: [255, 255, 255], fontWeight: 800,
+      getTextAnchor: 'middle', getAlignmentBaseline: 'center', fontFamily: 'system-ui, sans-serif', updateTriggers: { getText: stamp } })] : []);
   });
 
   C.onReady(function () {

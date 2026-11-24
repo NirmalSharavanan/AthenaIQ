@@ -30,7 +30,8 @@ BIN_SECONDS = 300                # 5-minute road statistics
 
 # Demand (ASSUMPTIONS — no traffic counts or commuting table are public for Hyderabad).
 # Passenger-car equivalents: two-wheelers and auto-rickshaws are folded into car trips.
-TOTAL_VEHICLE_TRIPS = 650_000    # vehicle trips on the modelled (major-road) network, 06:30–10:00, typical weekday
+# 650,000 gridlocked the model (08:00 network speed 12 km/h against about 20 km/h observed), so it was cut to 420,000.
+TOTAL_VEHICLE_TRIPS = 420_000    # vehicle trips on the modelled (major-road) network, 06:30–10:00, typical weekday
 # Relative departures per 15 minutes from 06:30 to 10:00 (14 slots).
 DEPART_PROFILE = [0.55, 0.75, 0.95, 1.05, 1.10, 1.10, 1.05, 1.00, 0.92, 0.85, 0.78, 0.72, 0.66, 0.60]
 EXTERNAL_SHARE = 0.12            # trips with one end at the study-area boundary

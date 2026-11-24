@@ -160,9 +160,9 @@
   }
 
   function setMode(m) {
-    // Live starts at the Hyderabad clock and plays at the configured speed (30× by default); at 1× it stays locked to the clock.
+    // Live starts at the Hyderabad clock and plays at the configured speed (1× by default, locked to the clock); 30× and faster run ahead.
     state.mode = m;
-    if (m === 'live') { setRate((CFG.start && CFG.start.rate) || 30); }
+    if (m === 'live') { setRate((CFG.start && CFG.start.rate) || 1); }
     Array.prototype.forEach.call($('mode').children, function (b) {
       var on = b.getAttribute('data-mode') === m; b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
     });
@@ -586,7 +586,7 @@
     }
     if (state.sites && ev) {
       layers.push(new deck.ScatterplotLayer({
-        id: 'sites', data: ev.sites, pickable: true, radiusUnits: 'pixels', stroked: true, lineWidthUnits: 'pixels',
+        id: 'sites', data: zoom >= 11.5 ? ev.sites : [], pickable: true, radiusUnits: 'pixels', stroked: true, lineWidthUnits: 'pixels',
         getPosition: function (st) { return [st.lon, st.lat]; },
         getRadius: function (st) { return Math.min(13, 3.5 + Math.sqrt(E.at(st.cum, state.t)) / 4); },
         getFillColor: [181, 140, 255, 210], getLineColor: [20, 12, 40], getLineWidth: 1,
@@ -598,7 +598,7 @@
     if (state.acc && ev) {
       var seen = ev.accidents.filter(function (a) { return a.t <= state.t; });
       layers.push(new deck.ScatterplotLayer({
-        id: 'accidents', data: seen, pickable: true, radiusUnits: 'pixels', stroked: true, lineWidthUnits: 'pixels',
+        id: 'accidents', data: zoom >= 13 ? seen : seen.filter(function (a) { return state.t < a.t + a.dur; }), pickable: true, radiusUnits: 'pixels', stroked: true, lineWidthUnits: 'pixels',
         getPosition: function (a) { return [a.lon, a.lat]; },
         getRadius: function (a) { return state.t < a.t + a.dur ? 8 : 3.5; },
         getFillColor: function (a) { return state.t < a.t + a.dur ? [239, 75, 90, 255] : [239, 75, 90, 90]; },
@@ -608,6 +608,31 @@
       }));
     }
     overlay.setProps({ layers: layers });
+  }
+  /* ---------- clustering: nearby symbols become one numbered bubble until the map is zoomed in ---------- */
+  // Groups points that fall in the same screen cell (cellPx wide) at this zoom. Returns [{ at, n, items }].
+  function cluster(data, pos, zoom, cellPx) {
+    var ws = 512 * Math.pow(2, zoom), cells = {}, out = [];
+    data.forEach(function (d) {
+      var p = pos(d), x = (p[0] + 180) / 360 * ws, s = Math.sin(p[1] * Math.PI / 180), y = (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * ws;
+      var k = Math.floor(x / cellPx) + ':' + Math.floor(y / cellPx), c = cells[k];
+      if (!c) { c = cells[k] = { lon: 0, lat: 0, n: 0, items: [] }; out.push(c); }
+      c.lon += p[0]; c.lat += p[1]; c.n++; c.items.push(d);
+    });
+    out.forEach(function (c) { c.at = [c.lon / c.n, c.lat / c.n]; });
+    return out;
+  }
+  // Layers for a set of clusters: single points are left to the caller (returned as `singles`), groups are bubbles with a count.
+  function clusterLayers(id, groups, color, ring) {
+    var multi = groups.filter(function (g) { return g.n > 1; });
+    var layers = [new deck.ScatterplotLayer({ id: id + '-cl', data: multi, pickable: true, radiusUnits: 'pixels', stroked: true, lineWidthUnits: 'pixels',
+      getPosition: function (g) { return g.at; }, getRadius: function (g) { return Math.min(22, 9 + Math.sqrt(g.n) * 2.2); }, getFillColor: color, getLineColor: ring || [255, 255, 255], getLineWidth: 2,
+      onClick: function (info) { if (info.object && map) { map.easeTo({ center: info.object.at, zoom: Math.min(18, map.getZoom() + 2), duration: 600 }); } } })];
+    if (deck.TextLayer) {
+      layers.push(new deck.TextLayer({ id: id + '-cln', data: multi, getPosition: function (g) { return g.at; }, getText: function (g) { return g.n > 999 ? Math.round(g.n / 100) / 10 + 'k' : String(g.n); },
+        getSize: 11, getColor: [255, 255, 255], fontWeight: 700, getTextAnchor: 'middle', getAlignmentBaseline: 'center', fontFamily: 'system-ui, sans-serif' }));
+    }
+    return { layers: layers, singles: groups.filter(function (g) { return g.n === 1; }).map(function (g) { return g.items[0]; }) };
   }
   var layerStamp = 0;
   function redraw() { layerStamp++; dirty = true; }
@@ -982,7 +1007,7 @@
       scenarioMeta: scenarioMeta, binNow: function () { return binOf(state.t); }, binAt: binOf, ratio: function (i) { return ratioAt(binOf(state.t), i); },
       occ: function (i) { return occAt(binOf(state.t), i) * 10 / SLOT; }, ratioAt: ratioAt, occAt: function (bin, i) { return occAt(bin, i) * 10 / SLOT; },
       kpiAt: kpiAt, roadStats: roadStats, eventTotals: eventTotals, showPopup: showPopup, flyTo: flyToPoint, locate: locate, listButton: listButton,
-      fact: fact, barRow: barRow, addLayers: function (fn) { layerProviders.push(fn); }, onMinute: function (fn) { minuteHooks.push(fn); },
+      cluster: cluster, clusterLayers: clusterLayers, fact: fact, barRow: barRow, addLayers: function (fn) { layerProviders.push(fn); }, onMinute: function (fn) { minuteHooks.push(fn); },
       startFocus: function () { return startFocus; }, theme: function () { return theme; }, setTheme: function (th) { setTheme(th); }, peopleInView: function () { return peopleInView; }, zones: function () { return zones; }, onZones: function (fn) { if (zones) { fn(zones); } else { zoneHooks.push(fn); } },
       railKm: function () { return (meta.extra || {}).rail_km || 0; }, cycleKm: function () { return (meta.extra || {}).cycle_km || 0; }, setPlaying: setPlaying,
       onReady: function (fn) { if (meta && day) { fn(); } else { readyHooks.push(fn); } }, redraw: redraw, setClosure: setClosure,

@@ -163,7 +163,7 @@
   }
 
   /* ---------------------------------------------------------------- map */
-  C.addLayers(function () {
+  C.addLayers(function (ctx) {
     var out = [];
     if (T.osintMap) { return out; }                 // js/osintmap.js draws the pictogram layers
     if (show.fires && fires) {
@@ -178,17 +178,19 @@
       out.push(new deck.ScatterplotLayer({ id: 'lv-ships', data: ships.ships, pickable: true, radiusUnits: 'pixels', getRadius: function (s) { return s.len >= 150 ? 6 : 4.5; }, stroked: true, lineWidthUnits: 'pixels', getLineWidth: 1, getLineColor: [10, 20, 35],
         getPosition: function (s) { return [s.lon, s.lat]; }, getFillColor: shipCol, onClick: function (i) { if (i.object) { showShip(i.object); } } }));
     }
+    // Labels only when zoomed in and never on phones, so they do not pile up over the map and its controls.
+    var labels = ctx.zoom >= 11 && !(window.matchMedia && window.matchMedia('(max-width: 760px)').matches), ink = C.theme() === 'light' ? [25, 40, 60] : [235, 240, 250];
     if (show.air && air && deck.IconLayer) {
       out.push(new deck.IconLayer({ id: 'lv-flights', data: air.flights, pickable: true, sizeUnits: 'pixels', getSize: 26, getIcon: function () { return { url: PLANE, width: 48, height: 48, mask: true }; },
         getPosition: function (f) { return [f.lon, f.lat]; }, getAngle: function (f) { return -f.track; }, getColor: function (f) { return arriving(f) ? [90, 220, 150] : [255, 200, 90]; }, onClick: function (i) { if (i.object) { showFlight(i.object); } } }));
-      if (deck.TextLayer) { out.push(new deck.TextLayer({ id: 'lv-flight-names', data: air.flights, getPosition: function (f) { return [f.lon, f.lat]; }, getText: function (f) { return f.flight || f.call || ''; }, getSize: 11, getColor: [235, 240, 250], getPixelOffset: [0, -18], fontFamily: 'system-ui, sans-serif' })); }
+      if (deck.TextLayer && labels) { out.push(new deck.TextLayer({ id: 'lv-flight-names', data: air.flights, getPosition: function (f) { return [f.lon, f.lat]; }, getText: function (f) { return f.flight || f.call || ''; }, getSize: 11, getColor: ink, getPixelOffset: [0, -18], fontFamily: 'system-ui, sans-serif' })); }
     }
     if (show.sats && satNow.length) {
       var near = satNow.filter(function (s) { return inRegion(s.at, 6); });
       out.push(new deck.PathLayer({ id: 'lv-sat-track', data: near.map(track), getPath: function (p) { return p; }, widthUnits: 'pixels', getWidth: 1.5, getColor: [190, 150, 255, 150] }));
       out.push(new deck.ScatterplotLayer({ id: 'lv-sats', data: near, pickable: true, radiusUnits: 'pixels', getRadius: 6, getPosition: function (s) { return s.at; }, getFillColor: [190, 150, 255], stroked: true, lineWidthUnits: 'pixels', getLineWidth: 1.5, getLineColor: [255, 255, 255],
         updateTriggers: { getPosition: Math.floor(Date.now() / 2000) }, onClick: function (i) { if (i.object) { var s = i.object; C.showPopup(s.at, s.name, [['Height', num(Math.round(s.alt)) + ' km'], ['Speed', num(Math.round(s.speed)) + ' km/h']], 'Position computed now from N2YO orbital elements'); } } }));
-      if (deck.TextLayer) { out.push(new deck.TextLayer({ id: 'lv-sat-names', data: near, getPosition: function (s) { return s.at; }, getText: function (s) { return s.name; }, getSize: 11, getColor: [225, 210, 255], getPixelOffset: [0, -14], fontFamily: 'system-ui, sans-serif', updateTriggers: { getPosition: Math.floor(Date.now() / 2000) } })); }
+      if (deck.TextLayer && labels) { out.push(new deck.TextLayer({ id: 'lv-sat-names', data: near, getPosition: function (s) { return s.at; }, getText: function (s) { return s.name; }, getSize: 11, getColor: C.theme() === 'light' ? [90, 50, 150] : [225, 210, 255], getPixelOffset: [0, -14], fontFamily: 'system-ui, sans-serif', updateTriggers: { getPosition: Math.floor(Date.now() / 2000) } })); }
     }
     return out;
   });

@@ -48,6 +48,8 @@
 
   // The layers for one map. o.view: 'region', 'state' or 'world'; o.pop(lngLat, title, rows, note) shows a pop-up on that map.
   function layersFor(map, o) {
+    // Names over flights and satellites only when they can be read: zoomed in on the city map, never on phones.
+    var labels = !(window.matchMedia && window.matchMedia('(max-width: 760px)').matches) && (o.view !== 'region' || map.getZoom() >= 11 || !!o.page);
     var D = data(o.view), out = [], z = map.getZoom(), big = z < 9.5, wide = o.view !== 'region', POP = o.pop, isz = function (b) { return big ? b : b + 6; };
     if (D.fires.length) {
       out.push(new deck.ColumnLayer({ id: 'os-fire-col', data: D.fires, diskResolution: 12, radius: big ? 1400 : 220, extruded: true, pickable: true, getPosition: function (f) { return f.at; },
@@ -64,7 +66,7 @@
       out.push(new deck.LineLayer({ id: 'os-plane-stem', data: D.flights, widthUnits: 'pixels', getWidth: 1, getColor: [90, 110, 140, 120], getSourcePosition: function (f) { return [f.lon, f.lat, 0]; }, getTargetPosition: function (f) { return [f.lon, f.lat, h(f)]; } }));
       out.push(new deck.IconLayer({ id: 'os-plane', data: D.flights, pickable: true, billboard: false, sizeUnits: 'pixels', getSize: isz(28), getIcon: function () { return URLS.plane; },
         getPosition: function (f) { return [f.lon, f.lat, h(f)]; }, getAngle: function (f) { return -f.track; }, getColor: function (f) { return /^(HYD)$/.test(f.to) ? COLR.planeIn : COLR.plane; }, onClick: function (i) { pickFlight(i, POP); } }));
-      out.push(new deck.TextLayer({ id: 'os-plane-name', data: D.flights, getPosition: function (f) { return [f.lon, f.lat, h(f)]; }, getText: function (f) { return f.flight || f.call || ''; }, getSize: 11, getColor: [30, 45, 70], getPixelOffset: [0, -20],
+      if (labels) out.push(new deck.TextLayer({ id: 'os-plane-name', data: D.flights, getPosition: function (f) { return [f.lon, f.lat, h(f)]; }, getText: function (f) { return f.flight || f.call || ''; }, getSize: 11, getColor: [30, 45, 70], getPixelOffset: [0, -20],
         fontFamily: 'system-ui, sans-serif', fontWeight: 600, outlineWidth: 3, outlineColor: [255, 255, 255, 230], fontSettings: { sdf: true } }));
     }
     var sats = D.sats.filter(function (s) { return near(map, s.at, big ? 25 : 6); });
@@ -72,7 +74,7 @@
       var sh = function (s) { return Math.min(s.alt, 2000) * 1000 * (M.satelliteHeightScale || 0.2); }, tick = Math.floor(Date.now() / 2000);
       out.push(new deck.LineLayer({ id: 'os-sat-stem', data: sats, widthUnits: 'pixels', getWidth: 1, getColor: [124, 92, 214, 110], getSourcePosition: function (s) { return [s.at[0], s.at[1], 0]; }, getTargetPosition: function (s) { return [s.at[0], s.at[1], sh(s)]; }, updateTriggers: { getSourcePosition: tick, getTargetPosition: tick } }));
       out.push(new deck.IconLayer({ id: 'os-sat', data: sats, pickable: true, sizeUnits: 'pixels', getSize: isz(24), getIcon: function () { return URLS.sat; }, getPosition: function (s) { return [s.at[0], s.at[1], sh(s)]; }, getColor: COLR.sat, updateTriggers: { getPosition: tick }, onClick: function (i) { pickSat(i, POP); } }));
-      out.push(new deck.TextLayer({ id: 'os-sat-name', data: sats, getPosition: function (s) { return [s.at[0], s.at[1], sh(s)]; }, getText: function (s) { return s.name; }, getSize: 10.5, getColor: [80, 55, 160], getPixelOffset: [0, -18], fontFamily: 'system-ui, sans-serif',
+      if (labels) out.push(new deck.TextLayer({ id: 'os-sat-name', data: sats, getPosition: function (s) { return [s.at[0], s.at[1], sh(s)]; }, getText: function (s) { return s.name; }, getSize: 10.5, getColor: [80, 55, 160], getPixelOffset: [0, -18], fontFamily: 'system-ui, sans-serif',
         outlineWidth: 3, outlineColor: [255, 255, 255, 230], fontSettings: { sdf: true }, updateTriggers: { getPosition: tick } }));
     }
     if (D.quakes.length) {
