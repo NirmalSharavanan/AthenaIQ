@@ -32,6 +32,7 @@ jobs:
     outputs:
       week: ${{ steps.week.outputs.week }}
     steps:
+      - uses: actions/checkout@v4
       - name: Week number for the OpenStreetMap cache
         id: week
         run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
