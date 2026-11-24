@@ -1,0 +1,57 @@
+name: UrbanIQ Deploy
+
+# Publishes the static site to S3 and clears the CloudFront cache.
+# Runs on every push to main, after the data-build workflows commit new data, and on demand.
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["Build twin data", "Build region data", "Add buildings to regions", "Fetch sample media"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: urbaniq-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # For workflow_run, only after a successful build.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main   # the branch tip, so data committed by a build is included
+      - name: Sign in to AWS (OIDC, role urbaniq-github-deploy)
+        run: bash .github/scripts/aws-login.sh deploy
+      - name: Build the site folder
+        run: |
+          mkdir _site
+          # Only what the browser needs; no build tools, docs or workflows.
+          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='docs' --exclude='_site' \
+            --exclude='README.md' --exclude='.gitignore' --exclude='.nojekyll' ./ _site/
+          du -sh _site
+      - name: Upload
+        run: |
+          # Long cache for fingerprint-free static assets that rarely change, no-cache for entry files and data.
+          aws s3 sync _site "s3://$SITE_BUCKET" --delete --only-show-errors \
+            --exclude '*.html' --exclude 'config.js' --exclude 'data/*' --exclude 'js/*' --exclude 'css/*' \
+            --cache-control 'public, max-age=86400'
+          aws s3 sync _site "s3://$SITE_BUCKET" --delete --only-show-errors \
+            --exclude '*' --include '*.html' --include 'config.js' --include 'data/*' --include 'js/*' --include 'css/*' \
+            --cache-control 'no-cache'
+      - name: Clear the CloudFront cache
+        run: |
+          id=$(aws cloudfront list-distributions --query "DistributionList.Items[?Comment=='UrbanIQ $URBANIQ_ENV'].Id | [0]" --output text)
+          [ -n "$id" ] && [ "$id" != "None" ] || { echo "::error::No CloudFront distribution found. Run UrbanIQ Infra (apply) first."; exit 1; }
+          inv=$(aws cloudfront create-invalidation --distribution-id "$id" --paths '/*' --query Invalidation.Id --output text)
+          aws cloudfront wait invalidation-completed --distribution-id "$id" --id "$inv"
+          dom=$(aws cloudfront list-distributions --query "DistributionList.Items[?Id=='$id'].DomainName | [0]" --output text)
+          echo "### Deployed: https://$dom" >>"$GITHUB_STEP_SUMMARY"

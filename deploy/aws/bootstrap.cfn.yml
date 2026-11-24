@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  UrbanIQ one-time setup. Lets GitHub Actions work in this AWS account through short-lived OIDC
+  credentials (no keys stored in GitHub) and creates the bucket that holds the OpenTofu state.
+
+Parameters:
+  GitHubRepo:
+    Type: String
+    Default: thirumald/UrbanIQ
+    Description: Repository allowed to work in this account, as owner/name.
+  ExistingOidcProviderArn:
+    Type: String
+    Default: ""
+    Description: >-
+      An account can have only one GitHub OIDC provider. If VisionX (or anything else) already created
+      it here, paste its ARN (arn:aws:iam::<account>:oidc-provider/token.actions.githubusercontent.com). Otherwise leave empty.
+
+Conditions:
+  CreateProvider: !Equals [!Ref ExistingOidcProviderArn, ""]
+
+Resources:
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList: [sts.amazonaws.com]
+
+  StateBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "urbaniq-tfstate-${AWS::AccountId}"
+      VersioningConfiguration: {Status: Enabled}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # Creates and changes the AWS resources (S3 site bucket, CloudFront). Used by the UrbanIQ Infra workflow.
+  InfraRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: urbaniq-github-infra
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !If [CreateProvider, !Ref GitHubOidcProvider, !Ref ExistingOidcProviderArn]
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubRepo}:ref:refs/heads/main"
+      Policies:
+        - PolicyName: urbaniq-infra
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: Services
+                Effect: Allow
+                Action: [cloudfront:*, s3:*, budgets:*, sns:*, acm:*]
+                Resource: "*"
+
+  # Publishes the site: upload to the site bucket and clear the CloudFront cache. Nothing else.
+  DeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: urbaniq-github-deploy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !If [CreateProvider, !Ref GitHubOidcProvider, !Ref ExistingOidcProviderArn]
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubRepo}:ref:refs/heads/main"
+      Policies:
+        - PolicyName: urbaniq-deploy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !Sub "arn:${AWS::Partition}:s3:::urbaniq-*-site-${AWS::AccountId}"
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject, s3:DeleteObject]
+                Resource: !Sub "arn:${AWS::Partition}:s3:::urbaniq-*-site-${AWS::AccountId}/*"
+              - Effect: Allow
+                Action: [cloudfront:CreateInvalidation, cloudfront:GetInvalidation, cloudfront:ListDistributions]
+                Resource: "*"
+
+Outputs:
+  AccountId:
+    Value: !Ref AWS::AccountId
+  StateBucket:
+    Value: !Ref StateBucket
