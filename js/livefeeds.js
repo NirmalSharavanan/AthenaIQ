@@ -108,7 +108,7 @@
     $('lvAirBars').innerHTML = Object.keys(by).sort(function (a, b) { return by[b] - by[a]; }).map(function (k) { return C.barRow(esc(LOCAL_AP[k] + ' (' + k + ')'), 'arriving or departing', by[k], by[k] / mx); }).join('');
     var ol = $('lvAirList'); ol.innerHTML = '';
     fl.slice().sort(function (a, b) { return km([a.lon, a.lat], centre) - km([b.lon, b.lat], centre); }).slice(0, 10).forEach(function (f) {
-      ol.appendChild(C.listButton(arriving(f) ? 'free' : 'moderate', (f.flight || f.call || 'Flight') + ' · ' + (f.from || '?') + ' → ' + (f.to || '?'), (f.type || '') + (f.airline ? ' · ' + f.airline : '') + ' · ' + num(f.gs) + ' kn · ' + Math.round(km([f.lon, f.lat], centre)) + ' km away', num(f.alt) + '<small>ft</small>', function () { if (inRegion([f.lon, f.lat], 0.6)) { C.flyTo(f.lon, f.lat, 11); } showFlight(f); }));
+      ol.appendChild(C.listButton(arriving(f) ? 'free' : 'moderate', (f.flight || f.call || 'Flight') + ' · ' + (f.from || '?') + ' → ' + (f.to || '?'), (f.type || '') + (f.airline ? ' · ' + f.airline : '') + ' · ' + num(f.gs) + ' kn · ' + Math.round(km([f.lon, f.lat], centre)) + ' km away', num(f.alt) + '<small>ft</small>', function () { if (K.tabOpen('osint') || inRegion([f.lon, f.lat], 0.6)) { C.flyTo(f.lon, f.lat, K.tabOpen('osint') ? 9 : 11); } showFlight(f); }));
     });
   }
 
@@ -148,7 +148,8 @@
     var ol = $('lvSatList'); ol.innerHTML = '';
     satNow.slice(0, 8).forEach(function (s) {
       ol.appendChild(C.listButton(s.el >= 30 ? 'free' : s.el > 0 ? 'moderate' : 'heavy', s.name, (s.el > 0 ? 'Elevation ' + Math.round(s.el) + '° to the ' + DIR[Math.round(s.az / 45) % 8] : 'Below the horizon') + ' · ' + num(Math.round(s.range)) + ' km away · ' + num(Math.round(s.speed)) + ' km/h', num(Math.round(s.alt)) + '<small>km</small>', function () {
-        C.showPopup(inRegion(s.at, 3) ? s.at : centre, s.name, [['NORAD number', s.id], ['Height', num(Math.round(s.alt)) + ' km'], ['Over', s.at[1].toFixed(2) + '°, ' + s.at[0].toFixed(2) + '°'], ['Elevation from here', Math.round(s.el) + '°'], ['Speed', num(Math.round(s.speed)) + ' km/h']], 'Position computed now from N2YO orbital elements');
+        if (K.tabOpen('osint')) { C.flyTo(s.at[0], s.at[1], 6); }
+        C.showPopup(K.tabOpen('osint') || inRegion(s.at, 3) ? s.at : centre, s.name, [['NORAD number', s.id], ['Height', num(Math.round(s.alt)) + ' km'], ['Over', s.at[1].toFixed(2) + '°, ' + s.at[0].toFixed(2) + '°'], ['Elevation from here', Math.round(s.el) + '°'], ['Speed', num(Math.round(s.speed)) + ' km/h']], 'Position computed now from N2YO orbital elements');
       }));
     });
   }

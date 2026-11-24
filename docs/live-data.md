@@ -125,3 +125,14 @@ in `config.js` under `map3d`.
 If the vector base map is slow to load, the app now keeps waiting and shows a
 notice after 20 seconds. Before, it gave up after 8 seconds and showed a plain
 background without buildings.
+
+## Clicking OSINT data on the map
+
+- Every symbol on the OSINT map can be clicked: a pop-up shows its details (fire power and time, flight route and
+  height, satellite height, earthquake place and depth, weather now and the 48-hour outlook, incident level and source).
+  Hovering shows its name and a pointer.
+- Tap a row in the **Symbols** legend to show all points of that kind: the map switches to the Telangana view and
+  zooms to fit them. Global incidents open the World view.
+- Tap an item in a feed card (fires, flights, satellites, earthquakes, natural events, global incidents) to fly the
+  OSINT map to it and open its pop-up. Source pages (USGS, NASA EONET, GDACS) are links inside the pop-up.
+- The orbit pauses while a pop-up is open, so the point stays under it.

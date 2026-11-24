@@ -836,3 +836,11 @@ body.map-light .ig-chip.st-live { color: #0a6b4f; } body.map-light .ig-chip.st-w
 .ig-uc-body .ig-table td:first-child { white-space: nowrap; color: var(--muted); } .ig-uc-body .ig-table td:last-child { text-align: left; font-weight: 400; }
 .ig-body .pick select { width: auto; }
 @media (max-width: 760px) { .ig-ucs { grid-template-columns: 1fr; } #igTabs { overflow-x: auto; max-width: 100%; } }
+
+/* OSINT: legend rows show their data on the map; hover labels on symbols */
+.os-leg[data-kind] { cursor: pointer; border-radius: 6px; padding-left: 4px; padding-right: 4px; }
+.os-leg[data-kind]:hover, .os-leg[data-kind]:focus-visible { background: var(--surface-2, rgba(0,0,0,.05)); outline: none; }
+.os-leg[data-kind]:focus-visible { box-shadow: 0 0 0 2px var(--accent, #2a78d6); }
+#opMap { position: relative; }
+.os-tip { position: absolute; z-index: 8; pointer-events: none; white-space: nowrap; background: var(--surface, #fff); color: var(--text, #1d2a3a); border: 1px solid var(--line, #c9d3dc); border-radius: 6px; padding: 4px 8px; font: 600 12px/1.35 system-ui, sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+.os-tip[hidden] { display: none; }

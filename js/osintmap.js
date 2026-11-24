@@ -63,7 +63,7 @@
       var h = function (f) { return Math.max(300, f.alt * 0.3048 * EX); };
       out.push(new deck.LineLayer({ id: 'os-plane-stem', data: D.flights, widthUnits: 'pixels', getWidth: 1, getColor: [90, 110, 140, 120], getSourcePosition: function (f) { return [f.lon, f.lat, 0]; }, getTargetPosition: function (f) { return [f.lon, f.lat, h(f)]; } }));
       out.push(new deck.IconLayer({ id: 'os-plane', data: D.flights, pickable: true, billboard: false, sizeUnits: 'pixels', getSize: isz(28), getIcon: function () { return URLS.plane; },
-        getPosition: function (f) { return [f.lon, f.lat, h(f)]; }, getAngle: function (f) { return -f.track; }, getColor: function (f) { return /^(AUH|DXB|DWC|SHJ|RKT|FJR|AAN|AZI)$/.test(f.to) ? COLR.planeIn : COLR.plane; }, onClick: function (i) { pickFlight(i, POP); } }));
+        getPosition: function (f) { return [f.lon, f.lat, h(f)]; }, getAngle: function (f) { return -f.track; }, getColor: function (f) { return /^(HYD)$/.test(f.to) ? COLR.planeIn : COLR.plane; }, onClick: function (i) { pickFlight(i, POP); } }));
       out.push(new deck.TextLayer({ id: 'os-plane-name', data: D.flights, getPosition: function (f) { return [f.lon, f.lat, h(f)]; }, getText: function (f) { return f.flight || f.call || ''; }, getSize: 11, getColor: [30, 45, 70], getPixelOffset: [0, -20],
         fontFamily: 'system-ui, sans-serif', fontWeight: 600, outlineWidth: 3, outlineColor: [255, 255, 255, 230], fontSettings: { sdf: true } }));
     }
@@ -89,7 +89,7 @@
         getPosition: function (x) { return [x.lon, x.lat]; }, getColor: function (x) { return LV[x.level]; },
         onClick: function (i) { var x = i.object; if (x) { POP([x.lon, x.lat], x.title || x.kind, [['Kind', x.kind], ['When', x.time.slice(0, 16).replace('T', ' ') + ' UTC'], ['Alert level', ['', 'Advisory', 'Orange', 'Red'][x.level]], ['Source', x.src]], 'Real data'); } } }));
     }
-    if (D.wx.length && (big || wide)) {
+    if (D.wx.length) {
       out.push(new deck.IconLayer({ id: 'os-wx', data: D.wx, pickable: true, sizeUnits: 'pixels', getSize: 30, getIcon: function (p) { return URLS[wxPic(p)]; }, getPosition: function (p) { return [p.lon, p.lat, 4000]; },
         getColor: function (p) { return wxPic(p) === 'dust' ? COLR.dust : wxPic(p) === 'sun' ? [230, 150, 0] : COLR.wx; }, onClick: function (i) { pickWx(i, POP); } }));
       out.push(new deck.TextLayer({ id: 'os-wx-temp', data: D.wx, getPosition: function (p) { return [p.lon, p.lat, 4000]; }, getText: function (p) { return Math.round(p.now.temp) + '°'; }, getSize: 13, getColor: [25, 40, 60], getPixelOffset: [22, 0], fontFamily: 'system-ui, sans-serif', fontWeight: 700,
@@ -111,7 +111,28 @@
     var D = data(view || 'world');
     return [['fire', COLR.fire, 'Fire or heat detection', D.fires.length, 'column height = power'], ['plane', COLR.plane, 'Flight', D.flights.length, 'green = arriving at Hyderabad'], ['ship', COLR.ship, 'Vessel', D.ships.length, 'colour = ship type'],
       ['sat', COLR.sat, 'Satellite', D.sats.length, 'moves in real time'], ['quake', COLR.quake, 'Earthquake', D.quakes.length, 'column height = magnitude'], ['sun', [230, 150, 0], 'Weather', D.wx.length, 'sun, cloud, rain or dust'],
-      ['event', [199, 54, 47], 'Global incident', (T.osint.world() || []).length, 'world view; colour = alert level']].map(function (r) { return { pic: PIC[r[0]], color: r[1], name: r[2], count: r[3], note: r[4] }; });
+      ['event', [199, 54, 47], 'Global incident', (T.osint.world() || []).length, 'world view; colour = alert level']].filter(function (r) { return !(r[0] === 'ship' && (CFG.live || {}).ais === false); }).map(function (r) { return { kind: r[0], pic: PIC[r[0]], color: r[1], name: r[2], count: r[3], note: r[4] }; });
   }
-  T.osintMap = { layersFor: layersFor, legend: legendRows };
+  // Short hover label for any OSINT symbol (both maps).
+  function tip(o, id) {
+    if (!o) { return null; }
+    if (/^os-fire/.test(id)) { return 'Heat detection · ' + o.frp.toFixed(1) + ' MW'; }
+    if (/^os-plane/.test(id)) { return (o.flight || o.call || 'Flight') + ' · ' + (o.from || '?') + ' → ' + (o.to || '?'); }
+    if (/^os-ship/.test(id)) { return o.name || 'MMSI ' + o.mmsi; }
+    if (/^os-sat/.test(id)) { return o.name + ' · ' + num(Math.round(o.alt)) + ' km'; }
+    if (/^os-quake/.test(id)) { return 'Earthquake M' + (o.mag || 0).toFixed(1) + ' · ' + o.place; }
+    if (/^os-event/.test(id)) { return o.title; }
+    if (/^os-world/.test(id)) { return (o.title || o.kind); }
+    if (/^os-wx/.test(id)) { return o.name + ' · ' + Math.round(o.now.temp) + ' °C'; }
+    return null;
+  }
+  // Positions of one kind of data, for "show on map" from the legend.
+  function points(kind, view) {
+    var D = data(view || 'state'), P = function (a) { return a; };
+    var m = { fire: D.fires.map(function (f) { return f.at; }), plane: D.flights.map(function (f) { return [f.lon, f.lat]; }), ship: D.ships.map(function (s) { return [s.lon, s.lat]; }),
+      sat: D.sats.map(function (s) { return s.at; }), quake: D.quakes.map(function (q) { return [q.lon, q.lat]; }), sun: D.wx.map(function (p) { return [p.lon, p.lat]; }),
+      event: (T.osint.world() || []).map(function (x) { return [x.lon, x.lat]; }) };
+    return (m[kind] || []).filter(P);
+  }
+  T.osintMap = { layersFor: layersFor, legend: legendRows, tip: tip, points: points };
 })();

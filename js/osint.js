@@ -58,18 +58,28 @@
     $('osDustChart').innerHTML = bars(p.dust, { unit: 'µg/m³', min: 150, from: p.from, label: 'Dust forecast by hour', color: function (k) { return RCOL[p.dustRisk[k]]; }, tip: function (k) { return hourLabel(p.from, k) + ' ' + dayWord(p.from, k) + ': ' + Math.round(p.dust[k] || 0) + ' µg/m³, gusts ' + Math.round(p.gust[k] || 0) + ' km/h, risk ' + RISK[p.dustRisk[k]]; } });
     $('osDustKey').innerHTML = RISK.map(function (r, i) { return '<span><i style="background:' + RCOL[i] + '"></i>' + r + '</span>'; }).join('');
   }
+  // A list item shows its point on the map with a pop-up; the source page is a link inside it.
+  function link(url, text) { return url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(text) + '</a>' : esc(text); }
+  function showQuake(x) {
+    C.flyTo(x.lon, x.lat, 7);
+    C.showPopup([x.lon, x.lat], 'Earthquake M' + (x.mag || 0).toFixed(1), [['Place', esc(x.place || '–')], ['Time', x.time.slice(0, 16).replace('T', ' ') + ' UTC'], ['Depth', x.depth + ' km'], ['Distance', num(Math.round(km(x.lon, x.lat))) + ' km from here'], ['Source', link(x.url, 'USGS event page')]], 'Real data, USGS');
+  }
+  function showEvent(x) {
+    C.flyTo(x.lon, x.lat, 7);
+    C.showPopup([x.lon, x.lat], x.title, [['Kind', esc(x.kind)], ['Last update', (x.date || '').slice(0, 16).replace('T', ' ') + ' UTC'], ['Distance', num(Math.round(km(x.lon, x.lat))) + ' km from here'], ['Source', link(x.url, 'NASA EONET')]], 'Real data');
+  }
   function renderQuakes() {
     $('osQkSub').textContent = quakes ? 'Updated ' + ago(quakes.updated) : loaded ? 'Not available yet' : 'Loading…'; if (!quakes) { return; }
     var q = quakes.quakes.map(function (x) { return Object.assign({ km: km(x.lon, x.lat) }, x); }), top = q.reduce(function (m, x) { return Math.max(m, x.mag || 0); }, 0), near = q.slice().sort(function (a, b) { return a.km - b.km; })[0];
     set('osQkN', q.length); set('osQkTop', q.length ? 'M' + top.toFixed(1) : '–'); set('osQkNear', near ? num(Math.round(near.km)) + '<small>km</small>' : '–'); set('osQk5', q.filter(function (x) { return x.mag >= 5; }).length);
     var ol = $('osQkList'); ol.innerHTML = '';
-    q.slice().sort(function (a, b) { return (b.mag || 0) - (a.mag || 0); }).slice(0, 6).forEach(function (x) { ol.appendChild(C.listButton(x.mag >= 5 ? 'severe' : x.mag >= 4 ? 'heavy' : 'moderate', x.place || 'Earthquake', ago(x.time) + ' · ' + num(Math.round(x.km)) + ' km from here · ' + x.depth + ' km deep', 'M' + (x.mag || 0).toFixed(1), function () { if (x.url) { window.open(x.url, '_blank', 'noopener'); } })); });
+    q.slice().sort(function (a, b) { return (b.mag || 0) - (a.mag || 0); }).slice(0, 6).forEach(function (x) { ol.appendChild(C.listButton(x.mag >= 5 ? 'severe' : x.mag >= 4 ? 'heavy' : 'moderate', x.place || 'Earthquake', ago(x.time) + ' · ' + num(Math.round(x.km)) + ' km from here · ' + x.depth + ' km deep', 'M' + (x.mag || 0).toFixed(1), function () { showQuake(x); })); });
     if (!q.length) { ol.innerHTML = '<li class="muted">No earthquake of magnitude 4 or more within 2,000 km in the last 30 days.</li>'; }
   }
   function renderEvents() {
     $('osEvSub').textContent = events ? 'Updated ' + ago(events.updated) : loaded ? 'Not available yet' : 'Loading…'; if (!events) { return; }
     var ol = $('osEvList'); ol.innerHTML = '';
-    events.events.map(function (x) { return Object.assign({ km: km(x.lon, x.lat) }, x); }).sort(function (a, b) { return a.km - b.km; }).slice(0, 6).forEach(function (x) { ol.appendChild(C.listButton(x.km < 300 ? 'severe' : x.km < 800 ? 'heavy' : 'moderate', x.title, x.kind + ' · ' + ago(x.date) + ' · ' + num(Math.round(x.km)) + ' km from here', '', function () { if (x.url) { window.open(x.url, '_blank', 'noopener'); } })); });
+    events.events.map(function (x) { return Object.assign({ km: km(x.lon, x.lat) }, x); }).sort(function (a, b) { return a.km - b.km; }).slice(0, 6).forEach(function (x) { ol.appendChild(C.listButton(x.km < 300 ? 'severe' : x.km < 800 ? 'heavy' : 'moderate', x.title, x.kind + ' · ' + ago(x.date) + ' · ' + num(Math.round(x.km)) + ' km from here', '', function () { showEvent(x); })); });
     if (!events.events.length) { ol.innerHTML = '<li class="muted">No natural event recorded across South Asia and the Bay of Bengal in the last 60 days.</li>'; }
   }
   function renderSpace() {
@@ -92,7 +102,7 @@
     $('osWdBars').innerHTML = Object.keys(kinds).sort(function (a, b) { return kinds[b] - kinds[a]; }).slice(0, 7).map(function (k) { return C.barRow(esc(k), '', kinds[k], kinds[k] / mx); }).join('');
     var ol = $('osWdList'); ol.innerHTML = '';
     w.slice(0, 10).forEach(function (x) {
-      ol.appendChild(C.listButton(x.level >= 3 ? 'severe' : x.level === 2 ? 'heavy' : 'moderate', x.title || x.kind, x.kind + (x.country ? ' · ' + (x.country.split(',').length > 3 ? x.country.split(',').slice(0, 3).join(',') + ' and ' + (x.country.split(',').length - 3) + ' more' : x.country) : '') + ' · ' + ago(x.time) + ' · ' + num(Math.round(km(x.lon, x.lat))) + ' km from here · ' + x.src, '', function () { if (T.osintPage) { T.osintPage.world([x.lon, x.lat]); } }));
+      ol.appendChild(C.listButton(x.level >= 3 ? 'severe' : x.level === 2 ? 'heavy' : 'moderate', x.title || x.kind, x.kind + (x.country ? ' · ' + (x.country.split(',').length > 3 ? x.country.split(',').slice(0, 3).join(',') + ' and ' + (x.country.split(',').length - 3) + ' more' : x.country) : '') + ' · ' + ago(x.time) + ' · ' + num(Math.round(km(x.lon, x.lat))) + ' km from here · ' + x.src, '', function () { if (T.osintPage) { T.osintPage.world([x.lon, x.lat]); } C.showPopup([x.lon, x.lat], x.title || x.kind, [['Kind', esc(x.kind)], ['When', x.time.slice(0, 16).replace('T', ' ') + ' UTC'], ['Alert level', ['', 'Advisory', 'Orange', 'Red'][x.level] || '–'], ['Distance', num(Math.round(km(x.lon, x.lat))) + ' km from here'], ['Source', x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">' + esc(x.src) + '</a>' : esc(x.src)]], 'Real data'); }));
     });
   }
   function render() { if (!K.tabOpen('osint')) { return; } renderWx(); renderQuakes(); renderEvents(); renderSpace(); renderWorld(); renderSources(); }

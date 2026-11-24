@@ -1,4 +1,4 @@
-/* IntelliTwin: the OSINT page.
+/* UrbanIQ: the OSINT page.
  *
  * OSINT opens as a page of its own, like Analytics: a 3D map of the open-source feeds on top (Telangana, world or the
  * open region), a symbol legend beside it, and the feed cards in a grid below. The cards are the ones built by
@@ -22,7 +22,7 @@
   function draw() { if (overlay && map) { overlay.setProps({ layers: T.osintMap.layersFor(map, { view: view, pop: pop }) }); } legend(); }
   function legend() {
     $('opLegend').innerHTML = T.osintMap.legend(view).map(function (r) {
-      return '<div class="os-leg"><svg viewBox="0 0 24 24" width="22" height="22" fill="rgb(' + r.color.join(',') + ')" aria-hidden="true">' + r.pic + '</svg><span><strong>' + r.name + '</strong>' + (r.note ? '<em>' + r.note + '</em>' : '') + '</span><b>' + num(r.count) + '</b></div>';
+      return '<div class="os-leg" role="button" tabindex="0" data-kind="' + r.kind + '" title="Show these on the map"><svg viewBox="0 0 24 24" width="22" height="22" fill="rgb(' + r.color.join(',') + ')" aria-hidden="true">' + r.pic + '</svg><span><strong>' + r.name + '</strong>' + (r.note ? '<em>' + r.note + '</em>' : '') + '</span><b>' + num(r.count) + '</b></div>';
     }).join('');
   }
   // The camera for each view. "region" is street level over the open region, where the 3D buildings show.
@@ -30,6 +30,31 @@
     var bb = (C.meta() || {}).bbox || [78.25, 17.22, 78.66, 17.58];
     return v === 'world' ? { center: at || [78.5, 20], zoom: at ? 4.2 : 1.7, pitch: at ? 35 : 0, bearing: 0 } : v === 'region' ? { center: (C.sites()[0] ? [C.sites()[0][1], C.sites()[0][2]] : [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2]), zoom: 14.6, pitch: 60, bearing: -20 } :
       { center: M.centre || [79.0, 17.85], zoom: M.zoom || 6.3, pitch: M.pitch || 52, bearing: M.bearing || -12 };
+  }
+  // Fly the OSINT map to every point of one kind (legend click). Global incidents open the world view.
+  function showKind(kind) {
+    if (!map) { return; }
+    if (kind === 'event') { setView('world'); return; }
+    if (kind === 'sat' && view === 'region') { setView('state'); }
+    var pts = T.osintMap.points(kind, view === 'world' ? 'world' : 'state');
+    if (!pts.length) { K.toast ? K.toast('No ' + kind + ' data on the map yet') : 0; return; }
+    if (view === 'region') { view = 'state'; Array.prototype.forEach.call($('opViews').children, function (b) { var on = b.getAttribute('data-v') === 'state'; b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); }); }
+    setOrbit(false);
+    if (pts.length === 1) { map.flyTo({ center: pts[0], zoom: 9, pitch: 45, duration: 1200 }); }
+    else {
+      var w = Math.min.apply(null, pts.map(function (p) { return p[0]; })), e = Math.max.apply(null, pts.map(function (p) { return p[0]; })),
+        s = Math.min.apply(null, pts.map(function (p) { return p[1]; })), n = Math.max.apply(null, pts.map(function (p) { return p[1]; }));
+      map.fitBounds([[w, s], [e, n]], { padding: 60, maxZoom: 10, pitch: 40, duration: 1200 });
+    }
+    draw();
+  }
+  // While the page is open, list items in the feed cards show their point on this map, not on the hidden main map.
+  function focusPoint(lng, lat, z) {
+    if (!map) { return; }
+    setOrbit(false);
+    if (view === 'region' && Math.hypot(lng - map.getCenter().lng, lat - map.getCenter().lat) > 0.3) { view = 'state'; Array.prototype.forEach.call($('opViews').children, function (b) { var on = b.getAttribute('data-v') === 'state'; b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); }); draw(); }
+    map.flyTo({ center: [lng, lat], zoom: Math.min(z || 10, 11), pitch: 50, duration: 1200 });
+    $('opMap').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
   function setView(v, at) {
     view = v; var cam = camFor(v, at);
@@ -44,7 +69,15 @@
       center: camFor(view).center, zoom: camFor(view).zoom, pitch: camFor(view).pitch, bearing: camFor(view).bearing, minZoom: 1, maxZoom: 18, maxPitch: 70, attributionControl: false, antialias: true });
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
-    overlay = new deck.MapboxOverlay({ interleaved: false, layers: [] }); map.addControl(overlay);
+    overlay = new deck.MapboxOverlay({ interleaved: false, layers: [], pickingRadius: 8,
+      // Every symbol can be clicked for its details; hovering shows its name and a pointer.
+      onHover: function (info) {
+        var t = info && info.object && info.layer ? T.osintMap.tip(info.object, info.layer.id) : null;
+        map.getCanvasContainer().style.cursor = info && info.object ? 'pointer' : '';
+        var el = $('opTip'); if (!el) { el = document.createElement('div'); el.id = 'opTip'; el.className = 'os-tip'; el.setAttribute('role', 'tooltip'); $('opMap').appendChild(el); }
+        if (t) { el.textContent = t + ' · click for details'; el.style.left = (info.x + 14) + 'px'; el.style.top = (info.y + 12) + 'px'; el.hidden = false; } else { el.hidden = true; }
+      } });
+    map.addControl(overlay);
     // The vector base map, if it can be reached; otherwise the symbols are drawn on the plain background.
     var url = light ? CFG.map.styleUrlLight : CFG.map.styleUrl;
     if (url) { fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (st) { if (st && map) { map.setStyle(st, { diff: false }); } }).catch(function () { /* plain background */ }); }
@@ -61,7 +94,7 @@
   function spin(now) {
     if (!isOpen) { lastT = 0; return; }
     var dt = lastT ? Math.min(0.1, (now - lastT) / 1000) : 0; lastT = now;
-    if (orbiting && map && !map.isEasing() && !handsOn && now > wheelUntil) { map.setBearing(map.getBearing() + (M.orbitDegPerSec || 4) * dt); }
+    if (orbiting && map && !map.isEasing() && !handsOn && now > wheelUntil && !(popup && popup.isOpen())) { map.setBearing(map.getBearing() + (M.orbitDegPerSec || 4) * dt); }
     requestAnimationFrame(spin);
   }
   function setOrbit(on) {
@@ -93,9 +126,15 @@
     $('opClose').addEventListener('click', close);
     $('opOrbit').addEventListener('click', function () { setOrbit(!orbiting); });
     $('opViews').addEventListener('click', function (e) { var b = e.target.closest('[data-v]'); if (b) { setView(b.getAttribute('data-v')); } });
+    var legendGo = function (e) { var r = e.target.closest('[data-kind]'); if (r && (e.type === 'click' || e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); showKind(r.getAttribute('data-kind')); } };
+    $('opLegend').addEventListener('click', legendGo); $('opLegend').addEventListener('keydown', legendGo);
+    // Card list clicks call the core flyTo and showPopup; while this page is open they act on its map instead.
+    var coreFly = C.flyTo, corePop = C.showPopup;
+    C.flyTo = function (lng, lat, z) { if (isOpen) { focusPoint(lng, lat, z); } else { coreFly.apply(C, arguments); } };
+    C.showPopup = function (lngLat, title, rows, note) { if (isOpen) { pop(lngLat, title, rows, note); } else { corePop.apply(C, arguments); } };
     $('analyticsBtn').addEventListener('click', close);
     document.getElementById('tabs').addEventListener('click', function (e) { if (e.target.closest('[data-tab]')) { close(); } });
     document.addEventListener('change', function (e) { if (isOpen && e.target && e.target.type === 'checkbox') { setTimeout(draw, 50); } });
   });
-  T.osintPage = { map: function () { return map; }, open: open, close: close, isOpen: function () { return isOpen; }, world: function (at) { open(); setView('world', at); $('opMap').scrollIntoView({ block: 'start' }); } };
+  T.osintPage = { showKind: function (k) { showKind(k); }, focus: focusPoint, map: function () { return map; }, open: open, close: close, isOpen: function () { return isOpen; }, world: function (at) { open(); setView('world', at); $('opMap').scrollIntoView({ block: 'start' }); } };
 })();
