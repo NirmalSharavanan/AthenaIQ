@@ -104,6 +104,8 @@ def satellites():
     for cat in CATEGORIES:
         above = json.loads(get(f"{base}/above/{CENTRE[0]}/{CENTRE[1]}/0/70/{cat}/&apiKey={key}"))
         if "above" not in above:
+            if "info" in above:   # a valid answer with nothing in this group overhead right now
+                continue
             raise RuntimeError("N2YO answered: " + scrub(json.dumps(above)))
         for s in above.get("above") or []:
             name = (s.get("satname") or "").strip()
