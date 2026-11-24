@@ -1,0 +1,56 @@
+# Calibration status, limits and disclaimer
+
+## Disclaimer
+
+UrbanIQ is an independent demonstrator built from open data. It is not an official model of the Government of Telangana, Hyderabad Traffic Police, GHMC, TGSRTC, the Census of India or any other government body, and it is not endorsed by them or by any data provider.
+
+The traffic shown is simulated, not observed. Results are indicative and must not be used for planning, investment, operational, legal or safety decisions. The software and data are provided as is, without warranty.
+
+## Calibration status
+
+**Not calibrated and not validated.** No traffic counts are public for Hyderabad, so nothing in the model has been compared with measured traffic. The total amount of traffic rests on one assumed number (see [methodology.md](methodology.md)). Treat every figure, and every individual road, as illustrative.
+
+## Known limits
+
+| Area | Limit |
+| --- | --- |
+| Coverage | Hyderabad inside and around the Outer Ring Road, plus nine other cities. Traffic from outside each area enters at boundary points with assumed volumes |
+| Network | Motorway to tertiary roads only. Residential and service streets are missing, so local access traffic is loaded onto the nearest larger street |
+| Demand total | Assumed, benchmarked only against another model's estimate |
+| Demand pattern | Homes and workplaces are not distinguished; origins and destinations share the same weights, so the tidal inbound morning flow is weaker than in reality |
+| Vehicle mix | One car type. No vans, lorries, taxis or motorcycles as separate classes |
+| Mixed traffic | Two-wheelers, auto-rickshaws and company cabs, a large part of the Hyderabad peak, are folded into car-equivalent trips; their own behaviour is not modelled |
+| Signals | Positions from OpenStreetMap; timings are not public, so a generic delay and capacity penalty is applied |
+| Tolls | Darb toll gates are not modelled as a price |
+| Route choice | One simulated morning with periodic rerouting; no day-to-day equilibrium, no departure-time choice |
+| Simulation detail | Mesoscopic queues, not individual car-following; no lane changing, no junction geometry effects |
+| Buses | Drawn from a timetable that may be several years old; they do not interact with traffic |
+| Buildings | Machine-detected footprints; most heights are estimated from footprint size |
+| Accidents and fines | Illustrative only, generated from the synthetic traffic. Not real records, sites or fine values |
+| Live, historical, 24 hours | A synthetic day: simulated morning states placed on an assumed daily curve. No live feed, no stored history. The evening peak reuses morning states, so its direction is not reversed |
+| Forecast | Reads the synthetic day ahead; not a prediction from measurements |
+| What-if closure | A local estimate in the browser, not a re-simulation |
+| Devices and camera views | Synthetic positions and readings; the camera view is a drawing unless a real stream is configured |
+| Signals | Real positions, generic cycle; no real timings or states |
+| Sign-in and audit log | Demo only: the role is chosen in the browser and the log is kept in the browser. Neither is a security control |
+| Arabic interface | Fixed labels only; sentences built from values, the assistant and the docs are English. Needs native-speaker review |
+| Vehicles on the map | Drawn to match each link's count and speed; not tracked vehicles |
+| Assistant | Rule-based, limited to the data in the page; not a language model |
+| Scenarios | Demand scaling only. No incident, closure, weather or event scenarios yet |
+| Days | One typical weekday. No Friday, weekend, Ramadan or school-holiday patterns |
+| Speed limits | From OpenStreetMap tags or class defaults; local enforcement practice is not represented |
+
+## What would make it a decision-grade model
+
+1. Traffic counts and journey times to calibrate and validate against (for example GEH statistics by count site).
+2. An origin–destination matrix from surveys, mobile data or licence-plate data.
+3. Signal plans and ramp-metering logic.
+4. Current GTFS and staff-transport data.
+5. A demand model that separates homes, jobs, schools and freight.
+6. An equilibrium assignment with documented convergence.
+- **Public transport is invented.** Bus routes, stops, timetables and delays, taxis, taxi ranks and on-demand shuttles are example data, not real services or vehicle positions (see [buses.md](buses.md)).
+- **Live is not a live feed.** Live starts at India Standard Time and, at the default 30×, runs ahead of it; all traffic in it is synthetic.
+- **The operations modules are demonstrations.** Incidents, signal plans, events and roadworks, parking, evacuation estimates, plate reads, crossings, freight, weather and work orders are generated examples (see [operations-modules.md](operations-modules.md)).
+- **Platform monitoring is synthetic.** There are no servers or feeds behind this static app (see [platform-monitoring.md](platform-monitoring.md)).
+- **Regions other than Hyderabad** start on a synthetic traffic pattern, and their sites and example services are placed from approximate coordinates (see [regions.md](regions.md)).
+- **TomTom features** are real and live but were tested with simulated responses only; they need a key in the browser (see [tomtom.md](tomtom.md)).

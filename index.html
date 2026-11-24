@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UrbanIQ — Telangana Urban Mobility Intelligence &amp; Predictive Simulation</title>
+<meta name="description" content="UrbanIQ: a city digital twin demonstrator for Hyderabad and nine other Telangana cities on OpenStreetMap roads, with a SUMO simulation, live open-data feeds and a synthetic live traffic feed. Simulated and synthetic data are labelled.">
+<meta name="theme-color" content="#0b1220">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1220'/%3E%3Cpath d='M6 22 L13 12 L19 18 L26 8' fill='none' stroke='%232dd4a7' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="vendor/maplibre-gl.css">
+<link rel="stylesheet" href="css/styles.css?v=20261124a">
+<link rel="stylesheet" href="css/theme.css?v=20261124a">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <!-- Presight logo (white lettering for dark backgrounds), self-hosted in assets/. -->
+    <img class="brand-logo" src="assets/presight-logo.png" alt="Presight" width="496" height="142">
+    <div>
+      <h1>UrbanIQ</h1>
+      <p data-i18n="tagline">Real-time transportation intelligence and predictive simulation</p>
+    </div>
+  </div>
+<div class="modebar" role="group" aria-label="Live or historical view">
+    <div class="seg small" id="mode" role="radiogroup" aria-label="View mode">
+      <button data-mode="live" role="radio" aria-checked="true" class="on" data-i18n="live">Live</button>
+      <button data-mode="hist" role="radio" aria-checked="false" data-i18n="historical">Historical</button>
+    </div>
+    <span class="hist" id="histControls" hidden>
+      <input type="date" id="hDate" aria-label="Date">
+      <select id="hHour" aria-label="Hour, 24-hour clock"></select><span aria-hidden="true">:</span><select id="hMin" aria-label="Minute"></select>
+    </span>
+  </div>
+  <label class="pick"><select id="regionSel" aria-label="Region" title="Region"></select></label>
+  <label class="pick"><select id="siteSel" aria-label="Site in this region" title="Site"><option value="">Sites…</option></select></label>
+  <label class="goto">
+    <select id="goto" aria-label="Go to a major road">
+      <option value="" data-i18n="gotoRoad">Go to a major road…</option>
+      <option value="all" data-i18n="wholeArea">Whole study area</option>
+      <optgroup label="Major roads" id="gotoRoads"></optgroup>
+    </select>
+  </label>
+  <div class="topbar-right">
+    <button type="button" class="btn small icon-btn" id="integTopBtn" aria-pressed="false" aria-label="Integration Studio" title="Integration Studio: connect devices and data sources"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h5v4H4zM4 14h5v4H4zM15 10h5v4h-5zM9 8h3v4h3M9 16h3v-4"/></svg></button>
+    <button class="alert-btn" id="themeBtn" title="Switch between the dark and the light map">Light map</button>
+    <button class="alert-btn" id="alertBtn" title="Open alerts"><span data-i18n="alerts">Alerts</span> <b id="alertCount">0</b></button>
+    <button class="btn small" id="langBtn" title="Switch language">తెలుగు</button>
+    <button class="btn small user" id="userBtn" hidden></button>
+    <span class="now"><span class="now-date" id="dateLabel"></span><span class="clock" id="clock" aria-live="off">--:--</span></span>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" id="tabs" role="tablist" aria-label="Sections">
+    <button type="button" class="rail-toggle" id="railToggle" aria-expanded="false" title="Expand the menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Menu</span></button>
+    <button role="tab" data-tab="dash" aria-selected="true" class="on" title="Dashboard"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7v9H4zM13 4h7v5h-7zM13 11h7v9h-7zM4 15h7v5H4z"/></svg><span data-i18n="dashboard">Dashboard</span></button>
+    <button role="tab" data-tab="cong" aria-selected="false" title="Congestion"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3 5 21M16 3l3 18M12 4v3M12 10.5v3M12 17v3"/></svg><span data-i18n="congestion">Congestion</span></button>
+    <button role="tab" data-tab="inc" aria-selected="false" title="Incident management"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg><span>Incidents</span></button>
+    <button role="tab" data-tab="acc" aria-selected="false" title="Accidents"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 20h19zM12 9.5v5M12 17.3v.2"/></svg><span data-i18n="accidents">Accidents</span></button>
+    <button role="tab" data-tab="fines" aria-selected="false" title="Fines"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/></svg><span data-i18n="fines">Fines</span></button>
+    <button role="tab" data-tab="sig" aria-selected="false" title="Signal control"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6v20H9zM12 6.5h.01M12 12h.01M12 17.5h.01"/></svg><span>Signals</span></button>
+    <button role="tab" data-tab="bus" aria-selected="false" title="Public transport"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v12H5zM5 11h14M8 21v-2M16 21v-2M8.5 15h.01M15.5 15h.01"/></svg><span>Transit</span></button>
+    <button role="tab" data-tab="park" aria-selected="false" title="Parking"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM10 17V7h3a3 3 0 0 1 0 6h-3"/></svg><span>Parking</span></button>
+    <button role="tab" data-tab="frt" aria-selected="false" title="Freight and restricted vehicles"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h5l3 3v4h-8zM7 19a1.5 1.5 0 1 0 0-.01M17 19a1.5 1.5 0 1 0 0-.01"/></svg><span>Freight</span></button>
+    <button role="tab" data-tab="ped" aria-selected="false" title="Pedestrian and school safety"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4a1.5 1.5 0 1 0 0-.01M9 21l2-6-2-2 1-5 3 1 2 3 3 1M13 15l2 6"/></svg><span>Pedestrians</span></button>
+    <button role="tab" data-tab="plan" aria-selected="false" title="Planned events and roadworks"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16v15H4zM4 10h16M8 3v4M16 3v4"/></svg><span>Events</span></button>
+    <button role="tab" data-tab="emg" aria-selected="false" title="Emergency and evacuation planning"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 5a1.5 1.5 0 1 0 0-.01M7 21l3-6-2-3 3-4 3 3 3 1M10 15l4 2v4"/></svg><span>Emergency</span></button>
+    <button role="tab" data-tab="anpr" aria-selected="false" title="Vehicle search"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-5-5"/></svg><span>Search</span></button>
+    <button role="tab" data-tab="zones" aria-selected="false" title="Zones"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.7 7.5 9 4.3-1.300 7.5-4.5 7.5-9V6z"/></svg><span>Zones</span></button>
+    <button role="tab" data-tab="env" aria-selected="false" title="Environment"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14zM5 19l7-7"/></svg><span>Environment</span></button>
+    <button role="tab" data-tab="dev" aria-selected="false" title="Devices"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l12-4 2 5-12 4zM15 9l4 1.5-1 3-4-1.500M8 13v5h4"/></svg><span data-i18n="devices">Devices</span></button>
+    <button role="tab" data-tab="rep" aria-selected="false" title="Reports"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l4 4v14H7zM14 3v4h4M10 12h5M10 16h5"/></svg><span data-i18n="reports">Reports</span></button>
+    <button role="tab" data-tab="sys" aria-selected="false" title="Platform monitoring"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v6H4zM4 14h16v6H4zM7.5 7h.01M7.5 17h.01M11 7h6M11 17h6"/></svg><span>Platform</span></button>
+    <button role="tab" data-tab="model" aria-selected="false" title="Model"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v6M12 7.500v.2"/></svg><span data-i18n="model">Model</span></button>
+    <button type="button" class="rail-item" id="osintBtn" aria-pressed="false" title="OSINT: open-source intelligence feeds"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg><span>OSINT</span></button>
+    <button type="button" class="rail-item" id="analyticsBtn" title="Analytics and city KPIs"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg><span>Analytics</span></button>
+    <button type="button" class="rail-item" id="integBtn" aria-pressed="false" title="Integration Studio: onboard data sources and map their fields"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h5v4H4zM4 14h5v4H4zM15 10h5v4h-5zM9 8h3v4h3M9 16h3v-4"/></svg><span>Integrations</span></button>
+  </nav>
+
+<main class="layout">
+  <section class="map-wrap" aria-label="Traffic map">
+    <div id="map"></div>
+    <div id="nodata" class="nodata" hidden>
+      <h2>Simulation data not built yet</h2>
+      <p>Run the “Build twin data” workflow in GitHub Actions, or follow <a href="docs/operations.md">docs/operations.md</a> to build it locally.</p>
+    </div>
+
+    <div class="sites" id="sites" role="group" aria-label="Major sites"><button type="button" class="mini" id="sitesMin" title="Show or hide the site shortcuts" data-i18n="sites">Sites</button></div>
+    <button type="button" class="panel-open-btn" id="panelOpen" hidden data-i18n="dashboard">Dashboard</button>
+
+    <div class="legend" id="legend" aria-label="Legend">
+      <button type="button" class="mini" id="legendMin" title="Show or hide the legend" data-i18n="legend">Legend</button>
+      <span><i class="sw free"></i><span data-i18n="lgFree">Free ≥80% of limit</span></span>
+      <span><i class="sw moderate"></i><span data-i18n="lgModerate">Moderate 60–80%</span></span>
+      <span><i class="sw heavy"></i><span data-i18n="lgHeavy">Heavy 40–60%</span></span>
+      <span><i class="sw severe"></i><span data-i18n="lgSevere">Severe &lt;40%</span></span>
+      <span><i class="pt car"></i><span data-i18n="lgVehicles">Vehicles (zoom in for 3D)</span></span>
+      <span><i class="pt synbus"></i>Bus, synthetic route</span>
+      <span><i class="pt" style="background:#c98500"></i>Taxi, synthetic</span>
+      <span><i class="pt" style="background:#d55181"></i>Shuttle, synthetic</span>
+      <span><i class="pt" style="background:#5aa7ff"></i>Ship, synthetic</span>
+      <span><i class="pt" style="background:#f0cf7f"></i>Aircraft, synthetic</span>
+      <span id="legendRail" hidden><i class="sw rail"></i>Railway</span>
+      <span id="legendCycle" hidden><i class="sw cyc"></i>Cycle track</span>
+      <span><i class="pt env"></i>Environmental sensor (synthetic)</span>
+      <span><i class="pt zone"></i>Critical site</span>
+      <span><i class="pt base"></i>Response unit (synthetic)</span>
+      <span><i class="sw route"></i>Response route</span>
+      <span><i class="pt acc"></i><span data-i18n="lgAccident">Accident (illustrative)</span></span>
+      <span><i class="pt site"></i><span data-i18n="lgSite">Enforcement camera (synthetic)</span></span>
+      <span><i class="pt cam"></i><span data-i18n="lgCam">CCTV camera</span></span>
+      <span><i class="pt det"></i><span data-i18n="lgDet">Detector</span></span>
+      <span><i class="pt vms"></i><span data-i18n="lgVms">Message sign</span></span>
+      <span><i class="pt sig"></i><span data-i18n="lgSig">Signal (generic cycle)</span></span>
+    </div>
+
+    <button id="chatOpen" class="chat-open" aria-expanded="false" aria-controls="chat" title="Twin Advisor: ask about the traffic, alerts and KPIs in this twin"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H9l-4.5 3v-5A7.5 7.5 0 0 1 4 11.5 7.5 7.5 0 0 1 11.5 4h1"/><path d="M18 2.5l.9 2.1 2.1.9-2.1.9L18 8.5l-.9-2.1-2.1-.9 2.1-.9z" fill="currentColor" stroke="none"/><path d="M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01"/></svg><span data-i18n="ask">Twin Advisor</span></button>
+    <section id="chat" class="chat" hidden aria-label="Twin Advisor">
+      <header><div class="chat-title"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H9l-4.5 3v-5A7.5 7.5 0 0 1 4 11.5 7.5 7.5 0 0 1 11.5 4h1"/><path d="M18 2.5l.9 2.1 2.1.9-2.1.9L18 8.5l-.9-2.1-2.1-.9 2.1-.9z" fill="currentColor" stroke="none"/><path d="M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01"/></svg><div><strong>Twin Advisor</strong><span>Built-in assistant · answers from the data in this twin</span></div></div><button id="chatClose" class="btn small" aria-label="Close assistant">Close</button></header>
+      <div id="chatLog" class="chat-log" aria-live="polite"></div>
+      <div id="chatChips" class="chat-chips">
+        <button type="button">How is traffic now?</button>
+        <button type="button">Which roads are slowest?</button>
+        <button type="button">Any alerts?</button>
+        <button type="button">Forecast</button>
+        <button type="button">Show accidents</button>
+        <button type="button">How many fines?</button>
+        <button type="button">Go to Yas Island</button>
+        <button type="button">Compare the demand cases</button>
+      </div>
+      <form id="chatForm" autocomplete="off"><input id="chatInput" type="text" placeholder="Ask about traffic, roads, alerts, accidents, fines…" aria-label="Question"><button class="btn" type="submit">Send</button></form>
+    </section>
+
+    <!-- Pushed alerts -->
+    <div id="toasts" class="toasts" aria-live="assertive"></div>
+
+    <!-- Camera video window -->
+    <section id="video" class="video" hidden aria-label="Camera view">
+      <header><div><strong id="videoTitle">Camera</strong><span id="videoSub"></span></div><button id="videoClose" class="btn small">Close</button></header>
+      <div class="video-body" id="videoBody"></div>
+      <footer id="videoNote"></footer>
+    </section>
+
+    <span class="g-credit" id="gCredit" hidden>Google Maps</span>
+    <span class="tt-credit" id="ttCredit" hidden>Live data © TomTom</span>
+    <div class="timeline" role="group" aria-label="Time controls">
+      <button id="play" class="btn icon" aria-label="Pause">❚❚</button>
+      <div class="seg" id="rate" role="radiogroup" aria-label="Playback speed">
+        <button data-rate="1" role="radio" aria-checked="false" title="Real time">1×</button>
+        <button data-rate="30" role="radio" aria-checked="true" class="on">30×</button>
+        <button data-rate="120" role="radio" aria-checked="false">120×</button>
+        <button data-rate="600" role="radio" aria-checked="false">600×</button>
+      </div>
+      <span class="sim-clock" id="simClock" title="Time shown on the map">--:--</span>
+      <input id="time" type="range" min="0" max="86399" step="60" value="0" aria-label="Time of day">
+      <div class="seg" id="viewMode" role="radiogroup" aria-label="Map view">
+        <button data-view="2d" role="radio" aria-checked="false" title="Flat map from above">2D</button>
+        <button data-view="3d" role="radio" aria-checked="true" class="on" title="Tilted map with 3D vehicles and buildings">3D</button>
+        <button data-view="city" role="radio" aria-checked="false" title="Closer, steeper view of the 3D buildings">City view</button>
+      </div>
+      <button id="tilt" class="btn" aria-pressed="false" hidden>3D</button>
+      <button id="fullView" class="btn" aria-pressed="false" title="Minimise or restore the panel, legend and site shortcuts" data-i18n="fullView">Full view</button>
+      <button id="orbit" class="btn" aria-pressed="false" title="Slowly circle the camera around the view" data-i18n="orbit">Orbit</button>
+    </div>
+  </section>
+
+  <aside class="panel" aria-label="Network intelligence">
+    <header class="panel-head">
+      <h2 id="panelTitle">Dashboard</h2>
+      <button type="button" class="mini" id="panelMin" title="Minimise this panel" aria-label="Minimise panel" data-i18n="minimise">Minimise</button>
+    </header>
+
+    <!-- Dashboard -->
+    <section class="card" data-tab="dash">
+      <div class="card-head"><h2 data-i18n="scenarioLayers">Scenario and layers</h2><span class="muted" id="scenSrc">Pre-simulated</span></div>
+      <label class="field"><span data-i18n="demandCase">Demand case</span><select id="scenario"></select></label>
+      <p class="insight" id="lyTtNote" hidden></p>
+      <label class="check"><input id="showCars" type="checkbox" checked><span><span data-i18n="vehicles">Vehicles</span> <span class="muted" id="carNote"></span></span></label>
+      <label class="check"><input id="showPeople" type="checkbox" checked><span>People on foot <span class="muted">(synthetic, street zoom)</span></span></label>
+      <label class="check"><input id="showAcc" type="checkbox" checked><span><span data-i18n="accidents">Accidents</span> <span class="muted">(illustrative)</span></span></label>
+      <label class="check"><input id="showSites" type="checkbox" checked><span data-i18n="lyEnf">Enforcement cameras</span></label>
+      <label class="check"><input id="showCams" type="checkbox" checked><span data-i18n="lyCam">CCTV cameras</span></label>
+      <label class="check"><input id="showDet" type="checkbox"><span data-i18n="lyDet">Detectors</span></label>
+      <label class="check"><input id="showVms" type="checkbox" checked><span data-i18n="lyVms">Message signs</span></label>
+      <label class="check" id="railRow" hidden><input id="showRail" type="checkbox" checked><span>Railway <span class="muted" id="railNote"></span></span></label>
+      <label class="check" id="cycleRow" hidden><input id="showCycle" type="checkbox" checked><span>Cycle tracks <span class="muted" id="cycleNote"></span></span></label>
+      <label class="check"><input id="showBases" type="checkbox" checked><span>Response units <span class="muted">(synthetic)</span></span></label>
+      <label class="check" id="sigRow" hidden><input id="showSig" type="checkbox" checked><span data-i18n="lySig">Traffic signals</span></label>
+      <label class="check" id="bldRow" hidden><input id="showBld" type="checkbox"><span>Buildings, 3D <span class="muted" id="bldNote"></span></span></label>
+      <label class="check"><input id="lyTtFlow" type="checkbox"><span>Live traffic, TomTom <span class="muted">(real; replaces the twin’s road colours)</span></span></label>
+      <label class="check"><input id="lyTtInc" type="checkbox" checked><span>Live incidents, TomTom <span class="muted" id="lyTtIncN"></span></span></label>
+      <label class="check"><input id="lyTtEv" type="checkbox"><span>EV charging stations, TomTom <span class="muted" id="lyTtEvN"></span></span></label>
+      <label class="check"><input id="lyTtFuel" type="checkbox"><span>Fuel stations, TomTom <span class="muted" id="lyTtFuelN"></span></span></label>
+      <label class="check"><input id="lyLvFire" type="checkbox" checked><span>Fire and heat detections, NASA FIRMS <span class="muted" id="lyLvFireN"></span></span></label>
+      <label class="check"><input id="lyLvShip" type="checkbox" checked><span>Live vessels, AIS <span class="muted" id="lyLvShipN"></span></span></label>
+      <label class="check"><input id="lyLvSat" type="checkbox" checked><span>Satellites overhead, N2YO <span class="muted" id="lyLvSatN"></span></span></label>
+      <label class="check"><input id="lyLvAir" type="checkbox" checked><span>Live flights, Flightradar24 <span class="muted" id="lyLvAirN"></span></span></label>
+      <div class="ly-action" id="lyCamWallRow"><button type="button" class="btn small" id="lyCamWall">Open the live camera wall</button></div>
+      <label class="check"><input id="lyOsWx" type="checkbox" checked><span>Weather, rain and dust warnings <span class="muted">(real, Open-Meteo)</span></span></label>
+      <label class="check"><input id="lyOsQk" type="checkbox" checked><span>Earthquake warnings <span class="muted">(real, USGS)</span></span></label>
+    </section>
+    <section class="card" data-tab="dash">
+      <div class="card-head"><h2 data-i18n="networkNow">Network now</h2><span class="muted" id="viewLabel"></span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label" data-i18n="avgSpeed">Average speed</span><span class="k-value" id="kSpeed">–</span><span class="k-delta" id="dSpeed"></span></div>
+        <div class="kpi"><span class="k-label" data-i18n="extraTime">Extra travel time</span><span class="k-value" id="kCong">–</span><span class="k-delta" id="dCong"></span></div>
+        <div class="kpi"><span class="k-label" data-i18n="vehMoving">Vehicles moving</span><span class="k-value" id="kVeh">–</span><span class="k-delta" id="dVeh"></span></div>
+        <div class="kpi"><span class="k-label" data-i18n="delayHour">Delay per hour</span><span class="k-value" id="kDelay">–</span><span class="k-delta" id="dDelay"></span></div>
+        <button class="kpi link" data-goto="acc"><span class="k-label"><span data-i18n="accToday">Accidents today</span> <em data-i18n="illustrative">illustrative</em></span><span class="k-value" id="kAcc">–</span><span class="k-delta" id="dAcc"></span></button>
+        <button class="kpi link" data-goto="fines"><span class="k-label"><span data-i18n="finesToday">Fines today</span> <em data-i18n="illustrative">illustrative</em></span><span class="k-value" id="kFines">–</span><span class="k-delta" id="dFines"></span></button>
+      </div>
+      <p class="insight" id="insight"></p>
+    </section>
+
+    <section class="card" data-tab="dash">
+      <div class="card-head"><h2 data-i18n="alerts">Alerts</h2><span class="muted" id="alertNote"></span></div>
+      <ol class="corridors" id="alertList"></ol>
+      <button type="button" class="btn small" id="notifyBtn" style="margin-top:10px">Enable browser notifications</button>
+    </section>
+
+    <section class="card" data-tab="dash">
+      <div class="card-head"><h2>Response route</h2><span class="muted" id="respNote">Quickest path to a critical alert</span></div>
+      <p class="insight" id="respText">No route yet. Tap an alert, or wait for a critical one.</p>
+      <p class="muted" id="ttRoute"></p>
+      <button type="button" class="btn small" id="respClear" hidden style="margin-top:8px">Clear route</button>
+    </section>
+
+    <section class="card" data-tab="dash">
+      <div class="card-head"><h2>Live traffic from TomTom</h2><span class="muted" id="ttSpeedNote"></span></div>
+      <p class="muted tt-need">Real, live data. Needs a TomTom key: Reports, TomTom live data.</p>
+      <div class="kpis"><button class="kpi link" data-goto="inc"><span class="k-label">Live incidents <em>TomTom</em></span><span class="k-value" id="dLiveInc">–</span></button></div>
+      <label class="check"><input id="showTomTom" type="checkbox"><span>Show live traffic on the map <span class="muted">(replaces the twin’s road colours)</span></span></label>
+      <label class="check"><input id="showTtInc" type="checkbox" checked><span>Show live incidents on the map</span></label>
+      <button type="button" class="btn small" id="ttSpeedBtn">Live speeds at this region’s sites</button>
+      <ol class="corridors" id="ttSpeedList"></ol>
+    </section>
+
+    <section class="card" data-tab="dash">
+      <div class="card-head"><h2>Sea and air now</h2><span class="muted" id="dSeaAirNote"></span></div>
+      <div class="kpis">
+        <button class="kpi link" data-goto="bus"><span class="k-label">Vessels moving <em>synthetic</em></span><span class="k-value" id="dSea">–</span></button>
+        <button class="kpi link" data-goto="bus"><span class="k-label">Berths in use <em>synthetic</em></span><span class="k-value" id="dBerth">–</span></button>
+        <button class="kpi link" data-goto="bus"><span class="k-label" id="dAirLabel">Aircraft in the air nearby <em>synthetic</em></span><span class="k-value" id="dAir">–</span></button>
+        <button class="kpi link" data-goto="bus"><span class="k-label" id="dAirOnLabel">Flights on time <em>synthetic</em></span><span class="k-value" id="dAirOn">–</span></button>
+      </div>
+    </section>
+
+    <section class="card" data-tab="dash">
+      <div class="card-head"><h2>Vehicles by type</h2><span class="muted">Assumed mix</span></div>
+      <div class="bars" id="mixBars"></div>
+    </section>
+
+    <section class="card" data-tab="dash">
+      <div class="card-head"><h2 data-i18n="forecast">Forecast</h2><span class="muted" data-i18n="forecastNote">From the synthetic day profile</span></div>
+      <div class="kpis three" id="forecastTiles"></div>
+    </section>
+
+    <section class="card" data-tab="dash">
+      <div class="card-head"><h2 data-i18n="dayProfile">Day profile</h2><span class="muted" data-i18n="speedKmh">Network speed, km/h</span></div>
+      <canvas id="chart" height="150" aria-label="Network average speed through the day"></canvas>
+      <div class="chart-key">
+        <span><i class="ln base"></i><span data-i18n="typical">Typical demand</span></span>
+        <span><i class="ln scen"></i><span data-i18n="selected">Selected case</span></span>
+        <span><i class="ln mark"></i><span data-i18n="shownTime">Shown time</span></span>
+      </div>
+    </section>
+
+    <!-- Congestion -->
+    <section class="card" data-tab="cong" hidden data-need="whatif">
+      <div class="card-head"><h2 data-i18n="whatIf">What-if: close a road</h2><span class="muted">Estimate</span></div>
+      <p class="notice">An estimate made in the browser: the closed road empties and roads within 1.5 km slow down. It is <strong>not re-simulated</strong>, so rerouting further away is not shown.</p>
+      <label class="field"><span data-i18n="roadToClose">Road to close</span><select id="closureRoad"><option value="">None</option></select></label>
+      <p class="insight" id="closureNote"></p>
+    </section>
+    <section class="card" data-tab="cong" hidden>
+      <div class="card-head"><h2 data-i18n="congByClass">Congestion by road class</h2><span class="muted">Share of vehicles in heavy or severe traffic</span></div>
+      <div class="bars" id="classBars"></div>
+    </section>
+    <section class="card" data-tab="cong" hidden>
+      <div class="card-head"><h2 data-i18n="slowest">Slowest roads now</h2><span class="muted" data-i18n="tapLocate">Tap to locate</span></div>
+      <ol class="corridors" id="corridors"></ol>
+    </section>
+
+    <!-- Accidents -->
+    <section class="card" data-tab="acc" hidden>
+      <p class="notice"><strong>Illustrative, not real records.</strong> No accident data is public for this region. These are generated from the synthetic traffic to show how the view works.</p>
+      <div class="kpis three">
+        <div class="kpi"><span class="k-label" data-i18n="today">Today</span><span class="k-value" id="aTotal">–</span></div>
+        <div class="kpi"><span class="k-label" data-i18n="activeNow">Active now</span><span class="k-value" id="aActive">–</span></div>
+        <div class="kpi"><span class="k-label" data-i18n="withInjury">With injury</span><span class="k-value" id="aInjury">–</span></div>
+      </div>
+    </section>
+    <section class="card" data-tab="acc" hidden>
+      <div class="card-head"><h2 data-i18n="accLog">Accident log</h2><span class="muted">Latest first · tap to locate</span></div>
+      <ol class="corridors" id="accList"></ol>
+    </section>
+
+    <!-- Fines -->
+    <section class="card" data-tab="fines" hidden>
+      <p class="notice"><strong>Illustrative, not real records.</strong> No enforcement data is public. Violations are generated from synthetic flow at 60 assumed sites, and the fine values are placeholders, not the official tariff.</p>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label" data-i18n="finesToday">Fines today</span><span class="k-value" id="fTotal">–</span></div>
+        <div class="kpi"><span class="k-label" data-i18n="value">Value</span><span class="k-value" id="fValue">–</span></div>
+      </div>
+    </section>
+    <section class="card" data-tab="fines" hidden>
+      <div class="card-head"><h2 data-i18n="byType">By violation type</h2><span class="muted">Count · assumed fine</span></div>
+      <div class="bars" id="typeBars"></div>
+    </section>
+    <section class="card" data-tab="fines" hidden>
+      <div class="card-head"><h2 data-i18n="busiestSites">Busiest enforcement sites</h2><span class="muted" data-i18n="tapLocate">Tap to locate</span></div>
+      <ol class="corridors" id="siteList"></ol>
+    </section>
+
+    <!-- Devices -->
+    <section class="card" data-tab="dev" hidden>
+      <p class="notice"><strong>Synthetic devices.</strong> Positions are placed by the app on busy roads unless real devices are listed in <code>config.js</code>. Readings come from the synthetic traffic.</p>
+      <table class="facts" id="devFacts"></table>
+    </section>
+    <section class="card" data-tab="dev" hidden>
+      <div class="card-head"><h2 data-i18n="cameras">CCTV cameras</h2><span class="muted">Tap to open the view</span></div>
+      <ol class="corridors" id="camList"></ol>
+    </section>
+    <section class="card" data-tab="dev" hidden>
+      <div class="card-head"><h2 data-i18n="signs">Message signs</h2><span class="muted" data-i18n="tapLocate">Tap to locate</span></div>
+      <ol class="corridors" id="vmsList"></ol>
+    </section>
+
+    <!-- Reports -->
+    <section class="card" data-tab="dev" hidden>
+      <p class="notice"><strong>Synthetic asset health.</strong> Availability and work orders are generated examples, not a maintenance system.</p>
+      <div class="card-head"><h2>Asset health and maintenance</h2><span class="muted">Availability today</span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Field assets</span><span class="k-value" id="asTotal">–</span></div>
+        <div class="kpi"><span class="k-label">Working now</span><span class="k-value" id="asAvail">–</span></div>
+        <div class="kpi"><span class="k-label">Open work orders</span><span class="k-value" id="asOpen">–</span></div>
+        <div class="kpi"><span class="k-label">Overdue</span><span class="k-value" id="asOverdue">–</span></div>
+      </div>
+      <div id="asBars"></div>
+      <div class="card-head sub-head"><h2>Work orders</h2><span class="muted">Priority</span></div>
+      <ol class="corridors" id="asList"></ol>
+    </section>
+    <section class="card" data-tab="rep" hidden data-need="export">
+      <div class="card-head"><h2>Scheduled reports</h2><span class="muted">Tap to generate now</span></div>
+      <p class="muted">This static app cannot send reports by itself; the schedule shows when each would run on a server. Generating one downloads it as a file.</p>
+      <ol class="corridors" id="rpList"></ol>
+    </section>
+    <section class="card" data-tab="rep" hidden data-need="export">
+      <div class="card-head"><h2>Before and after study</h2></div>
+      <p class="muted">Compares two synthetic days. They differ only by day type (weekday, Friday, weekend), so this shows the method, not the effect of a real measure.</p>
+      <div class="two-col"><label class="field"><span>Before</span><input type="date" id="baBefore"></label><label class="field"><span>After</span><input type="date" id="baAfter"></label></div>
+      <button type="button" class="btn small" id="baRun">Compare</button>
+      <table class="facts" id="baFacts"></table>
+    </section>
+    <section class="card" data-tab="rep" hidden data-need="export">
+      <div class="card-head"><h2 data-i18n="exports">Exports</h2><span class="muted" id="repLabel"></span></div>
+      <div class="btn-col">
+        <button class="btn" data-export="kpi">Day KPIs (CSV)</button>
+        <button class="btn" data-export="roads">Roads now (CSV)</button>
+        <button class="btn" data-export="accidents">Accidents today (CSV)</button>
+        <button class="btn" data-export="fines">Fines by site (CSV)</button>
+        <button class="btn" data-export="print">Print summary (or save as PDF)</button>
+      </div>
+    </section>
+    <section class="card" data-tab="rep" hidden data-need="audit">
+      <div class="card-head"><h2 data-i18n="audit">Audit log</h2><span class="muted">Kept in this browser</span></div>
+      <div class="btn-col row"><button class="btn small" data-export="audit">Export CSV</button><button class="btn small" id="auditClear">Clear</button></div>
+      <table class="facts audit" id="auditTable"></table>
+    </section>
+    <section class="card" data-tab="rep" hidden id="svcCard">
+      <div class="card-head"><h2>Connection check</h2><span class="muted">Google Maps and TomTom</span></div>
+      <p class="muted" id="svcNote">Not checked yet.</p>
+      <div id="svcList"></div>
+      <div class="search-row"><button type="button" class="btn small" id="svcRun">Test connections</button><button type="button" class="btn small" id="svcCopy" hidden>Copy result</button></div>
+      <textarea id="svcText" class="svc-text" rows="6" readonly hidden aria-label="Connection check result"></textarea>
+      <p class="muted">Each call is made from this browser with the configured key, the same way the application makes it. A failed call shows the provider’s reason and what to change.</p>
+    </section>
+    <section class="card" data-tab="rep" hidden>
+      <div class="card-head"><h2>Base map</h2></div>
+      <p class="muted" id="gStatus"></p>
+      <label class="field"><span>Show</span><select id="gType"><option value="osm">MapLibre 3D buildings (OpenFreeMap vector map)</option><option value="roadmap">Google Maps, road map</option><option value="satellite">Google Maps, satellite</option><option value="hybrid">Google Maps, satellite with roads</option></select></label>
+      <label class="check"><input id="g3d" type="checkbox"><span>Google 3D buildings and terrain <span class="muted">(photorealistic, experimental)</span></span></label>
+      <div class="search-row"><input id="gKey" type="password" autocomplete="off" aria-label="Google Maps API key" placeholder="Paste the Google Maps API key"><button type="button" class="btn small" id="gKeySave">Save</button><button type="button" class="btn small" id="gKeyRemove" hidden>Remove</button></div>
+      <p class="muted" id="gHelp">Google Maps needs a key with the Map Tiles API enabled. A key entered here is kept in this browser only and takes the place of the one in the site configuration. The twin’s roads, traffic and sites stay on OpenStreetMap data; only the background picture changes.</p>
+    </section>
+    <section class="card" data-tab="rep" hidden>
+      <div class="card-head"><h2>TomTom live data</h2></div>
+      <p class="muted" id="ttStatus"></p>
+      <div class="search-row"><input id="ttKey" type="password" autocomplete="off" aria-label="TomTom API key" placeholder="Paste the TomTom API key"><button type="button" class="btn small" id="ttKeySave">Save</button><button type="button" class="btn small" id="ttKeyRemove" hidden>Remove</button></div>
+      <p class="muted">A key entered here is kept in this browser only and takes the place of the one in the site configuration. It switches on live traffic, live incidents, live speeds, EV and fuel stations and live route times.</p>
+    </section>
+    <section class="card" data-tab="rep" hidden data-need="settings">
+      <div class="card-head"><h2 data-i18n="settings">Configuration</h2><span class="muted">From config.js</span></div>
+      <table class="facts" id="cfgFacts"></table>
+    </section>
+    <section class="card" data-tab="rep" hidden id="repLocked">
+      <p class="muted">Your role does not include exports. Sign in as an operator or administrator.</p>
+    </section>
+
+    <!-- Model -->
+    <!-- Buses -->
+    <section class="card track-card" data-tab="bus" id="trackCard" data-locked="1" hidden>
+      <div class="card-head"><h2 id="trackTitle">Tracking</h2><button type="button" class="btn small" id="trackStop">Stop tracking</button></div>
+      <table class="facts" id="trackFacts"></table>
+      <p class="muted">The map follows this vehicle. Synthetic position, not a real vehicle.</p>
+    </section>
+    <section class="card" data-tab="bus" hidden>
+      <p class="notice"><strong>Synthetic bus network.</strong> These routes, stops, timetables and delays are example data generated by the app, not the region's real services.</p>
+      <p class="notice" id="busEmpty" hidden>No bus routes could be built on this road network.</p>
+      <div class="card-head"><h2>Buses now</h2><span class="muted" id="busNote2"></span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Routes</span><span class="k-value" id="bRoutes">–</span></div>
+        <div class="kpi"><span class="k-label">Buses in service</span><span class="k-value" id="bBuses">–</span></div>
+        <div class="kpi"><span class="k-label">Average headway</span><span class="k-value" id="bHeadway">–</span></div>
+        <div class="kpi"><span class="k-label">Buses on time</span><span class="k-value" id="bOnTime">–</span></div>
+      </div>
+      <label class="check"><input id="showSynBuses" type="checkbox" checked><span>Show routes and buses on the map</span></label>
+    </section>
+    <section class="card" data-tab="bus" id="busDetail" data-locked="1" hidden>
+      <div class="card-head"><h2 id="busDetailTitle">Route</h2><button type="button" class="btn small" id="busClear">Clear</button></div>
+      <table class="facts" id="busFacts"></table>
+      <div class="card-head sub-head"><h2>Buses on this route</h2><span class="muted">Tap to track live</span></div>
+      <ol class="corridors" id="busFleet"></ol>
+      <div class="card-head sub-head"><h2>Stops and next bus</h2><span class="muted">Tap to locate</span></div>
+      <ol class="corridors scroll-list" id="busStops"></ol>
+    </section>
+    <section class="card" data-tab="bus" hidden>
+      <div class="card-head"><h2>Routes</h2><span class="muted">Tap to show on the map</span></div>
+      <ol class="corridors" id="busList"></ol>
+    </section>
+    <section class="card" data-tab="bus" hidden>
+      <p class="notice"><strong>Synthetic taxi fleet.</strong> Example taxis, statuses and rank queues generated by the app. There is no public feed of real taxi positions.</p>
+      <div class="card-head"><h2>Taxis now</h2><span class="muted">Tap a taxi on the map to track it</span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Taxis on the road</span><span class="k-value" id="txTotal">–</span></div>
+        <div class="kpi"><span class="k-label">Hired</span><span class="k-value" id="txHired">–</span></div>
+        <div class="kpi"><span class="k-label">Vacant</span><span class="k-value" id="txVacant">–</span></div>
+        <div class="kpi"><span class="k-label">Going to a booking</span><span class="k-value" id="txCall">–</span></div>
+      </div>
+      <p class="map-key"><span><i class="pt" style="background:#0ca30c"></i>Vacant</span><span><i class="pt" style="background:#c98500"></i>Hired</span><span><i class="pt" style="background:#3987e5"></i>Going to a booking</span><span><i class="pt" style="background:#fab219"></i>Taxi rank</span></p>
+      <label class="check"><input id="showTaxis" type="checkbox" checked><span>Show taxis and ranks on the map</span></label>
+      <div class="card-head sub-head"><h2>Taxi ranks</h2><span class="muted">Tap to locate</span></div>
+      <ol class="corridors" id="rankList"></ol>
+    </section>
+    <section class="card" data-tab="bus" hidden>
+      <p class="notice"><strong>Synthetic on-demand shuttles and rail.</strong> Example shuttle zones, vehicles and waits. The railway line is real OpenStreetMap track.</p>
+      <div class="card-head"><h2>Other public transport</h2><span class="muted">Tap a shuttle on the map to track it</span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">On-demand shuttles</span><span class="k-value" id="shVehicles">–</span></div>
+        <div class="kpi"><span class="k-label">Passengers on board</span><span class="k-value" id="shRiders">–</span></div>
+      </div>
+      <label class="check"><input id="showShuttles" type="checkbox" checked><span>Show shuttle zones and shuttles on the map</span></label>
+      <ol class="corridors" id="shuttleList"></ol>
+      <table class="facts" id="railFact"></table>
+    </section>
+    <section class="card" data-tab="bus" hidden>
+      <p class="notice"><strong>Synthetic ship movements.</strong> Example vessels on approximate shipping lanes off the port. There is no vessel-position feed in this app; names, times and positions are generated.</p>
+      <div class="card-head"><h2>Ships now</h2><button type="button" class="btn small" id="seaView">Show the sea lanes</button></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Vessels moving</span><span class="k-value" id="seaMoving">–</span></div>
+        <div class="kpi"><span class="k-label">Berths in use</span><span class="k-value" id="seaBerth">–</span></div>
+        <div class="kpi"><span class="k-label">Inbound</span><span class="k-value" id="seaIn">–</span></div>
+        <div class="kpi"><span class="k-label">Outbound</span><span class="k-value" id="seaOut">–</span></div>
+      </div>
+      <label class="check"><input id="showSea" type="checkbox" checked><span>Show ships and sea lanes on the map</span></label>
+      <div class="card-head sub-head"><h2>Vessels</h2><span class="muted">Tap to track</span></div>
+      <ol class="corridors" id="seaList"></ol>
+    </section>
+    <section class="card" data-tab="bus" hidden id="airSynCard">
+      <p class="notice"><strong>Synthetic flight movements.</strong> Example flights on approximate approach and departure paths. There is no aircraft-position feed in this app; flight numbers, times and positions are generated.</p>
+      <div class="card-head"><h2>Flights now</h2><button type="button" class="btn small" id="airView">Show the airport</button></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Aircraft in the air nearby</span><span class="k-value" id="airNow">–</span></div>
+        <div class="kpi"><span class="k-label">Movements this hour</span><span class="k-value" id="airHour">–</span></div>
+        <div class="kpi"><span class="k-label">On time</span><span class="k-value" id="airOnTime">–</span></div>
+        <div class="kpi"><span class="k-label">Average delay</span><span class="k-value" id="airDelay">–</span></div>
+      </div>
+      <label class="check"><input id="showAir" type="checkbox" checked><span>Show aircraft and flight paths on the map</span></label>
+      <div class="card-head sub-head"><h2>Arrivals and departures</h2><span class="muted">Tap a flight in the air to track it</span></div>
+      <ol class="corridors" id="airList"></ol>
+    </section>
+    <section class="card" data-tab="bus" hidden>
+      <p class="notice"><strong>Real locations, synthetic usage.</strong> Charging stations are from OpenStreetMap; sockets in use are generated. Live stations and live charger availability come from TomTom when a key is set.</p>
+      <div class="card-head"><h2>EV charging</h2><span class="muted" id="evNote"></span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Charging stations</span><span class="k-value" id="evCount">–</span></div>
+        <div class="kpi"><span class="k-label">Sockets</span><span class="k-value" id="evSockets">–</span></div>
+        <div class="kpi"><span class="k-label">In use now</span><span class="k-value" id="evBusy">–</span></div>
+        <div class="kpi"><span class="k-label">Free now</span><span class="k-value" id="evFree">–</span></div>
+      </div>
+      <label class="check"><input id="showEv" type="checkbox" checked><span>Show charging stations on the map</span></label>
+      <ol class="corridors" id="evList"></ol>
+      <div class="card-head sub-head"><h2>Live from TomTom</h2><span class="muted" id="ttEvNote"></span></div>
+      <button type="button" class="btn small" id="ttEvBtn">Find charging stations near the map centre</button>
+      <p class="muted tt-need">Needs a TomTom key: Reports, TomTom live data.</p>
+      <ol class="corridors" id="ttEvList"></ol>
+    </section>
+    <section class="card" data-tab="bus" hidden>
+      <p class="notice"><strong>Real locations, synthetic usage.</strong> Fuel stations are from OpenStreetMap; vehicles at the pumps are generated. Fuel prices are not shown.</p>
+      <div class="card-head"><h2>Fuel stations</h2><span class="muted" id="fuNote"></span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Fuel stations</span><span class="k-value" id="fuCount">–</span></div>
+        <div class="kpi"><span class="k-label">Brands</span><span class="k-value" id="fuBrands">–</span></div>
+        <div class="kpi"><span class="k-label">Largest brand</span><span class="k-value" id="fuTop">–</span></div>
+      </div>
+      <label class="check"><input id="showFuel" type="checkbox" checked><span>Show fuel stations on the map</span></label>
+      <div id="fuBars"></div>
+      <ol class="corridors" id="fuList"></ol>
+      <div class="card-head sub-head"><h2>Live from TomTom</h2><span class="muted" id="ttFuelNote"></span></div>
+      <button type="button" class="btn small" id="ttFuelBtn">Find fuel stations near the map centre</button>
+      <p class="muted tt-need">Needs a TomTom key: Reports, TomTom live data.</p>
+      <ol class="corridors" id="ttFuelList"></ol>
+    </section>
+
+    <!-- Incidents -->
+    <section class="card" data-tab="inc" hidden>
+      <p class="notice"><strong>Illustrative incidents.</strong> Incidents follow the illustrative accident records; response steps are generated unless an operator acts. Not real incidents.</p>
+      <div class="card-head"><h2>Incidents today</h2><span class="muted" id="incNote"></span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Open now</span><span class="k-value" id="incOpen">–</span></div>
+        <div class="kpi"><span class="k-label">Cleared today</span><span class="k-value" id="incCleared">–</span></div>
+        <div class="kpi"><span class="k-label">Average response</span><span class="k-value" id="incResp">–</span></div>
+        <div class="kpi"><span class="k-label">On scene within target</span><span class="k-value" id="incSla">–</span></div>
+      </div>
+      <button type="button" class="btn small" id="incExport" data-need="export">Export incidents (CSV)</button>
+    </section>
+    <section class="card track-card" data-tab="inc" id="incDetail" data-locked="1" hidden>
+      <div class="card-head"><h2 id="incTitle">Incident</h2></div>
+      <table class="facts" id="incFacts"></table>
+      <div class="btn-row"><button type="button" class="btn small" id="incAck">Acknowledge</button><button type="button" class="btn small" id="incDisp">Dispatch a unit</button><button type="button" class="btn small" id="incClose">Close incident</button></div>
+    </section>
+    <section class="card" data-tab="inc" hidden>
+      <div class="card-head"><h2>Incident register</h2><span class="muted">Tap to open</span></div>
+      <ol class="corridors" id="incList"></ol>
+    </section>
+    <section class="card" data-tab="inc" hidden>
+      <div class="card-head"><h2>Live incidents from TomTom</h2><span class="muted" id="ttIncCount"></span></div>
+      <p class="muted" id="ttIncNote"></p>
+      <button type="button" class="btn small" id="ttIncBtn">Refresh</button>
+      <ol class="corridors" id="ttIncList"></ol>
+    </section>
+
+    <!-- Signals -->
+    <section class="card" data-tab="sig" hidden>
+      <p class="notice"><strong>Example signal plans.</strong> Junction positions are from OpenStreetMap and service levels from the simulation; cycle times, plans and adaptive status are examples, not the real controller settings.</p>
+      <div class="card-head"><h2>Signal control</h2><span class="muted" id="sgNote"></span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Signalised junctions</span><span class="k-value" id="sgCount">–</span></div>
+        <div class="kpi"><span class="k-label">Adaptive (example pilot)</span><span class="k-value" id="sgAdaptive">–</span></div>
+        <div class="kpi"><span class="k-label">Average cycle now</span><span class="k-value" id="sgCycle">–</span></div>
+        <div class="kpi"><span class="k-label">At service level E or F</span><span class="k-value" id="sgPoor">–</span></div>
+      </div>
+    </section>
+    <section class="card" data-tab="sig" hidden>
+      <div class="card-head"><h2>Emergency vehicle priority</h2></div>
+      <p class="muted" id="sgPriorityNote"></p>
+      <button type="button" class="btn small" id="sgPriority">Hold signals green along the response route</button>
+    </section>
+    <section class="card" data-tab="sig" hidden>
+      <div class="card-head"><h2>Green-wave corridors</h2><span class="muted">Share of green band kept</span></div>
+      <ol class="corridors" id="sgCorr"></ol>
+      <div class="card-head sub-head"><h2>Junctions with most delay</h2><span class="muted">Cycle time</span></div>
+      <ol class="corridors" id="sgList"></ol>
+    </section>
+
+    <!-- Parking -->
+    <section class="card" data-tab="park" hidden>
+      <p class="notice"><strong>Synthetic parking.</strong> Example car parks and on-street zones with generated occupancy. Not a real parking feed.</p>
+      <div class="card-head"><h2>Parking now</h2><span class="muted">Tap for guidance</span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Spaces</span><span class="k-value" id="pkSpaces">–</span></div>
+        <div class="kpi"><span class="k-label">Occupied</span><span class="k-value" id="pkUsed">–</span></div>
+        <div class="kpi"><span class="k-label">Full or nearly full</span><span class="k-value" id="pkFull">–</span></div>
+        <div class="kpi"><span class="k-label">Parking violations today</span><span class="k-value" id="pkFines">–</span></div>
+      </div>
+      <ol class="corridors" id="pkList"></ol>
+    </section>
+
+    <!-- Freight -->
+    <section class="card" data-tab="frt" hidden>
+      <p class="notice"><strong>Synthetic freight data.</strong> Lorry numbers come from the assumed vehicle mix; the restricted zone, ban hours, weigh stations and hazardous loads are examples from <code>config.js</code>.</p>
+      <div class="card-head"><h2>Freight now</h2><span class="muted" id="frNote"></span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Lorries on the network</span><span class="k-value" id="frLorries">–</span></div>
+        <div class="kpi"><span class="k-label">Lorry ban</span><span class="k-value" id="frBan">–</span></div>
+        <div class="kpi"><span class="k-label">Lorries in the zone during the ban</span><span class="k-value" id="frViol">–</span></div>
+        <div class="kpi"><span class="k-label">Hazardous loads tracked</span><span class="k-value" id="frHaz">–</span></div>
+      </div>
+      <table class="facts" id="frFacts"></table>
+      <div class="card-head sub-head"><h2>Weigh stations</h2><span class="muted">Overweight share</span></div>
+      <ol class="corridors" id="frList"></ol>
+    </section>
+
+    <!-- Pedestrians and schools -->
+    <section class="card" data-tab="ped" hidden>
+      <p class="notice"><strong>Synthetic pedestrian data.</strong> Schools are real OpenStreetMap sites; nearby speeds come from the simulated traffic; crossing counts and crowd levels are generated.</p>
+      <div class="card-head"><h2>Pedestrian and school safety</h2><span class="muted" id="pdNote"></span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Schools watched</span><span class="k-value" id="pdSchools">–</span></div>
+        <div class="kpi"><span class="k-label">School time</span><span class="k-value" id="pdWindow">–</span></div>
+        <div class="kpi"><span class="k-label">Schools with fast traffic nearby</span><span class="k-value" id="pdFast">–</span></div>
+        <div class="kpi"><span class="k-label">People crossing an hour</span><span class="k-value" id="pdFlow">–</span></div>
+      </div>
+      <div class="card-head sub-head"><h2>Schools with fast traffic nearby</h2><span class="muted">Tap to open</span></div>
+      <ol class="corridors" id="pdSchoolList"></ol>
+      <div class="card-head sub-head"><h2>Crossings to review</h2><span class="muted">Crossing away from the signal</span></div>
+      <ol class="corridors" id="pdCrossList"></ol>
+      <div class="card-head sub-head"><h2>Crowd level at major sites</h2></div>
+      <table class="facts" id="pdCrowd"></table>
+    </section>
+
+    <!-- Planned events and roadworks -->
+    <section class="card" data-tab="plan" hidden>
+      <p class="notice"><strong>Example calendar.</strong> These roadworks and events are examples set in <code>config.js</code>, dated from the day on the map. They are not real permits or events.</p>
+      <div class="card-head"><h2>Planned events and roadworks</h2><span class="muted">Next two weeks</span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Active now</span><span class="k-value" id="plNow">–</span></div>
+        <div class="kpi"><span class="k-label">Today</span><span class="k-value" id="plToday">–</span></div>
+        <div class="kpi"><span class="k-label">Roadworks</span><span class="k-value" id="plWorks">–</span></div>
+        <div class="kpi"><span class="k-label">Events</span><span class="k-value" id="plEvents">–</span></div>
+      </div>
+      <ol class="corridors" id="plList"></ol>
+      <div class="card-head sub-head"><h2>Test a roadworks closure</h2></div>
+      <label class="field"><span>Road</span><select id="plRoad"></select></label>
+      <button type="button" class="btn small" id="plTest">Estimate the effect of closing it</button>
+    </section>
+
+    <!-- Emergency and evacuation -->
+    <section class="card" data-tab="emg" hidden>
+      <p class="notice"><strong>Planning estimate.</strong> Sites are from OpenStreetMap. People, assembly points and road capacity are assumptions in <code>config.js</code>; the clearance time is a simple estimate, not an approved evacuation plan.</p>
+      <div class="card-head"><h2>Evacuation planning</h2></div>
+      <label class="field"><span>Site to evacuate</span><select id="emSite"><option value="">Choose a site…</option></select></label>
+    </section>
+    <section class="card" data-tab="emg" hidden>
+      <p class="notice"><strong>What-if exercise.</strong> Natural disaster scenarios use example hazard areas from <code>config.js</code>. They are for planning exercises; they are not warnings, forecasts or hazard maps.</p>
+      <div class="card-head"><h2>Natural disaster scenarios</h2></div>
+      <label class="field"><span>Scenario</span><select id="dzType"><option value="">Choose a scenario…</option></select></label>
+      <div id="dzResult" hidden>
+        <div class="card-head sub-head"><h2 id="dzTitle">Scenario</h2></div>
+        <table class="facts" id="dzFacts"></table>
+        <div class="card-head sub-head"><h2>Response checklist</h2></div>
+        <ul class="sy-issues" id="dzActions"></ul>
+        <p class="map-key"><span><i class="pt" style="background:#3987e5"></i>Exercise area</span><span><i class="pt" style="background:#ec835a"></i>Affected roads</span><span><i class="pt" style="background:#d03b3b"></i>Critical sites</span><span><i class="pt" style="background:#0ca30c"></i>Assembly points</span></p>
+      </div>
+    </section>
+    <section class="card track-card" data-tab="emg" id="emResult" hidden>
+      <div class="card-head"><h2 id="emTitle">Site</h2></div>
+      <table class="facts" id="emFacts"></table>
+      <p class="map-key"><span><i class="pt" style="background:#0ca30c"></i>Evacuation route</span><span><i class="pt" style="background:#d55181"></i>From hospital</span><span><i class="pt" style="background:#3987e5"></i>From police</span><span><i class="pt" style="background:#d95926"></i>From fire station</span></p>
+    </section>
+
+    <!-- Vehicle search -->
+    <section class="card" data-tab="anpr" hidden data-need="search">
+      <p class="notice"><strong>Synthetic plate reads.</strong> Plates, sightings and the watch list are generated examples at synthetic cameras; no real vehicle is tracked. Every search is written to the audit log.</p>
+      <div class="card-head"><h2>Vehicle search</h2></div>
+      <form id="vsForm" class="search-row" autocomplete="off"><input id="vsPlate" type="text" placeholder="Plate, for example DEMO-48213" aria-label="Plate number"><button class="btn small" type="submit">Search</button><button class="btn small" type="button" id="vsClear">Clear</button></form>
+    </section>
+    <section class="card track-card" data-tab="anpr" id="vsResult" hidden data-need="search">
+      <div class="card-head"><h2 id="vsTitle">Plate</h2></div>
+      <table class="facts" id="vsFacts"></table>
+      <ol class="corridors" id="vsList"></ol>
+    </section>
+    <section class="card" data-tab="anpr" hidden data-need="search">
+      <div class="card-head"><h2>Watch list</h2><span class="muted">Example entries</span></div>
+      <ol class="corridors" id="vsWatch"></ol>
+    </section>
+
+    <!-- Platform monitoring -->
+    <!-- OSINT: real public feeds -->
+    <section class="card" data-tab="osint" hidden>
+      <p class="notice"><strong>Real data.</strong> Weather and forecast from Open-Meteo for the open region, refreshed every 30 minutes. Shown at real time, not the twin’s clock.</p>
+      <div class="card-head"><h2>Weather now</h2><span class="muted" id="osWxSub"></span></div>
+      <div class="kpis"><div class="kpi"><span class="k-label">Temperature</span><span class="k-value" id="osWxTemp">–</span></div><div class="kpi"><span class="k-label">Sky</span><span class="k-value" id="osWxSky">–</span></div><div class="kpi"><span class="k-label">Wind</span><span class="k-value" id="osWxWind">–</span></div><div class="kpi"><span class="k-label">Visibility</span><span class="k-value" id="osWxVis">–</span></div></div>
+      <table class="facts" id="osWxFacts"></table>
+    </section>
+    <section class="card" data-tab="osint" hidden>
+      <div class="card-head"><h2>Rain forecast</h2><span class="muted">Next 48 hours</span></div>
+      <div class="kpis"><div class="kpi"><span class="k-label">Rain, next 48 h</span><span class="k-value" id="osRain48">–</span></div><div class="kpi"><span class="k-label">Rain, next 12 h</span><span class="k-value" id="osRain12">–</span></div><div class="kpi"><span class="k-label">Highest chance</span><span class="k-value" id="osRainProb">–</span></div><div class="kpi"><span class="k-label">Heaviest hour</span><span class="k-value" id="osRainPeak">–</span></div></div>
+      <div id="osRainChart" class="os-chart"></div>
+      <p class="insight" id="osRainNote"></p>
+    </section>
+    <section class="card" data-tab="osint" hidden>
+      <p class="notice"><strong>Indicative forecast.</strong> Risk is worked out here from forecast dust, wind gusts and visibility. It is not an official warning; the India Meteorological Department (IMD) issues those.</p>
+      <div class="card-head"><h2>Dust storm and air quality forecast</h2><span class="muted">Next 48 hours</span></div>
+      <div class="kpis"><div class="kpi"><span class="k-label">Highest risk</span><span class="k-value" id="osDustRisk">–</span></div><div class="kpi"><span class="k-label">Peak dust</span><span class="k-value" id="osDustMax">–</span></div><div class="kpi"><span class="k-label">Strongest gusts</span><span class="k-value" id="osDustGust">–</span></div><div class="kpi"><span class="k-label">Lowest visibility</span><span class="k-value" id="osDustVis">–</span></div></div>
+      <div id="osDustChart" class="os-chart"></div>
+      <div class="os-key" id="osDustKey"></div>
+      <p class="insight" id="osDustNote"></p>
+    </section>
+    <section class="card" data-tab="osint" hidden>
+      <div class="card-head"><h2>Earthquakes</h2><span class="muted" id="osQkSub"></span></div>
+      <p class="muted">Magnitude 4 and above within 2,000 km, last 30 days (USGS). Telangana lies in a low seismic zone (zone II); strong earthquakes in the Himalaya and Myanmar are rarely felt here.</p>
+      <div class="kpis"><div class="kpi"><span class="k-label">Earthquakes</span><span class="k-value" id="osQkN">–</span></div><div class="kpi"><span class="k-label">Strongest</span><span class="k-value" id="osQkTop">–</span></div><div class="kpi"><span class="k-label">Nearest</span><span class="k-value" id="osQkNear">–</span></div><div class="kpi"><span class="k-label">Magnitude 5 and above</span><span class="k-value" id="osQk5">–</span></div></div>
+      <ol class="corridors" id="osQkList"></ol>
+    </section>
+    <section class="card" data-tab="osint" hidden>
+      <div class="card-head"><h2>Natural events</h2><span class="muted" id="osEvSub"></span></div>
+      <p class="muted">Events across South Asia and the Bay of Bengal in the last 60 days, from NASA EONET: cyclones and storms, floods, dust and haze, wildfires.</p>
+      <ol class="corridors" id="osEvList"></ol>
+    </section>
+    <section class="card" data-tab="osint" hidden>
+      <p class="notice"><strong>Real data.</strong> Strong earthquakes (USGS), open natural events (NASA EONET) and orange and red disaster alerts (GDACS) from around the world.</p>
+      <div class="card-head"><h2>Global incidents</h2><span class="muted" id="osWdSub"></span></div>
+      <div class="kpis"><div class="kpi"><span class="k-label">Incidents</span><span class="k-value" id="osWdN">–</span></div><div class="kpi"><span class="k-label">Red alerts</span><span class="k-value" id="osWdRed">–</span></div><div class="kpi"><span class="k-label">Earthquakes, M5.5 and above</span><span class="k-value" id="osWdQk">–</span></div><div class="kpi"><span class="k-label">Kinds of event</span><span class="k-value" id="osWdKinds">–</span></div></div>
+      <div id="osWdBars"></div>
+      <ol class="corridors" id="osWdList"></ol>
+    </section>
+    <section class="card" data-tab="osint" hidden>
+      <div class="card-head"><h2>Space weather</h2><span class="muted" id="osSpSub"></span></div>
+      <div class="kpis"><div class="kpi"><span class="k-label">Planetary K index now</span><span class="k-value" id="osSpKp">–</span></div><div class="kpi"><span class="k-label">Highest, last 3 days</span><span class="k-value" id="osSpMax">–</span></div><div class="kpi"><span class="k-label">Condition</span><span class="k-value" id="osSpState">–</span></div></div>
+      <p class="insight" id="osSpNote"></p>
+    </section>
+    <section class="card" data-tab="osint" hidden id="osSources">
+      <div class="card-head"><h2>Sources</h2><span class="muted">Open and public feeds</span></div>
+      <table class="facts" id="osSrcTable"></table>
+      <p class="muted">The feeds are fetched by the Live data workflow every 30 minutes.</p>
+    </section>
+
+    <section class="card" data-tab="sys" hidden>
+      <p class="notice"><strong>Synthetic platform figures.</strong> This demonstrator runs in the browser with no servers or live feeds behind it. The figures show what the monitoring view of a deployed platform would look like.</p>
+      <div class="card-head"><h2>Platform now</h2><span class="muted" id="syClock"></span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Events ingested</span><span class="k-value" id="syRate">–</span><canvas class="spark" id="spRate" aria-hidden="true"></canvas></div>
+        <div class="kpi"><span class="k-label">End-to-end latency</span><span class="k-value" id="syLatency">–</span><canvas class="spark" id="spLatency" aria-hidden="true"></canvas></div>
+        <div class="kpi"><span class="k-label">Feeds healthy</span><span class="k-value" id="syFeeds">–</span></div>
+        <div class="kpi"><span class="k-label">Queue backlog</span><span class="k-value" id="syQueue">–</span><canvas class="spark" id="spQueue" aria-hidden="true"></canvas></div>
+        <div class="kpi"><span class="k-label">CPU, average</span><span class="k-value" id="syCpu">–</span><canvas class="spark" id="spCpu" aria-hidden="true"></canvas></div>
+        <div class="kpi"><span class="k-label">GPU, average</span><span class="k-value" id="syGpu">–</span><canvas class="spark" id="spGpu" aria-hidden="true"></canvas></div>
+      </div>
+    </section>
+    <section class="card" data-tab="sys" hidden>
+      <div class="card-head"><h2>Open issues</h2><span class="muted" id="syHealth"></span></div>
+      <ul class="sy-issues" id="syIssues"></ul>
+    </section>
+    <section class="card" data-tab="sys" hidden>
+      <div class="card-head"><h2>Data ingestion</h2><span class="muted">Messages a second</span></div>
+      <ol class="corridors" id="syFeedList"></ol>
+    </section>
+    <section class="card" data-tab="sys" hidden>
+      <div class="card-head"><h2>Infrastructure</h2><span class="muted">Servers and clusters</span></div>
+      <div id="syNodes"></div>
+    </section>
+    <section class="card" data-tab="sys" hidden>
+      <div class="card-head"><h2>Services</h2><span class="muted">Response time</span></div>
+      <ol class="corridors" id="sySvc"></ol>
+      <div class="card-head sub-head"><h2>Storage and backup</h2></div>
+      <table class="facts" id="syStore"></table>
+    </section>
+
+    <!-- Environment -->
+    <section class="card" data-tab="env" id="wxCard" hidden>
+      <p class="notice"><strong>Synthetic weather.</strong> Conditions are generated for the day; the advice follows an example rule set. Use the selector to demonstrate fog, a sandstorm or rain. The traffic simulation does not change.</p>
+      <div class="card-head"><h2>Weather and visibility</h2><label class="inline-field">Show <select id="wxDemo"><option value="auto">Today (generated)</option><option value="clear">Clear</option><option value="fog">Fog</option><option value="sand">Sandstorm</option><option value="rain">Rain</option></select></label></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Conditions</span><span class="k-value" id="wxNow">–</span></div>
+        <div class="kpi"><span class="k-label">Visibility</span><span class="k-value" id="wxVis">–</span></div>
+        <div class="kpi"><span class="k-label">Wind</span><span class="k-value" id="wxWind">–</span></div>
+        <div class="kpi"><span class="k-label">Advised motorway limit</span><span class="k-value" id="wxLimit">–</span></div>
+      </div>
+      <table class="facts" id="wxFacts"></table>
+    </section>
+    <section class="card" data-tab="env" hidden>
+      <p class="notice"><strong>Synthetic sensors and readings.</strong> Example roadside sensors; values are generated from the synthetic traffic and a daily pattern, not measured.</p>
+      <div class="card-head"><h2>Air and noise now</h2><span class="muted" id="envNote"></span></div>
+      <div class="kpis">
+        <div class="kpi"><span class="k-label">Air quality index, average</span><span class="k-value" id="eAqi">–</span></div>
+        <div class="kpi"><span class="k-label">Noise, average</span><span class="k-value" id="eNoise">–</span></div>
+        <div class="kpi"><span class="k-label">PM2.5, average</span><span class="k-value" id="ePm">–</span></div>
+        <div class="kpi"><span class="k-label">NO₂, average</span><span class="k-value" id="eNo2">–</span></div>
+      </div>
+      <label class="check"><input id="showEnv" type="checkbox" checked><span>Show sensors on the map</span></label>
+    </section>
+    <section class="card" data-tab="env" hidden>
+      <div class="card-head"><h2>Sensors, worst air first</h2><span class="muted">Tap to locate</span></div>
+      <ol class="corridors" id="envList"></ol>
+    </section>
+
+    <!-- Critical zones -->
+    <section class="card" data-tab="zones" hidden>
+      <div class="card-head"><h2>Critical zones</h2><span class="muted" id="zoneNote"></span></div>
+      <p class="notice" id="zoneEmpty" hidden>No site data in this build yet. Sites are read from OpenStreetMap by the data build; you can also list your own in <code>config.js</code>.</p>
+      <div class="kpis three">
+        <div class="kpi"><span class="k-label">Monitored</span><span class="k-value" id="zTotal">–</span></div>
+        <div class="kpi"><span class="k-label">On watch</span><span class="k-value" id="zWatch">–</span></div>
+        <div class="kpi"><span class="k-label">In alert</span><span class="k-value" id="zAlert">–</span></div>
+      </div>
+      <label class="field" style="margin-top:12px"><span>Site type</span><select id="zoneType"></select></label>
+      <label class="check"><input id="showZones" type="checkbox" checked><span>Show sites on the map</span></label>
+    </section>
+    <section class="card" data-tab="zones" hidden>
+      <div class="card-head"><h2>Sites needing attention</h2><span class="muted">Tap to locate</span></div>
+      <ol class="corridors" id="zoneList"></ol>
+    </section>
+
+    <section class="card" data-tab="model" hidden>
+      <div class="card-head"><h2>The simulated morning</h2><span class="muted" id="winLabel"></span></div>
+      <table class="facts" id="tripFacts"></table>
+    </section>
+    <section class="card" data-tab="model" hidden>
+      <div class="card-head"><h2>What is built</h2><span class="muted" id="builtLabel"></span></div>
+      <table class="facts" id="netFacts"></table>
+    </section>
+    <section class="card" data-tab="model" hidden>
+      <div class="card-head"><h2>Validation</h2><span class="muted">Not calibrated</span></div>
+      <p class="muted">No traffic counts or journey times are connected, so the model has not been checked against measured traffic. Connecting counts is the first step to a decision-grade model; see docs/limitations.md.</p>
+    </section>
+    <section class="card about" data-tab="model" hidden>
+      <h2>About this demonstrator</h2>
+      <p>UrbanIQ shows traffic on the OpenStreetMap road network of Hyderabad and nine other Telangana cities. The roads are real. The <strong>traffic is simulated</strong> with Eclipse SUMO from assumed demand, and the live and historical views are a <strong>synthetic feed</strong> built from those simulated states. Accidents, fines, devices and camera views are illustrative.</p>
+      <p>It is an independent demonstrator, not an official model of the Government of Telangana or any other authority, and must not be used for planning, investment, operational, legal or safety decisions.</p>
+      <p>Sources, method, configuration and limits are in the <a href="docs/README.md">docs folder</a>.</p>
+      <p class="muted">Roads © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL). Base map: OpenStreetMap data, vector tiles by OpenFreeMap. Buildings: Microsoft Global ML Building Footprints. Buses: synthetic example network. Software: Eclipse SUMO, deck.gl, MapLibre GL JS.</p>
+    </section>
+  </aside>
+<section class="os-page" id="osintPage" hidden aria-label="OSINT">
+  <header class="an-head">
+    <div><h2>OSINT</h2><p>Open-source intelligence from public feeds: weather, hazards, flights, vessels, satellites and incidents. Real data, shown at real time.</p></div>
+    <div class="op-tools">
+      <div class="seg" id="opViews" role="radiogroup" aria-label="Map view"><button type="button" data-v="region" role="radio" class="on" aria-checked="true">City 3D, buildings</button><button type="button" data-v="state" role="radio" aria-checked="false">Telangana 3D</button><button type="button" data-v="world" role="radio" aria-checked="false">World</button></div>
+      <button type="button" class="btn" id="opOrbit" aria-pressed="true" title="Slowly circle the camera around the view">Orbit</button>
+      <button type="button" class="btn" id="opClose">Close</button>
+    </div>
+  </header>
+  <div class="op-body">
+    <div class="op-top">
+      <div class="op-map" id="opMap" role="application" aria-label="OSINT map"></div>
+      <aside class="card op-side"><div class="card-head"><h2>Symbols</h2><span class="muted">Tap one on the map</span></div><div id="opLegend" class="os-legend"></div><p class="muted">Flight and satellite heights are scaled so they can be seen. Layers follow the tick boxes in Scenario and layers.</p><h3 class="cc-h">3D map</h3><div id="opM3"></div><p class="muted">The page opens on “City 3D”: street level over the open region, where the 3D buildings and floors show, with the camera orbiting. Touch the map to pause the orbit; the Orbit button turns it off.</p></aside>
+    </div>
+    <div class="op-grid" id="opGrid"></div>
+  </div>
+</section>
+<section class="os-page ig-page" id="integPage" hidden aria-label="Integration Studio">
+  <header class="an-head">
+    <div><h2>Integration Studio</h2><p>Connect cameras, radar, LiDAR, IoT sensors and other systems: discover their fields, map them to the platform data model, test, publish and store as time series. No code.</p></div>
+    <div class="op-tools">
+      <div class="seg" id="igTabs" role="tablist" aria-label="Integration Studio views"><button type="button" data-t="list" role="tab" class="on" aria-selected="true">Integrations</button><button type="button" data-t="registry" role="tab" aria-selected="false">Schema registry</button><button type="button" data-t="data" role="tab" aria-selected="false">Data and analytics</button><button type="button" data-t="monitor" role="tab" aria-selected="false">Monitor</button></div>
+      <button type="button" class="btn" id="igClose">Close</button>
+    </div>
+  </header>
+  <div class="ig-body" id="igBody"></div>
+</section>
+<section class="analytics" id="analytics" hidden aria-label="Predictive analytics">
+  <header class="an-head">
+    <div><h2>Analytics and city KPIs</h2><p>Scorecard and planning projections from the synthetic model. Illustrations of the method, not forecasts for decisions.</p></div>
+    <div class="an-controls">
+      <label>Region <select id="anRegion" title="Region: reloads the twin for that region"></select></label>
+      <label>Scenario <select id="anScenario" title="Demand case the figures are worked out for"></select></label>
+      <label>Data layer <select id="anLayer" title="Show the sections for one kind of data"></select></label>
+      <label>Growth <select id="anGrowth"></select></label>
+      <label>Horizon <select id="anHorizon"></select></label>
+      <button class="btn" id="anClose">Close</button>
+    </div>
+  </header>
+  <nav class="an-menu" id="anMenu" role="tablist" aria-label="Analytics sections">
+    <button role="tab" data-an="kpi" class="on" aria-selected="true">City scorecard</button>
+    <button role="tab" data-an="ops" aria-selected="false">Operations today</button>
+    <button role="tab" data-an="reg" aria-selected="false">Regions</button>
+    <button role="tab" data-an="over" aria-selected="false">Outlook</button>
+    <button role="tab" data-an="road" aria-selected="false">Road expansion</button>
+    <button role="tab" data-an="sig" aria-selected="false">Traffic signals</button>
+    <button role="tab" data-an="pop" aria-selected="false">Population and fleet</button>
+    <button role="tab" data-an="env" aria-selected="false">Environment</button>
+    <button role="tab" data-an="safe" aria-selected="false">Accidents and violations</button>
+    <button role="tab" data-an="other" aria-selected="false">Demand</button>
+  </nav>
+  <div class="an-main">
+  <details class="an-tree" id="anTree"><summary><span>Sections and data</span><b id="anTreeNow"></b></summary><div class="an-tree-list" id="anTreeList" role="tree" aria-label="Analytics sections and their data"></div></details>
+  <div class="an-body" id="anBody">
+    <div data-an-sec="kpi">
+      <p class="notice"><strong>Example scorecard.</strong> Values come from the simulated traffic and the synthetic and illustrative data in this twin, at the time shown on the map. Targets are examples set in <code>config.js</code>, not official targets.</p>
+      <div class="an-tiles" id="scSummary"></div>
+      <div class="an-grid sc-visual">
+        <figure class="an-card"><figcaption>All KPIs by status</figcaption><div class="an-pie"><canvas id="scDonut" class="an-chart"></canvas><div class="an-pie-key" id="scDonutKey"></div></div></figure>
+        <figure class="an-card"><figcaption>KPIs on target by goal, %</figcaption><canvas id="scGoals" class="an-chart"></canvas></figure>
+        <figure class="an-card wide" id="scGapsCard"><figcaption>Furthest from target, % beyond the target</figcaption><canvas id="scGaps" class="an-chart"></canvas></figure>
+      </div>
+      <div id="scBody"></div>
+    </div>
+    <div data-an-sec="ops" hidden>
+      <p class="notice"><strong>Synthetic and illustrative.</strong> These charts show the same generated figures as the operational sections, at the time shown on the map. No live feed is connected.</p>
+      <div class="an-tiles" id="anOpsTiles"></div>
+      <div class="an-grid">
+        <figure class="an-card"><figcaption>Venue occupancy, % of capacity (synthetic)</figcaption><canvas id="anOpsCrowd" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Bus lateness by route, minutes (synthetic)</figcaption><canvas id="anOpsBus" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Incidents today by stage (illustrative)</figcaption><div class="an-pie"><canvas id="anOpsInc" class="an-chart"></canvas><div class="an-pie-key" id="anOpsIncKey"></div></div></figure>
+        <figure class="an-card"><figcaption>EV charging sockets now (real stations, synthetic usage)</figcaption><div class="an-pie"><canvas id="anOpsEv" class="an-chart"></canvas><div class="an-pie-key" id="anOpsEvKey"></div></div></figure>
+        <figure class="an-card"><figcaption>Car park occupancy, % (synthetic)</figcaption><canvas id="anOpsPark" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Device availability by type, % (synthetic)</figcaption><canvas id="anOpsAsset" class="an-chart"></canvas></figure>
+        <figure class="an-card wide"><figcaption>Air quality index through the day (synthetic sensors)<span class="an-key" id="anOpsAqiKey"></span></figcaption><canvas id="anOpsAqi" class="an-chart"></canvas></figure>
+        <figure class="an-card wide"><figcaption>Sea and air now (ships synthetic; flights from Flightradar24)<span class="an-key" id="anOpsSeaAirKey"></span></figcaption><canvas id="anOpsSeaAir" class="an-chart"></canvas></figure>
+      </div>
+    </div>
+    <div data-an-sec="reg" hidden>
+      <p class="notice"><strong>Real road networks.</strong> Road length, links and signal positions come from OpenStreetMap for each region. The highlighted region is the one open now.</p>
+      <div class="an-tiles" id="anRegTiles"></div>
+      <div class="an-grid">
+        <figure class="an-card"><figcaption>Road network by region, km</figcaption><canvas id="anRegKm" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Traffic signals by region</figcaption><canvas id="anRegSig" class="an-chart"></canvas></figure>
+        <figure class="an-card wide"><figcaption>Road length by class and region, km<span class="an-key" id="anRegClassKey"></span></figcaption><canvas id="anRegClass" class="an-chart"></canvas></figure>
+        <div class="an-card wide"><h3>Regions in this twin</h3><div class="an-scroll"><table class="an-table" id="anRegTable"></table></div></div>
+      </div>
+    </div>
+    <div data-an-sec="over" hidden>
+      <div class="an-tiles" id="anOverTiles"></div>
+      <div class="an-grid">
+        <figure class="an-card wide"><figcaption>Peak network speed by year, km/h<span class="an-key" id="anNetKey"></span></figcaption><canvas id="anNet" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Roads critical at the peak, by year<span class="an-key" id="anCritKey"></span></figcaption><canvas id="anCrit" class="an-chart"></canvas></figure>
+        <div class="an-card"><h3>Where to act first</h3><ol class="corridors" id="anRecs"></ol></div>
+      </div>
+    </div>
+    <div data-an-sec="road" hidden>
+      <div class="an-tiles" id="anRoadTiles"></div>
+      <div class="an-grid">
+        <figure class="an-card"><figcaption>Peak-hour delay saved by one extra lane, vehicle-hours</figcaption><canvas id="anRoadBar" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Peak speed as a share of the limit, %<span class="an-key" id="anRoadCmpKey"></span></figcaption><canvas id="anRoadCmp" class="an-chart"></canvas></figure>
+        <div class="an-card wide"><h3>Widening candidates</h3><div class="an-scroll"><table class="an-table" id="anRoadTable"></table></div></div>
+      </div>
+    </div>
+    <div data-an-sec="sig" hidden>
+      <div class="an-tiles" id="anSigTiles"></div>
+      <div class="an-grid">
+        <figure class="an-card"><figcaption>Junctions by service level at the peak (A best, F worst)<span class="an-key" id="anLosKey"></span></figcaption><canvas id="anLos" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Approach delay at the peak, vehicle-hours</figcaption><canvas id="anSigBar" class="an-chart"></canvas></figure>
+        <div class="an-card wide"><h3>Junctions to retime or put under adaptive control</h3><div class="an-scroll"><table class="an-table" id="anSigTable"></table></div></div>
+      </div>
+    </div>
+    <div data-an-sec="pop" hidden>
+      <div class="an-tiles" id="anPopTiles"></div>
+      <div class="an-grid">
+        <figure class="an-card"><figcaption>Residents, Hyderabad metro districts (Census 2011)<span class="an-key" id="anPopRegKey"></span></figcaption><canvas id="anPopReg" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Telangana residents, projected, millions<span class="an-key" id="anPopLineKey"></span></figcaption><canvas id="anPopLine" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Vehicles moving at the peak, by type (assumed mix)</figcaption><canvas id="anFleet" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Network length by mode, km</figcaption><canvas id="anModes" class="an-chart"></canvas></figure>
+      </div>
+    </div>
+    <div data-an-sec="env" hidden>
+      <div class="an-tiles" id="anEnvTiles"></div>
+      <div class="an-grid">
+        <figure class="an-card"><figcaption>Sensors by air-quality band at the peak</figcaption><div class="an-pie"><canvas id="anAqiPie" class="an-chart"></canvas><div class="an-pie-key" id="anAqiPieKey"></div></div></figure>
+        <figure class="an-card"><figcaption>Pollutants through a working day, µg/m³, sensor average<span class="an-key" id="anPollKey"></span></figcaption><canvas id="anPoll" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Noise at each sensor at the peak, dB(A)</figcaption><canvas id="anNoiseBar" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Road length by noise band at the peak, km<span class="an-key" id="anNoiseBandKey"></span></figcaption><canvas id="anNoiseBand" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>CO₂ from traffic by hour, tonnes<span class="an-key" id="anCo2Key"></span></figcaption><canvas id="anCo2" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>CO₂ by vehicle type, share of the day</figcaption><div class="an-pie"><canvas id="anCo2Pie" class="an-chart"></canvas><div class="an-pie-key" id="anCo2PieKey"></div></div></figure>
+      </div>
+    </div>
+    <div data-an-sec="safe" hidden>
+      <p class="notice"><strong>Illustrative, not real records.</strong> Accidents and violations are generated from the synthetic traffic for the day shown in the twin. No accident or enforcement data is public.</p>
+      <div class="an-tiles" id="anSafeTiles"></div>
+      <div class="an-grid">
+        <figure class="an-card"><figcaption>Accidents by severity</figcaption><div class="an-pie"><canvas id="anAccPie" class="an-chart"></canvas><div class="an-pie-key" id="anAccPieKey"></div></div></figure>
+        <figure class="an-card"><figcaption>Accidents by hour<span class="an-key" id="anAccHourKey"></span></figcaption><canvas id="anAccHour" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Violations by type</figcaption><div class="an-pie"><canvas id="anVioPie" class="an-chart"></canvas><div class="an-pie-key" id="anVioPieKey"></div></div></figure>
+        <figure class="an-card"><figcaption>Violations by hour<span class="an-key" id="anVioHourKey"></span></figcaption><canvas id="anVioHour" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Accident exposure index by road (100 = highest)</figcaption><canvas id="anRisk" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Violations at the busiest enforcement sites</figcaption><canvas id="anVioSites" class="an-chart"></canvas></figure>
+      </div>
+    </div>
+    <div data-an-sec="other" hidden>
+      <div class="an-tiles" id="anOtherTiles"></div>
+      <div class="an-grid">
+        <figure class="an-card wide"><figcaption>Network speed through a working day, km/h<span class="an-key" id="anDemandKey"></span></figcaption><canvas id="anDemand" class="an-chart"></canvas></figure>
+        <figure class="an-card wide"><figcaption>Vehicles moving through a working day<span class="an-key" id="anVehDayKey"></span></figcaption><canvas id="anVehDay" class="an-chart"></canvas></figure>
+      </div>
+    </div>
+    <p class="an-assume"><strong>Assumptions.</strong> <span id="anAssume"></span> Traffic is synthetic and uncalibrated; change the assumptions in <code>config.js</code>.</p>
+  </div>
+  </div>
+</section>
+</main>
+</div>
+
+<footer class="statusbar">
+  <span class="strap" data-i18n="badge">Intelligent Digital Twin for Smarter Cities</span>
+  <span class="mode-note" id="modeNote"></span>
+  <button type="button" class="svc svc-none" id="svcG">Google Maps</button>
+  <button type="button" class="svc svc-none" id="svcTt">TomTom</button>
+  <button type="button" class="style-btn" id="styleBtn" title="Change the interface style: Standard, Military, Police or Enterprise">Style</button>
+  <span class="status-right">UrbanIQ · Telangana · Real-time urban mobility intelligence and predictive simulation</span>
+</footer>
+
+<!-- Demo sign-in -->
+<!-- Predictive analytics: a separate full-screen view -->
+
+<div class="login" id="login" hidden>
+  <div class="login-card">
+    <img src="assets/presight-logo.png" alt="Presight" width="496" height="142">
+    <h2>UrbanIQ</h2>
+    <p>Choose a role to continue.</p>
+    <label class="field"><span>Your name (optional, for the audit log)</span><input id="loginName" type="text" maxlength="40" autocomplete="off"></label>
+    <div class="btn-col" id="loginRoles"></div>
+    <p class="muted">Demo sign-in. The role is chosen in the browser, so this is not a security control. Use real authentication in front of the app for anything beyond a demo.</p>
+  </div>
+</div>
+
+<!-- Printed summary -->
+<div id="report" class="report" aria-hidden="true"></div>
+
+<script src="config.js?v=20261124a"></script>
+<script src="js/regions.js?v=20261124a"></script>
+<script src="vendor/maplibre-gl.js"></script>
+<script src="vendor/deck.gl.min.js"></script>
+<script src="vendor/satellite.min.js"></script>
+<script src="js/daymodel.js?v=20261124a"></script>
+<script src="js/events.js?v=20261124a"></script>
+<script src="js/vehicles3d.js?v=20261124a"></script>
+<script src="js/app.js?v=20261124a"></script>
+<script src="js/ops.js?v=20261124a"></script>
+<script src="js/devices.js?v=20261124a"></script>
+<script src="js/i18n.js?v=20261124a"></script>
+<script src="js/response.js?v=20261124a"></script>
+<script src="js/zones.js?v=20261124a"></script>
+<script src="js/environment.js?v=20261124a"></script>
+<script src="js/buses.js?v=20261124a"></script>
+<script src="js/transit.js?v=20261124a"></script>
+<script src="js/operations.js?v=20261124a"></script>
+<script src="js/mobility.js?v=20261124a"></script>
+<script src="js/support.js?v=20261124a"></script>
+<script src="js/seaair.js?v=20261124a"></script>
+<script src="js/energy.js?v=20261124a"></script>
+<script src="js/tomtom.js?v=20261124a"></script>
+<script src="js/citycases.js?v=20261124a"></script>
+<script src="js/osint.js?v=20261124a"></script>
+<script src="js/livefeeds.js?v=20261124a"></script>
+<script src="js/osintmap.js?v=20261124a"></script>
+<script src="js/layertree.js?v=20261124a"></script>
+<script src="js/camwall.js?v=20261124a"></script>
+<script src="js/map3d.js?v=20261124a"></script>
+<script src="js/osintpage.js?v=20261124a"></script>
+<script src="js/diagnostics.js?v=20261124a"></script>
+<script src="js/platform.js?v=20261124a"></script>
+<script src="js/mapping-engine.js?v=20261124a"></script>
+<script src="js/integrations.js?v=20261124a"></script>
+<script src="js/vlm.js?v=20261124a"></script>
+<script src="js/analytics.js?v=20261124a"></script>
+<script src="js/analytics-ops.js?v=20261124a"></script>
+<script src="js/analytics-nav.js?v=20261124a"></script>
+<script src="js/assistant.js?v=20261124a"></script>
+<script src="js/shell.js?v=20261124a"></script>
+</body>
+</html>
