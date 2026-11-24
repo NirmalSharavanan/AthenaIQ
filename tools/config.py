@@ -3,8 +3,13 @@
 # Study area: Hyderabad — the city inside and around the Outer Ring Road, out to the airport at Shamshabad (lon/lat).
 BBOX = (78.25, 17.22, 78.66, 17.58)  # west, south, east, north
 
-# OpenStreetMap source: Geofabrik's India Southern Zone extract, cut once to Telangana and cached.
-OSM_URL = "https://download.geofabrik.de/asia/india/southern-zone-latest.osm.pbf"
+# OpenStreetMap sources, tried in order until one downloads; the file is cut once to Telangana and cached.
+OSM_URLS = [
+    "https://download.openstreetmap.fr/extracts/asia/india/telangana-latest.osm.pbf",   # Telangana only (OpenStreetMap France)
+    "https://download.geofabrik.de/asia/india/southern-zone-latest.osm.pbf",           # Geofabrik India Southern Zone
+    "https://download.geofabrik.de/asia/india-latest.osm.pbf",                         # Geofabrik India (large)
+]
+OSM_URL = OSM_URLS[0]
 STATE_BBOX = (77.20, 15.80, 81.40, 19.95)  # Telangana: west, south, east, north
 
 # India drives on the left: the network is built left-hand (netconvert --lefthand).

@@ -44,17 +44,11 @@ jobs:
             build/telangana.osm.pbf
             build/osm_timestamp.txt
           key: geofabrik-telangana-${{ steps.week.outputs.week }}
-      - name: Download India Southern Zone and cut it to Telangana
+      - name: Download OpenStreetMap and cut it to Telangana
         if: steps.osmcache.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool
-          mkdir -p build
-          URL="$(python3 -c 'import sys; sys.path.insert(0, "tools"); import config; print(config.OSM_URL)')"
-          SB="$(python3 -c 'import sys; sys.path.insert(0, "tools"); import config; print(",".join(map(str, config.STATE_BBOX)))')"
-          curl -fL --retry 6 --retry-all-errors --retry-delay 30 --connect-timeout 30 -o build/source.osm.pbf "$URL"
-          osmium fileinfo -g header.option.osmosis_replication_timestamp build/source.osm.pbf > build/osm_timestamp.txt || echo unknown > build/osm_timestamp.txt
-          osmium extract --bbox "$SB" --strategy complete_ways build/source.osm.pbf -o build/telangana.osm.pbf --overwrite
-          rm -f build/source.osm.pbf
+          bash tools/fetch_state.sh build
       - name: Save OpenStreetMap extract
         if: steps.osmcache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
