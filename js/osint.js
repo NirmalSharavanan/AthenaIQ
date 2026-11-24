@@ -80,6 +80,7 @@
   }
   function renderSources() {
     var names = { world: 'Global incidents (USGS, EONET, GDACS)', weather: 'Open-Meteo weather and dust', quakes: 'USGS earthquakes', events: 'NASA EONET natural events', space: 'NOAA space weather', fires: 'NASA FIRMS fire detections', flights: 'Flightradar24 flights', vessels: 'aisstream.io vessels', satellites: 'N2YO satellites' };
+    if (L.ais === false) { delete names.vessels; }
     $('osSrcTable').innerHTML = Object.keys(names).map(function (k) { var s = status[k] || {}; return C.fact(names[k], s.ok === false ? 'last attempt failed' : s.note ? String(s.note).slice(0, 70) : '', s.ok ? 'Updated ' + ago(s.updated) : s.updated ? 'Stale: ' + ago(s.updated) : 'No data'); }).join('');
   }
   function renderWorld() {
@@ -105,7 +106,7 @@
   }
   // The published weather file can be stale when the forecast service turns the workflow away. The same public service
   // is then asked directly from this browser for the open region (no key), and the result is shaped the same way.
-  function risk(dust, gust, vis) { dust = dust || 0; gust = gust || 0; vis = vis == null ? 99999 : vis; return dust >= 500 || vis < 1000 ? 3 : dust >= 200 || (gust >= 50 && dust >= 100) || vis < 3000 ? 2 : dust >= 100 || gust >= 45 ? 1 : 0; }
+  function risk(dust, gust, vis) { dust = dust || 0; gust = gust || 0; vis = vis == null ? 99999 : vis; return dust >= 500 || (vis < 1000 && dust >= 100) ? 3 : dust >= 200 || (gust >= 50 && dust >= 100) || (vis < 3000 && dust >= 100) ? 2 : dust >= 100 || (gust >= 60 && dust >= 30) ? 1 : 0; }
   function direct() {
     var c = CEN[C.region.id] || centre, q = 'latitude=' + c[1] + '&longitude=' + c[0] + '&forecast_days=3&timezone=Asia%2FKolkata';
     var j = function (u) { return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); };

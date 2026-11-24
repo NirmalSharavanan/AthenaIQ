@@ -264,6 +264,7 @@ sampleVideos: [
     enabled: true,
     baseUrl: 'https://raw.githubusercontent.com/thirumald/UrbanIQ/live-data/',
     refreshMin: 10,              // how often the browser looks for newer files
+    ais: false,                  // no coast in Telangana: no AIS card, layer or source
     fires: true, vessels: false, satellites: true, flights: true,   // layers on at start
     replaceSyntheticShips: true, // hide the synthetic ships once enough real AIS vessels are loaded
     minVesselsToReplace: 15,     // fewer real vessels than this: keep the synthetic ships as well

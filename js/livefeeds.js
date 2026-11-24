@@ -202,6 +202,7 @@
       '<div class="kpis">' + tile('Vessels heard', 'lvShipAll') + tile('Near this region', 'lvShipHere') + tile('Under way', 'lvShipMove') + tile('Tankers and cargo', 'lvShipTank') + '</div><div id="lvShipBars"></div><ol class="corridors" id="lvShipList"></ol>');
     card('osint', 'lvSat', 'Satellites overhead', REAL + 'Orbits from N2YO; each position is computed in this browser for the present moment, so the satellites move as you watch. Elevation is measured from the centre of this region.',
       '<div class="kpis">' + tile('Satellites tracked', 'lvSatAll') + tile('Above the horizon now', 'lvSatUp') + tile('Higher than 30°', 'lvSatHigh') + tile('Space Station', 'lvSatIss') + '</div><ol class="corridors" id="lvSatList"></ol>');
+    if (L.ais === false && $('lyLvShip')) { var shipRow = $('lyLvShip').closest('label'); if (shipRow) { shipRow.hidden = true; } }
     [['lyLvFire', 'fires'], ['lyLvShip', 'vessels'], ['lyLvSat', 'sats'], ['lyLvAir', 'air']].forEach(function (p) { var el = $(p[0]); if (el) { el.checked = show[p[1]]; el.addEventListener('change', function () { show[p[1]] = el.checked; C.redraw(); }); } });
     load();
     setInterval(load, Math.max(2, L.refreshMin || 10) * 60000);

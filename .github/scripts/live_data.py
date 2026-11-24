@@ -260,11 +260,12 @@ def dust_risk(dust, gust, vis):
     """Indicative dust risk for one hour, from forecast dust (ug/m3), wind gusts (km/h) and visibility (m).
     0 low, 1 moderate, 2 high, 3 severe. Not an official warning."""
     dust, gust, vis = dust or 0, gust or 0, vis if vis is not None else 99999
-    if dust >= 500 or vis < 1000:
+    # Low visibility counts only when there is dust in the air: in Telangana, winter haze and fog lower visibility without any dust.
+    if dust >= 500 or (vis < 1000 and dust >= 100):
         return 3
-    if dust >= 200 or (gust >= 50 and dust >= 100) or vis < 3000:
+    if dust >= 200 or (gust >= 50 and dust >= 100) or (vis < 3000 and dust >= 100):
         return 2
-    if dust >= 100 or gust >= 45:
+    if dust >= 100 or (gust >= 60 and dust >= 30):
         return 1
     return 0
 
