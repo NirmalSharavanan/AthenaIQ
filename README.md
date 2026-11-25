@@ -70,7 +70,7 @@ Added as cards inside the existing menus, each with a map layer and a label sayi
 
 | Menu | Use case |
 |---|---|
-| Municipality (next to Dashboard) | Waste management: smart bins (IoT) · Fleet and routing · Street lighting and building energy · Weather · Water leakage · Drought and water supply · Environment (air, noise, sensors, emissions, streams) · Citizen reports |
+| Municipality (next to Dashboard) | Ten modules: waste (smart bins, fleet and route planner, illegal dumping) · urban planning and digital twin · public safety and early warning · infrastructure and lighting (potholes, structures, predictive maintenance) · inspections and permitting · mobility and parking · environmental intelligence (weather, air, noise, water quality, carbon) · utilities (leakage, metering, drought) · citizen reports and SLA · asset management. 3D models and weather at street zoom. |
 | Fines | Traffic and parking tickets: city streets · Traffic tickets: prefecture roads and national highways |
 | Transit | Port and city interface (Piraeus gates) · Airport landside · Transport for Athens |
 | ANPR | Smuggling: border crossings, customs and silent vessels (live AIS) |

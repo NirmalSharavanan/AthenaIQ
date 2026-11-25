@@ -106,8 +106,8 @@ window.INTELLITWIN_CONFIG = {
     fullView: true,             // open with the panel, legend and site shortcuts minimised
     focus: 'most-congested-site', // select the major site (map chip) with the slowest traffic; 'most-congested' = slowest road; 'all' = whole area
     orbit: true,                // circle the camera; it stays on until the Orbit button is unclicked
-    selectionZoomBoost: 2,      // zoom levels added when a site, road or item is selected (0 = off)
-    selectionMaxZoom: 17.5,     // closest zoom a selection goes to
+    selectionZoomBoost: 0.5,    // zoom levels added when a site, road or item is selected (0 = off)
+    selectionMaxZoom: 16.5,     // closest zoom a selection goes to (keeps the object and its surroundings on screen)
     view: '3d',                 // map view at start: '2d' (flat), '3d' (tilted, 3D vehicles and buildings) or 'city' (Google photorealistic 3D, experimental)
     autoZoomForPanel: true      // zoom out a little when the panel narrows the map, so a selection stays whole while orbiting
   },

@@ -353,6 +353,11 @@
         bounds: [[b[0], b[1]], [b[2], b[3]]], fitBoundsOptions: { padding: 10 },
         minZoom: 8, maxZoom: 19, maxPitch: 70, attributionControl: false, antialias: true   // smooth edges on the 3D buildings
       });
+      (function () {   // remember where the pointer was released on the map, for pop-up anchoring
+        var down = null, el = map.getCanvasContainer();
+        el.addEventListener('pointerdown', function (e) { down = [e.clientX, e.clientY]; }, true);
+        el.addEventListener('pointerup', function (e) { if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6) { return; } var r = el.getBoundingClientRect(), pt = { x: e.clientX - r.left, y: e.clientY - r.top }; try { lastClick = { t: Date.now(), pt: pt, lngLat: map.unproject([pt.x, pt.y]) }; } catch (e1) { lastClick = null; } }, true);
+      })();
       // Selections are centred in the part of the map that is not covered by the panel, and go in closer.
       // Any move to a place (centre + zoom of 13.5 or more) gets the padding of the visible area, the configured zoom
       // boost, and a small zoom reduction when the panel narrows the view, so the selection stays whole while the camera orbits.
@@ -425,8 +430,15 @@
     }
   }
 
+  var lastClick = null;
   function showPopup(lngLat, title, rows, note) {
     if (!map) { return; }
+    // Anchor at the point the user clicked when the pop-up comes from a map click: in a tilted 3D view the object's
+    // ground position can sit far from the model or column drawn above it.
+    if (lastClick && Date.now() - lastClick.t < 600) {
+      try { var a = map.project(Array.isArray(lngLat) ? lngLat : [lngLat.lng, lngLat.lat]); if (Math.hypot(a.x - lastClick.pt.x, a.y - lastClick.pt.y) > 24) { lngLat = lastClick.lngLat; } } catch (e0) { lngLat = lastClick.lngLat; }
+    }
+    lastClick = null;
     if (popup) { popup.remove(); }
     var box = document.createElement('div');
     box.className = 'pop';
@@ -435,7 +447,7 @@
     box.querySelector('h3').textContent = title;
     // One pop-up at a time, lifted clear of the symbol it belongs to.
     Array.prototype.forEach.call(document.querySelectorAll('.maplibregl-popup'), function (el) { el.remove(); });
-    popup = new maplibregl.Popup({ closeButton: true, maxWidth: '300px', offset: 16 }).setLngLat(lngLat).setDOMContent(box).addTo(map);
+    popup = new maplibregl.Popup({ closeButton: true, maxWidth: Math.min(300, window.innerWidth - 40) + 'px', offset: 14 }).setLngLat(lngLat).setDOMContent(box).addTo(map);
     return box;
   }
   function roadPopup(i, coordinate) {
@@ -459,7 +471,9 @@
   }
   function flyToPoint(lon, lat, zoom) {
     if (!map) { return; }
-    map.flyTo({ center: [lon, lat], zoom: zoom || 14, duration: 1000 });
+    // Lists ask for street zoom; cap it so the object and its surroundings fit on screen (closer on large screens).
+    var cap = window.innerWidth < 720 ? 15 : 15.8;
+    map.flyTo({ center: [lon, lat], zoom: Math.min(zoom || 14, cap), duration: 1000 });
   }
   function locate(g) {
     if (!map) { return; }
@@ -1002,7 +1016,7 @@
     state: state, getMap: function () { return map; }, getOverlay: function () { return overlay; },
     core: {
       CFG: CFG, $: $, num: num, pad: pad, clock: clock, level: level, LEVEL_LABEL: LEVEL_LABEL, CLASS_NAME: CLASS_NAME, SLOT: SLOT, SLOTS: SLOTS, DAY: DAY,
-      meta: function () { return meta; }, edges: function () { return edges; }, names: function () { return names; }, groups: function () { return groups; },
+      meta: function () { return meta; }, buildingsData: function () { return buildings; }, edges: function () { return edges; }, names: function () { return names; }, groups: function () { return groups; },
       majorRoads: function () { return majorRoads; }, signals: function () { return signals; }, day: function () { return day; }, events: function () { return ev; },
       scenarioMeta: scenarioMeta, binNow: function () { return binOf(state.t); }, binAt: binOf, ratio: function (i) { return ratioAt(binOf(state.t), i); },
       occ: function (i) { return occAt(binOf(state.t), i) * 10 / SLOT; }, ratioAt: ratioAt, occAt: function (bin, i) { return occAt(bin, i) * 10 / SLOT; },

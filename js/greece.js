@@ -81,13 +81,14 @@
   var BINS = null;
   function bins() {
     if (BINS) { return BINS; }
-    BINS = every([2, 3, 4], 900, SEED).slice(0, 400).map(function (e, k) { return { id: 'B' + (1000 + k), at: e.at, street: e.name || 'Street', kind: rnd(SEED, k * 7) < 0.7 ? 'Mixed' : rnd(SEED, k * 7 + 1) < 0.6 ? 'Recycling (blue)' : 'Organic (brown)', rate: 2.5 + rnd(SEED, k * 3) * 5.5, start: rnd(SEED, k * 5) * 35 }; });
+    BINS = every([2, 3, 4], 900, SEED).slice(0, 400).map(function (e, k) { return { id: 'B' + (1000 + k), i: e.i, at: e.at, street: e.name || 'Street', kind: rnd(SEED, k * 7) < 0.7 ? 'Mixed' : rnd(SEED, k * 7 + 1) < 0.6 ? 'Recycling (blue)' : 'Organic (brown)', rate: 2.5 + rnd(SEED, k * 3) * 5.5, start: rnd(SEED, k * 5) * 35 }; });
     return BINS;
   }
   function sensorOk(b, k) { return rnd(SEED + 41, (k || 0) + Math.floor(state.t / 21600)) > 0.03; }
   function muni(id) { var box = $(id), all = $('showMuniAll'); return (!box || box.checked) && (K.tabOpen('muni') || (all && all.checked)); }
   function chk(id, label) { return '<label class="check"><input id="' + id + '" type="checkbox" checked><span>' + label + '</span></label>'; }
-  function fill(b) { var h = hour(), f = b.start + b.rate * ((h + 24 - 5) % 24); return Math.min(100, f % 125); }   // emptied on the 05:00 round
+  var EMPTIED = {};   // bins emptied by a simulated collection run, id -> true
+  function fill(b) { if (EMPTIED[b.id]) { return 3; } var h = hour(), f = b.start + b.rate * ((h + 24 - 5) % 24); return Math.min(100, f % 125); }   // emptied on the 05:00 round
   var route = null;
   function planRoute() {
     var full = bins().filter(function (b) { return fill(b) >= 75; }), depot = ATH && inBox([23.6460, 38.0480]) ? [23.6460, 38.0480] : centre(), path = [depot], left = full.slice(), cur = depot, km = 0;
@@ -120,9 +121,9 @@
     var kmh = v.type.indexOf('sweeper') >= 0 ? 8 : 18, d = ((state.t / 3600 * kmh * 1000) + v.off * v.len) % v.len, i = 1;
     while (i < v.cum.length - 1 && v.cum[i] < d) { i++; }
     var f = (d - v.cum[i - 1]) / Math.max(1, v.cum[i] - v.cum[i - 1]), a = v.path[i - 1], z = v.path[i];
-    return { at: [a[0] + (z[0] - a[0]) * f, a[1] + (z[1] - a[1]) * f], done: d / v.len };
+    return { at: [a[0] + (z[0] - a[0]) * f, a[1] + (z[1] - a[1]) * f], done: d / v.len, yaw: Math.atan2((z[1] - a[1]) * ky, (z[0] - a[0]) * kx) * 180 / Math.PI };
   }
-  function fleetNow() { return fleet().filter(onShift).map(function (v) { var p = posOf(v); return { v: v, at: p.at, done: p.done }; }); }
+  function fleetNow() { var only = T.muni3d && T.muni3d.vehicleFilter ? T.muni3d.vehicleFilter() : ''; return fleet().filter(function (v) { return onShift(v) && (!only || v.type === only); }).map(function (v) { var p = posOf(v); return { v: v, at: p.at, done: p.done, yaw: p.yaw }; }); }
   function vehPopup(x) { return [x.v.id + ' · ' + x.v.type, [['Shift', x.v.shift[1] - x.v.shift[0] >= 24 ? '24 h standby' : clock(x.v.shift[0] * 3600) + '–' + clock((x.v.shift[1] % 24) * 3600)], ['Round done', Math.round(x.done * 100) + '%'], ['Round length', (x.v.len / 1000).toFixed(1) + ' km']], 'Synthetic vehicle on the real road network']; }
   function renderFleet() {
     var F = fleetNow(), by = {};
@@ -401,18 +402,19 @@
   /* ============================== map layers ============================== */
   C.addLayers(function () {
     var out = [], o = K.tabOpen;
-    if (muni('showBins')) {
+    var is3d = T.muni3d && T.muni3d.on();
+    if (muni('showBins') && !is3d) {
       out.push(dots('gr-bins', bins(), function (b) { var f = fill(b); return rgb(f >= 95 ? 'severe' : f >= 75 ? 'heavy' : f >= 50 ? 'moderate' : 'free'); }, 4, function (b) { return [b.id + ' · ' + b.kind, [['Fill', Math.round(fill(b)) + '%'], ['Street', b.street], ['Emptied', '05:00']], 'Synthetic bin level']; }));
     }
     if (muni('showFleet')) {
-      out.push(dots('gr-fleet', fleetNow(), function (x) { return x.v.col; }, 7, vehPopup));
+      if (!is3d) { out.push(dots('gr-fleet', fleetNow(), function (x) { return x.v.col; }, 7, vehPopup)); }
       if (route) { out.push(new deck.PathLayer({ id: 'gr-route', pickable: true, onClick: function (i) { C.showPopup(i.coordinate, 'Planned collection route', [['Full bins', route.stops], ['Length', route.km.toFixed(1) + ' km']], route.roads ? 'Follows the model road network' : 'Straight lines'); }, data: [route.path], getPath: function (p) { return p; }, widthUnits: 'pixels', getWidth: 3, getColor: [40, 120, 200, 220], jointRounded: true })); }
     }
     if (muni('showDma')) {
       out.push(new deck.PolygonLayer({ id: 'gr-dma', data: dmas(), pickable: true, getPolygon: function (d) { return d.poly; }, getFillColor: function (d) { return rgb(d.leak >= 2.5 ? 'severe' : d.leak >= 1.5 ? 'heavy' : 'free').concat([d.leak >= 1.5 ? 60 : 18]); }, getLineColor: [40, 120, 200, 120], lineWidthUnits: 'pixels', getLineWidth: 1, stroked: true,
         onClick: function (i) { if (i.object) { C.showPopup(i.object.at, i.object.id, [['Night flow', '×' + i.object.leak.toFixed(1) + ' of expected'], ['Properties', num(i.object.props)]], 'Synthetic meter data'); } } }));
     }
-    if (muni('showLamps')) {
+    if (muni('showLamps') && !is3d) {
       out.push(dots('gr-lamps', lamps(), function (l) { var s = lampState(l); return s === 'fault' ? rgb('severe') : s === 'dim' ? [200, 170, 60] : s === 'on' ? [255, 220, 90] : rgb('off'); }, 3, function (l) { return [l.id, [['State', lampState(l)], ['Type', l.led ? 'LED, dimmable' : 'Sodium'], ['Road', l.road]], 'Synthetic lamp state']; }));
     }
     if (o('fines')) {
@@ -445,5 +447,5 @@
     C.onTab(function () { render(); C.redraw(); });
     C.onMinute(render);
   });
-  T.greece = { render: render, bins: bins, drones: drones, assets: assets };
+  T.greece = { render: render, bins: bins, drones: drones, assets: assets, fill: fill, sensorOk: sensorOk, fleetNow: fleetNow, vehPopup: vehPopup, lamps: lamps, lampState: lampState, dmas: dmas, emptied: EMPTIED, area: area, centre: centre, renderFleet: function () { renderFleet(); }, renderWaste: function () { renderWaste(); }, FTYPES: FTYPES };
 })();

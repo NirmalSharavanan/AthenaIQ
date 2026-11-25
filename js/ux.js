@@ -172,6 +172,24 @@
     "Prefecture and highway cameras": "Κάμερες επαρχιακών δρόμων και αυτοκινητοδρόμων",
     "Counter-UAV and threat detection": "Αντι-drone και ανίχνευση απειλών",
     "Municipality": "Δήμος",
+    "Citizen reports and service requests": "Αναφορές και αιτήματα πολιτών",
+    "Illegal dumping detection": "Εντοπισμός παράνομης απόρριψης",
+    "Urban planning and digital twin": "Πολεοδομία και ψηφιακό δίδυμο",
+    "Early warning": "Έγκαιρη προειδοποίηση",
+    "Roads and structures: predictive maintenance": "Δρόμοι και κατασκευές: προγνωστική συντήρηση",
+    "Inspections and permitting": "Επιθεωρήσεις και αδειοδοτήσεις",
+    "Mobility and parking": "Κινητικότητα και στάθμευση",
+    "Water quality and temperature": "Ποιότητα νερού και θερμοκρασία",
+    "Smart metering and utility assets": "Έξυπνη μέτρηση και υποδομές κοινής ωφέλειας",
+    "Municipal asset management": "Διαχείριση δημοτικών παγίων",
+    "Intelligent waste management": "Έξυπνη διαχείριση απορριμμάτων",
+    "Public safety and early warning": "Δημόσια ασφάλεια και έγκαιρη προειδοποίηση",
+    "Smart infrastructure and lighting": "Έξυπνες υποδομές και φωτισμός",
+    "Intelligent inspections and permitting": "Έξυπνες επιθεωρήσεις και αδειοδοτήσεις",
+    "Intelligent mobility and parking": "Έξυπνη κινητικότητα και στάθμευση",
+    "Environmental intelligence": "Περιβαλλοντική πληροφόρηση",
+    "Smart utilities management": "Έξυπνη διαχείριση δικτύων",
+    "Citizen engagement and services": "Συμμετοχή και εξυπηρέτηση πολιτών",
     "Municipality now": "Ο δήμος τώρα",
     "Waste management: smart bins (IoT)": "Διαχείριση απορριμμάτων: έξυπνοι κάδοι (IoT)",
     "Fleet and routing": "Στόλος και δρομολόγηση",
@@ -201,7 +219,7 @@
   var orig = new WeakMap();
   function translate(lang) {
     var te = lang === 'el';
-    document.querySelectorAll('.panel h2, .card-head h2, #panelTitle, .op-head h1, .op-head h2, #osintPage h1, #analytics h1, .rate-label, .tour-btn, #moreBtn').forEach(function (el) {
+    document.querySelectorAll('.panel h2, .card-head h2, .mu-mod-n, .mu-t-name, #panelTitle, .op-head h1, .op-head h2, #osintPage h1, #analytics h1, .rate-label, .tour-btn, #moreBtn').forEach(function (el) {
       if (el.children.length) { return; }
       var cur = el.textContent;   // text set by the app since the last switch (a new tab title, a tracked vehicle) becomes the new original
       if (!orig.has(el) || (cur !== orig.get(el) && cur !== TE[orig.get(el)])) { orig.set(el, cur); }

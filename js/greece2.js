@@ -349,13 +349,14 @@
   function render() {
     var o = K.tabOpen;
     if (o('anpr') && ATH) { renderRing(); }
-    if (o('emg')) { renderFire(); renderWinter(); renderGauges(); renderQuake(); }
+    if (o('emg')) { renderFire(); renderWinter(); renderQuake(); }
+    if (o('muni')) { renderGauges(); }
     if (o('env')) { renderWater(); }
     if (o('ped')) { if ($('grHe')) { renderHeritage(); } renderLX(); }
     if (o('plan')) { if ($('grCr')) { renderCruise(); } renderStrike(); }
     if (o('bus')) { if ($('grFy')) { renderFerry(); } renderMicro(); }
     if (o('cong') && $('grTl')) { renderTolls(); }
-    if (o('dev')) { renderReports(); }
+    if (o('muni')) { renderReports(); }
     if (o('rep')) { renderEU(); }
   }
 
@@ -374,6 +375,8 @@
         out.push(new deck.PathLayer({ id: 'gr-closed', data: fire.closures.map(function (i) { return E[i].path; }), getPath: function (p) { return p; }, widthUnits: 'pixels', getWidth: 3, getColor: [208, 59, 59, 200] }));
       }
       out.push(dots('gr-winter', winter(), function (w) { return rgb(lvl(w.st)); }, 7, function (w) { return [w.name, [['Road temperature', w.temp.toFixed(1) + ' °C'], ['Height', w.alt + ' m']], 'Estimated from real air temperature']; }));
+    }
+    if (o('muni')) {
       out.push(dots('gr-gauge', gauges(), function (g) { return rgb(lvl(g.st)); }, 7, function (g) { return [g.name, [['Level', g.h.toFixed(2) + ' m'], ['Alarm', g.alarm.toFixed(1) + ' m']], 'Synthetic level']; }));
     }
     if (o('ped')) {
@@ -386,7 +389,7 @@
       out.push(dots('gr-docks', docks(), function (d) { return d.bikes == null ? rgb('info') : rgb(d.bikes <= 2 ? 'heavy' : d.bikes >= d.cap - 1 ? 'moderate' : 'free'); }, 5, function (d) { return ['Dock ' + d.id, [['Bikes', (d.bikes || 0) + ' of ' + d.cap]], 'Synthetic dock']; }));
     }
     if (o('cong') && $('grTl')) { out.push(dots('gr-toll', tolls(), function (x) { return rgb(x.q > 8 ? 'severe' : x.q > 4 ? 'heavy' : 'free'); }, 8, function (x) { return [x.name, [['Vehicles an hour', num(x.flow)], ['Cash queue', x.q + ' min']], 'Simulated traffic; synthetic queue']; })); }
-    if (o('dev')) { out.push(dots('gr-rep', reports().filter(function (r) { return r.st !== 'Fixed'; }), function (r) { return rgb(r.st === 'New' ? 'heavy' : 'moderate'); }, 5, function (r) { return [r.id + ' · ' + r.type, [['Team', r.team], ['Status', r.st]], 'Synthetic report']; })); }
+    if (o('muni')) { out.push(dots('gr-rep', reports().filter(function (r) { return r.st !== 'Fixed'; }), function (r) { return rgb(r.st === 'New' ? 'heavy' : 'moderate'); }, 5, function (r) { return [r.id + ' · ' + r.type, [['Team', r.team], ['Status', r.st]], 'Synthetic report']; })); }
     return out;
   });
 
@@ -397,5 +400,5 @@
     C.onTab(function () { render(); C.redraw(); });
     C.onMinute(render);
   });
-  T.greece2 = { render: render, ringOn: ringOn, crossings: function () { return crossings(); } };
+  T.greece2 = { render: render, ringOn: ringOn, crossings: function () { return crossings(); }, gauges: gauges, quake: quake };
 })();

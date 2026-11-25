@@ -499,3 +499,38 @@ body.map-light #map { background: #e3f1e4; }
 .mu-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 button.kpi.mu-go { border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
 button.kpi.mu-go:hover, button.kpi.mu-go:focus-visible { outline: 2px solid var(--accent, #2f7d5b); outline-offset: -2px; }
+
+/* Pop-ups stay on screen; long ones scroll */
+.maplibregl-popup .pop { max-height: min(55vh, 420px); overflow: auto; }
+
+/* Municipality: illustrations, 3D buttons, route planner */
+.mu-illus { height: 64px; margin: -2px 0 6px; display: flex; justify-content: flex-end; opacity: .95; }
+.mu-illus svg { height: 64px; width: auto; }
+.mu-3drow { align-items: center; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.mu-3drow .check { margin: 0; }
+.mp-filter { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin: 8px 0; flex-wrap: wrap; }
+.mp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin: 6px 0 8px; }
+.mp-f { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
+.mp-f select { width: 100%; }
+.mp-table th, .mp-table td { font-size: 12px; padding: 3px 4px; }
+.mp-sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+.mp-bar { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; margin: 4px 0; }
+.mp-bar i { display: block; height: 100%; background: var(--accent, #2f7d5b); transition: width .2s; }
+@media (max-width: 720px) { .mp-grid { grid-template-columns: 1fr; } }
+
+/* Municipality modules */
+.mu-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0 10px; }
+.mu-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; text-align: left; background: var(--surface-2); border: 0; border-radius: 10px; padding: 8px 10px; color: inherit; font: inherit; cursor: pointer; min-width: 0; }
+.mu-tile:hover, .mu-tile:focus-visible { outline: 2px solid var(--accent, #2f7d5b); outline-offset: -2px; }
+.mu-t-name { font-weight: 600; font-size: 12px; line-height: 1.25; }
+.mu-t-k { font-size: 11px; opacity: .7; margin-top: 2px; }
+.mu-t-v { font-size: 18px; font-weight: 700; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.mu-mod { margin: 14px 2px 6px; padding: 10px 12px; border-radius: 10px; background: linear-gradient(135deg, rgba(47, 125, 91, .16), rgba(40, 120, 200, .10)); border-left: 4px solid var(--accent, #2f7d5b); }
+.mu-mod-h { display: flex; width: 100%; justify-content: space-between; align-items: center; background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; text-align: left; }
+.mu-mod-n { font-weight: 700; font-size: 14px; }
+.mu-mod-c { font-size: 11px; opacity: .7; }
+.mu-mod-c::after { content: ' cards ▾'; }
+.mu-mod-h[aria-expanded="false"] .mu-mod-c::after { content: ' cards ▸'; }
+.mu-mod-u { font-size: 12px; margin: 6px 0 2px; opacity: .85; }
+.mu-mod-b { font-size: 12px; margin: 0; }
+.panel section.mu-folded { display: none !important; }
