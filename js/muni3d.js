@@ -44,7 +44,7 @@
   function meshFor(type) { return /truck/i.test(type) ? [TRUCK, WHEELS_T] : /sweeper/i.test(type) ? [SWEEP, WHEELS_V] : [VAN, WHEELS_V]; }
   var BIN_COL = { 'Mixed': [46, 120, 70], 'Recycling (blue)': [40, 110, 200], 'Organic (brown)': [130, 84, 50] };
   function lvlCol(f) { return f >= 95 ? [208, 59, 59] : f >= 75 ? [236, 131, 40] : f >= 50 ? [240, 195, 40] : [40, 170, 100]; }
-  function scale() { var z = zoom(); return z >= 17.5 ? 1.2 : z >= 16.5 ? 2 : z >= 15.5 ? 3 : 4.2; }
+  function scale() { var z = zoom(); return z >= 17.5 ? 1.6 : z >= 16.5 ? 2.4 : z >= 15.5 ? 3.4 : 4.6; }
   function inView(at, pad) { var mp = T.getMap(); if (!mp) { return true; } var b = mp.getBounds(), p = pad || 0.003; return at[0] > b.getWest() - p && at[0] < b.getEast() + p && at[1] > b.getSouth() - p && at[1] < b.getNorth() + p; }
   var pulse = 0;
 
@@ -203,10 +203,11 @@
         var B = g.bins().filter(function (b) { return inView(b.at); }), bp = { data: B, getPosition: function (b) { return b.at; }, getOrientation: function (b) { return [0, (b.i || 0) * 37 % 180, 0]; }, sizeScale: sc };
         out.push(new deck.SimpleMeshLayer(Object.assign({ id: 'm3-bins', mesh: BIN, pickable: true, getColor: function (b) { return BIN_COL[b.kind] || [80, 90, 100]; },
           onClick: function (i) { var b = i.object; if (b) { var f = g.fill(b); C.showPopup(b.at, b.id + ' · ' + b.kind + ' bin', [['Fill now', Math.round(f) + '%'], ['Sensor', g.sensorOk(b, +b.id.slice(1) - 1000) ? 'Online, reporting every 15 min' : 'Offline'], ['Street', esc(b.street)], ['Next collection', f >= 75 ? 'Today' : 'Scheduled round']], 'Synthetic IoT bin sensor'); } } }, bp)));
-        out.push(new deck.SimpleMeshLayer(Object.assign({ id: 'm3-bins-d', mesh: BIN_DARK, getColor: [30, 32, 36] }, bp)));
-        out.push(new deck.ColumnLayer({ id: 'm3-bin-gauge', data: B, diskResolution: 8, radius: 0.3 * sc, extruded: true, getPosition: function (b) { return [b.at[0] + 0.9 * sc / kx, b.at[1]]; },
+        var binClick = function (i) { var b = i.object; if (b) { var f = g.fill(b); C.showPopup(b.at, b.id + ' · ' + b.kind + ' bin', [['Fill now', Math.round(f) + '%'], ['Sensor', g.sensorOk(b, +b.id.slice(1) - 1000) ? 'Online, reporting every 15 min' : 'Offline'], ['Street', esc(b.street)], ['Next collection', f >= 75 ? 'Today' : 'Scheduled round']], 'Synthetic IoT bin sensor'); } };
+        out.push(new deck.SimpleMeshLayer(Object.assign({ id: 'm3-bins-d', mesh: BIN_DARK, getColor: [30, 32, 36], pickable: true, onClick: binClick }, bp)));
+        out.push(new deck.ColumnLayer({ id: 'm3-bin-gauge', data: B, pickable: true, onClick: binClick, diskResolution: 8, radius: 0.3 * sc, extruded: true, getPosition: function (b) { return [b.at[0] + 0.9 * sc / kx, b.at[1]]; },
           getElevation: function (b) { return Math.max(0.05, g.fill(b) / 100 * 1.35 * sc); }, getFillColor: function (b) { return lvlCol(g.fill(b)); }, updateTriggers: { getElevation: t + ':' + Object.keys(g.emptied).length, getFillColor: t + ':' + Object.keys(g.emptied).length } }));
-        out.push(new deck.PointCloudLayer({ id: 'm3-bin-beacon', data: B, pointSize: 6, sizeUnits: 'pixels', getPosition: function (b) { return [b.at[0], b.at[1], 1.9 * sc]; },
+        out.push(new deck.PointCloudLayer({ id: 'm3-bin-beacon', data: B, pickable: true, onClick: binClick, pointSize: 8, sizeUnits: 'pixels', getPosition: function (b) { return [b.at[0], b.at[1], 1.9 * sc]; },
           getColor: function (b, o) { var f = g.fill(b); return !g.sensorOk(b, o.index) ? [130, 130, 140, 200] : f >= 75 ? [255, 70, 50, 140 + 115 * Math.abs(Math.sin(pulse))] : [60, 220, 120, 220]; }, updateTriggers: { getColor: Math.round(pulse * 4) } }));
       }
       if (box('showFleet')) {
@@ -215,24 +216,26 @@
           var data = F.filter(function (x) { return kind === 'truck' ? /truck/i.test(x.v.type) : kind === 'sweeper' ? /sweeper/i.test(x.v.type) : !/truck|sweeper/i.test(x.v.type); }); if (!data.length) { return; }
           var ms = meshFor(data[0].v.type), fp = { data: data, getPosition: function (x) { return x.at; }, getOrientation: function (x) { return [0, x.yaw, 0]; }, sizeScale: sc, updateTriggers: { getPosition: state.t, getOrientation: state.t } };
           out.push(new deck.SimpleMeshLayer(Object.assign({ id: 'm3-fleet-' + kind, mesh: ms[0], pickable: true, getColor: function (x) { return x.v.col; }, onClick: function (i) { if (i.object) { var p = g.vehPopup(i.object); C.showPopup(i.object.at, p[0], p[1], p[2]); } } }, fp)));
-          out.push(new deck.SimpleMeshLayer(Object.assign({ id: 'm3-fleet-' + kind + '-d', mesh: ms[1], getColor: [25, 28, 34] }, fp)));
+          out.push(new deck.SimpleMeshLayer(Object.assign({ id: 'm3-fleet-' + kind + '-d', mesh: ms[1], getColor: [25, 28, 34], pickable: true, onClick: function (i) { if (i.object) { var p = g.vehPopup(i.object); C.showPopup(i.object.at, p[0], p[1], p[2]); } } }, fp)));
         });
-        out.push(new deck.PointCloudLayer({ id: 'm3-fleet-light', data: F, pointSize: 7, sizeUnits: 'pixels', getPosition: function (x) { return [x.at[0], x.at[1], 3.6 * sc]; }, getColor: [255, 170, 30, 160 + 95 * Math.abs(Math.sin(pulse * 2))], updateTriggers: { getColor: Math.round(pulse * 8), getPosition: state.t } }));
+        out.push(new deck.PointCloudLayer({ id: 'm3-fleet-light', data: F, pickable: true, onClick: function (i) { if (i.object) { var p = g.vehPopup(i.object); C.showPopup(i.object.at, p[0], p[1], p[2]); } }, pointSize: 9, sizeUnits: 'pixels', getPosition: function (x) { return [x.at[0], x.at[1], 3.6 * sc]; }, getColor: [255, 170, 30, 160 + 95 * Math.abs(Math.sin(pulse * 2))], updateTriggers: { getColor: Math.round(pulse * 8), getPosition: state.t } }));
       }
       if (box('showLamps')) {
         var L = g.lamps().filter(function (l) { return inView(l.at); }), st = function (l) { return g.lampState(l); }, blink = Math.sin(pulse * 3) > 0;
-        out.push(new deck.ColumnLayer({ id: 'm3-poles', data: L, diskResolution: 6, radius: 0.16 * sc, extruded: true, getPosition: function (l) { return l.at; }, getElevation: 9 * sc, getFillColor: [96, 104, 116], pickable: true,
-          onClick: function (i) { var l = i.object; if (l) { var s = st(l); C.showPopup(l.at, l.id + ' · street light', [['State', { on: 'On, full power', dim: 'On, dimmed to 50% (quiet road)', off: 'Off (daylight)', fault: 'Fault: not responding' }[s]], ['Lamp', l.led ? 'LED, dimmable' : 'Sodium'], ['Power now', s === 'on' ? (l.led ? '90 W' : '150 W') : s === 'dim' ? '45 W' : '0 W'], ['Road', esc(l.road)]], 'Synthetic lighting controller'); } } }));
-        out.push(new deck.PointCloudLayer({ id: 'm3-lamp-heads', data: L, pointSize: 9, sizeUnits: 'pixels', getPosition: function (l) { return [l.at[0], l.at[1], 9 * sc]; },
+        var lampClick = function (i) { var l = i.object; if (l) { var s = st(l); C.showPopup(l.at, l.id + ' · street light', [['State', { on: 'On, full power', dim: 'On, dimmed to 50% (quiet road)', off: 'Off (daylight)', fault: 'Fault: not responding' }[s]], ['Lamp', l.led ? 'LED, dimmable' : 'Sodium'], ['Power now', s === 'on' ? (l.led ? '90 W' : '150 W') : s === 'dim' ? '45 W' : '0 W'], ['Road', esc(l.road)]], 'Synthetic lighting controller'); } };
+        out.push(new deck.ColumnLayer({ id: 'm3-poles', data: L, diskResolution: 6, radius: 0.35 * sc, extruded: true, getPosition: function (l) { return l.at; }, getElevation: 9 * sc, getFillColor: [96, 104, 116], pickable: true, onClick: lampClick }));
+        out.push(new deck.PointCloudLayer({ id: 'm3-lamp-heads', data: L, pickable: true, onClick: lampClick, pointSize: 11, sizeUnits: 'pixels', getPosition: function (l) { return [l.at[0], l.at[1], 9 * sc]; },
           getColor: function (l) { var s = st(l); return s === 'on' ? [255, 226, 130, 255] : s === 'dim' ? [230, 190, 100, 200] : s === 'fault' ? (blink ? [255, 50, 40, 255] : [90, 20, 20, 160]) : [170, 175, 185, 200]; }, updateTriggers: { getColor: t + ':' + blink } }));
         out.push(new deck.ScatterplotLayer({ id: 'm3-lamp-pools', data: L.filter(function (l) { var s = st(l); return s === 'on' || s === 'dim'; }), radiusUnits: 'meters', getRadius: 7 * sc, getPosition: function (l) { return l.at; },
           getFillColor: function (l) { return st(l) === 'on' ? [255, 214, 110, 70] : [255, 214, 110, 35]; }, updateTriggers: { getFillColor: t } }));
       }
       if (box('showDma')) {
-        out.push(new deck.PolygonLayer({ id: 'm3-dma', data: g.dmas(), extruded: true, pickable: true, getPolygon: function (d) { return d.poly; }, getElevation: function (d) { return Math.max(5, (d.leak - 0.5) * 120); },
-          getFillColor: function (d) { return d.leak >= 2.5 ? [208, 59, 59, 120] : d.leak >= 1.5 ? [236, 131, 40, 110] : [40, 140, 210, 55]; }, getLineColor: [40, 120, 200, 160], wireframe: true,
+        out.push(new deck.PolygonLayer({ id: 'm3-dma', data: g.dmas(), extruded: true, pickable: false, getPolygon: function (d) { return d.poly; }, getElevation: function (d) { return Math.max(1, (d.leak - 0.5) * 12); },
+          getFillColor: function (d) { return d.leak >= 2.5 ? [208, 59, 59, 60] : d.leak >= 1.5 ? [236, 131, 40, 50] : [40, 140, 210, 22]; }, getLineColor: [40, 120, 200, 160], wireframe: true,
           onClick: function (i) { var d = i.object; if (d) { C.showPopup(d.at, d.id + ' · metered area', [['Night flow', '×' + d.leak.toFixed(1) + ' of expected'], ['Properties', num(d.props)], ['Action', d.leak >= 1.5 ? 'Send a leak-detection crew' : 'None']], 'Height shows night flow; synthetic meters'); } } }));
       }
+      if (box('showDma')) { out.push(new deck.ScatterplotLayer({ id: 'm3-dma-pt', data: g.dmas(), pickable: true, radiusUnits: 'pixels', getRadius: 7, getPosition: function (d) { return d.at; }, getFillColor: function (d) { return d.leak >= 2.5 ? [208, 59, 59] : d.leak >= 1.5 ? [236, 131, 40] : [40, 120, 200]; }, stroked: true, getLineColor: [255, 255, 255], lineWidthUnits: 'pixels', getLineWidth: 2,
+        onClick: function (i) { var d = i.object; if (d) { C.showPopup(d.at, d.id + ' · metered area', [['Night flow', '×' + d.leak.toFixed(1) + ' of expected'], ['Properties', num(d.props)], ['Action', d.leak >= 1.5 ? 'Send a leak-detection crew' : 'None']], 'Synthetic meters'); } } })); }
       if (box('showEnv') && T.environment) {
         var S = T.environment.sensors().map(function (s) { var r = T.environment.readingAt(s, state.t); return { s: s, r: r, at: [s.lon, s.lat] }; });
         out.push(new deck.ColumnLayer({ id: 'm3-aq', data: S, diskResolution: 12, radius: 14, extruded: true, pickable: true, getPosition: function (x) { return x.at; }, getElevation: function (x) { return x.r.aqi * 1.6; },

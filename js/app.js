@@ -422,7 +422,7 @@
           sun: new deck.DirectionalLight({ color: [255, 244, 228], intensity: 2.4, direction: [-1.2, -2, -3] }),
           fill: new deck.DirectionalLight({ color: [200, 215, 255], intensity: 0.7, direction: [2, 1.5, -1] }) })];
       } catch (errLight) { effects = []; }
-      overlay = new deck.MapboxOverlay({ interleaved: false, layers: [], effects: effects });
+      overlay = new deck.MapboxOverlay({ interleaved: false, layers: [], effects: effects, pickingRadius: 6 });   // small 3D objects are easier to tap
       map.addControl(overlay);
     } catch (e) {
       $('map').innerHTML = '<p style="padding:16px;color:#8fa0bd">The map needs WebGL, which is unavailable in this browser. The panels still work.</p>';
