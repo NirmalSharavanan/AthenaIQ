@@ -333,11 +333,11 @@
     if (K.tabOpen('env') && HYD) {
       out.push(new deck.ScatterplotLayer({ id: 'tg-aq', data: TG.aqStations || [], pickable: true, radiusUnits: 'pixels', getPosition: function (s) { return s.at; }, getRadius: 6, getFillColor: [120, 90, 200, 230], stroked: true, getLineColor: [255, 255, 255], lineWidthUnits: 'pixels', getLineWidth: 2,
         onClick: function (i) { if (i.object) { C.showPopup(i.object.at, i.object.name + ' station', [['Network', TG.aqNetwork || 'Air-quality network'], ['Readings', 'not connected']], 'Approximate position; readings not connected yet'); } } }));
-      out.push(new deck.ScatterplotLayer({ id: 'tg-lakes', data: lakes(), radiusUnits: 'pixels', getPosition: function (l) { return l.at; }, getRadius: 7, getFillColor: [30, 140, 210, 230], stroked: true, getLineColor: [255, 255, 255], lineWidthUnits: 'pixels', getLineWidth: 2 }));
+      out.push(new deck.ScatterplotLayer({ id: 'tg-lakes', data: lakes(), pickable: true, onClick: function (i) { if (i.object) { C.showPopup(i.object.at, i.object.name, [['Type', 'Stream or reservoir'], ['Level', 'see the Streams and reservoir levels card']], 'Position approximate'); } }, radiusUnits: 'pixels', getPosition: function (l) { return l.at; }, getRadius: 7, getFillColor: [30, 140, 210, 230], stroked: true, getLineColor: [255, 255, 255], lineWidthUnits: 'pixels', getLineWidth: 2 }));
     }
     if (K.tabOpen('inc') && HYD) {
       var st = orrStats(), byName = {}; st.forEach(function (b) { byName[b.name] = b; });
-      out.push(new deck.PathLayer({ id: 'tg-orr', data: orrEdges(), getPath: function (o) { return o.path; }, widthUnits: 'pixels', getWidth: 4,
+      out.push(new deck.PathLayer({ id: 'tg-orr', data: orrEdges(), pickable: true, onClick: function (i) { if (i.object) { var b = byName[SECT[i.object.sec]]; C.showPopup(i.coordinate, ((TG.ring || {}).title || 'Ring road') + ' · ' + (SECT[i.object.sec] || ''), [['Speed vs free flow', b ? Math.round(b.ratio * 100) + '%' : '–'], ['Vehicles in sector', b ? num(Math.round(b.veh || 0)) : '–']], 'Simulated traffic'); } }, getPath: function (o) { return o.path; }, widthUnits: 'pixels', getWidth: 4,
         getColor: function (o) { var b = byName[SECT[o.sec]]; var r = b ? b.ratio : 1; return r < 0.35 ? [208, 59, 59, 200] : r < 0.6 ? [230, 130, 40, 200] : r < 0.8 ? [230, 190, 40, 200] : [40, 160, 100, 200]; },
         updateTriggers: { getColor: Math.floor(state.t / 300) } }));
     }

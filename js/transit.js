@@ -8,7 +8,7 @@
 (function () {
   'use strict';
   var T = window.IntelliTwin, C = T.core, CFG = C.CFG, $ = C.$, num = C.num, state = T.state;
-  var X = CFG.taxis || {}, S = CFG.shuttles || {}, kx = 111320 * Math.cos(24.4 * Math.PI / 180), ky = 110570;
+  var X = CFG.taxis || {}, S = CFG.shuttles || {}, kx = 111320 * Math.cos(38.3 * Math.PI / 180), ky = 110570;
   var corridors = [], taxis = [], shuttles = [], show = { taxi: true, shuttle: true };
   var COL = { vacant: [12, 163, 12], hired: [201, 133, 0], call: [57, 135, 229] }, LABEL = { vacant: 'Vacant', hired: 'Hired', call: 'On the way to a booking' };
 
@@ -110,7 +110,7 @@
         updateTriggers: { getFillColor: bucket }, onClick: function (info) { if (info.object) { trackTaxi(info.object.x); } } }));
     }
     if (show.shuttle && shuttles.length) {
-      out.push(new deck.ScatterplotLayer({ id: 'shuttle-zones', data: S.zones, radiusUnits: 'meters', stroked: true, filled: true, lineWidthUnits: 'pixels',
+      out.push(new deck.ScatterplotLayer({ id: 'shuttle-zones', data: S.zones, pickable: true, onClick: function (info) { var z = info.object; if (z) { C.showPopup(z.at || z.centre || info.coordinate, (z.name || 'Shuttle zone'), [['Service', 'On-demand shuttle'], ['Shuttles', (shuttles || []).filter(function (sh) { return sh.zone === z || sh.z === z; }).length || '–']], 'Synthetic service zone'); } }, radiusUnits: 'meters', stroked: true, filled: true, lineWidthUnits: 'pixels',
         getPosition: function (z) { return z.at; }, getRadius: function (z) { return z.radiusM; }, getFillColor: [213, 81, 129, 22], getLineColor: [213, 81, 129, 200], getLineWidth: 1.5 }));
       out.push(new deck.ScatterplotLayer({ id: 'shuttles', data: shuttles.map(function (sh) { return shuttleAt(sh, t); }), pickable: true, radiusUnits: 'pixels', stroked: true, lineWidthUnits: 'pixels',
         getPosition: function (a) { return a.p; }, getRadius: ctx.zoom < 12 ? 3 : 5.5, getFillColor: [213, 81, 129], getLineColor: [255, 255, 255], getLineWidth: 1.5,

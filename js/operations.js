@@ -8,7 +8,7 @@
 (function () {
   'use strict';
   var T = window.IntelliTwin, C = T.core, CFG = C.CFG, $ = C.$, num = C.num, clock = C.clock, state = T.state;
-  var kx = 111320 * Math.cos(24.4 * Math.PI / 180), ky = 110570;
+  var kx = 111320 * Math.cos(38.3 * Math.PI / 180), ky = 110570;
   function hashStr(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
   function rnd(seed, k) { var h = (Math.imul(seed ^ (k * 2654435761), 2246822519)) >>> 0; h ^= h >>> 13; h = Math.imul(h, 3266489917) >>> 0; h ^= h >>> 16; return (h >>> 0) / 4294967296; }
   function dist(a, b) { return Math.hypot((a[0] - b[0]) * kx, (a[1] - b[1]) * ky); }
@@ -241,7 +241,7 @@
     if (open.length) {
       out.push(new deck.ScatterplotLayer({ id: 'incidents', data: open, pickable: true, radiusUnits: 'pixels', filled: false, stroked: true, lineWidthUnits: 'pixels',
         getPosition: function (x) { return x.at; }, getRadius: function (x) { return x.id === selInc ? 18 : 13; }, getLineColor: function (x) { return x.sev === 3 ? [208, 59, 59] : x.sev === 2 ? [236, 131, 90] : [250, 178, 25]; }, getLineWidth: function (x) { return x.id === selInc ? 4 : 2.5; },
-        updateTriggers: { getRadius: selInc, getLineWidth: selInc }, onClick: function (info) { if (info.object) { C.showTab('inc'); selInc = null; selectInc(info.object.id); } } }));
+        updateTriggers: { getRadius: selInc, getLineWidth: selInc }, onClick: function (info) { if (info.object) { var x = info.object; C.showTab('inc'); selInc = null; selectInc(x.id); C.showPopup(x.at, (x.title || 'Incident') + ' · ' + x.id, [['Severity', ['', 'Minor', 'Serious', 'Critical'][x.sev] || x.sev], ['Opened', clock(x.opened)], ['Stage', x.stage || '–']], 'Synthetic incident · details in the Incidents card'); } } }));
     }
     if (priority) {
       if (state.t > priority.until || state.t < priority.until - 900) { priority = null; }

@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   var T = window.IntelliTwin, C = T.core, CFG = C.CFG, $ = C.$, num = C.num, state = T.state;
-  var EN = CFG.environment, sensors = [], show = true, kx = 111320 * Math.cos(24.4 * Math.PI / 180), ky = 110570;
+  var EN = CFG.environment, sensors = [], show = true, kx = 111320 * Math.cos(38.3 * Math.PI / 180), ky = 110570;
   // Air-quality bands by index value; colours are the reserved status colours.
   var BANDS = [
     { max: 50, label: 'Good', color: [12, 163, 12], css: '#0ca30c' },

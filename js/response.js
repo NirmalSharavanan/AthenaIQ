@@ -11,7 +11,7 @@
   'use strict';
   var T = window.IntelliTwin, C = T.core, CFG = C.CFG, $ = C.$, num = C.num, state = T.state;
   var R = CFG.response || { bases: [], speedFactor: 1.2, auto: true };
-  var next = null, kx = 111320 * Math.cos(24.4 * Math.PI / 180), ky = 110570, route = null, show = true;
+  var next = null, kx = 111320 * Math.cos(38.3 * Math.PI / 180), ky = 110570, route = null, show = true;
 
   function dist(a, b) { return Math.hypot((a[0] - b[0]) * kx, (a[1] - b[1]) * ky); }
 

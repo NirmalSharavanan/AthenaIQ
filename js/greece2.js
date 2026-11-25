@@ -52,7 +52,7 @@
       onClick: function (i) { if (i.object && popup) { var p = popup(i.object); C.showPopup(i.object.at, p[0], p[1], p[2]); } } });
   }
   function rings(id, data, col) {
-    return new deck.ScatterplotLayer({ id: id, data: data, radiusUnits: 'meters', getRadius: function (d) { return d.r; }, getPosition: function (d) { return d.at; }, updateTriggers: { getRadius: tick, getFillColor: tick },
+    return new deck.ScatterplotLayer({ id: id, data: data, radiusUnits: 'meters', pickable: true, onClick: function (i) { if (i.object && i.object.pop) { var p = i.object.pop(); C.showPopup(i.object.at, p[0], p[1], p[2]); } }, getRadius: function (d) { return d.r; }, getPosition: function (d) { return d.at; }, updateTriggers: { getRadius: tick, getFillColor: tick },
       getFillColor: function (d) { return (d.col || col).concat([45]); }, stroked: true, getLineColor: function (d) { return (d.col || col).concat([220]); }, lineWidthUnits: 'pixels', getLineWidth: 2 });
   }
   var tick = 0;   // bumped when a button changes a scenario
@@ -363,13 +363,13 @@
   C.addLayers(function () {
     var out = [], o = K.tabOpen;
     if (o('anpr') && ATH) {
-      out.push(new deck.PolygonLayer({ id: 'gr-ring', data: [RING], getPolygon: function (p) { return p; }, getFillColor: ringOn() ? [208, 59, 59, 30] : [40, 120, 200, 20], getLineColor: ringOn() ? [208, 59, 59, 220] : [40, 120, 200, 200], lineWidthUnits: 'pixels', getLineWidth: 2, stroked: true, updateTriggers: { getFillColor: ringOn() + ':' + strike, getLineColor: ringOn() + ':' + strike } }));
+      out.push(new deck.PolygonLayer({ id: 'gr-ring', pickable: true, onClick: function (i) { C.showPopup(i.coordinate, 'Daktylios (traffic ring)', [['Now', ringOn() ? 'In force' : 'Not in force'], ['Allowed today', ringOn() ? (today().day % 2 ? 'Odd plates' : 'Even plates') : 'All plates'], ['Hours', 'Mon–Thu 07–20, Fri 07–15']], 'Outline approximate'); }, data: [RING], getPolygon: function (p) { return p; }, getFillColor: ringOn() ? [208, 59, 59, 30] : [40, 120, 200, 20], getLineColor: ringOn() ? [208, 59, 59, 220] : [40, 120, 200, 200], lineWidthUnits: 'pixels', getLineWidth: 2, stroked: true, updateTriggers: { getFillColor: ringOn() + ':' + strike, getLineColor: ringOn() + ':' + strike } }));
       out.push(dots('gr-ring-g', RING_GATES.map(function (g) { return { name: g[0], at: [g[1], g[2]] }; }), function () { return rgb(ringOn() ? 'heavy' : 'info'); }, 7, function (g) { return [g.name, [['Rule', ringOn() ? 'Odd/even in force' : 'Open']], 'Approximate gate; synthetic reads']; }));
     }
     if (o('emg')) {
       if (fire) {
-        out.push(rings('gr-fire', [{ at: fire.front.at, r: fire.front.r, col: [208, 59, 59] }, { at: fire.w.at, r: 600, col: [230, 130, 40] }], [208, 59, 59]));
-        if (fire.route) { out.push(new deck.PathLayer({ id: 'gr-evac', data: [fire.route.path], getPath: function (p) { return p; }, widthUnits: 'pixels', getWidth: 6, getColor: [40, 160, 100, 230], jointRounded: true, capRounded: true })); }
+        out.push(rings('gr-fire', [{ at: fire.front.at, r: fire.front.r, col: [208, 59, 59], pop: function () { return ['Evacuation zone', [['Radius', (fire.front.r / 1000).toFixed(1) + ' km'], ['Wind', fire.wind + ' km/h'], ['Roads closed', fire.closures.length], ['Go to', esc(fire.ap.name)]], 'Exercise scenario']; } }, { at: fire.w.at, r: 600, col: [230, 130, 40], pop: function () { return ['Fire start: ' + esc(fire.w.name), [['Reported', clock(fire.t0)]], 'Exercise scenario']; } }], [208, 59, 59]));
+        if (fire.route) { out.push(new deck.PathLayer({ id: 'gr-evac', pickable: true, onClick: function (i) { C.showPopup(i.coordinate, 'Evacuation route', [['To', esc(fire.ap.name)], ['Road links', fire.route.links.length], ['Direction', 'one-way outbound']], 'Follows the model road network'); }, data: [fire.route.path], getPath: function (p) { return p; }, widthUnits: 'pixels', getWidth: 6, getColor: [40, 160, 100, 230], jointRounded: true, capRounded: true })); }
         var E = C.edges();
         out.push(new deck.PathLayer({ id: 'gr-closed', data: fire.closures.map(function (i) { return E[i].path; }), getPath: function (p) { return p; }, widthUnits: 'pixels', getWidth: 3, getColor: [208, 59, 59, 200] }));
       }

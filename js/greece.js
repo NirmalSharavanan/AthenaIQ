@@ -72,8 +72,8 @@
       updateTriggers: { getFillColor: Math.floor(state.t / 60), getRadius: Math.floor(state.t / 60) },
       onClick: function (i) { if (i.object && popup) { var p = popup(i.object); C.showPopup(i.object.at, p[0], p[1], p[2]); } } });
   }
-  function rings(id, data, rM, col) {
-    return new deck.ScatterplotLayer({ id: id, data: data, radiusUnits: 'meters', getRadius: function (d) { return d.r || rM; }, getPosition: function (d) { return d.at; },
+  function rings(id, data, rM, col, popup) {
+    return new deck.ScatterplotLayer({ id: id, data: data, radiusUnits: 'meters', pickable: !!popup, onClick: function (i) { if (i.object && popup) { var p = popup(i.object); C.showPopup(i.object.at, p[0], p[1], p[2]); } }, getRadius: function (d) { return d.r || rM; }, getPosition: function (d) { return d.at; },
       getFillColor: function (d) { return (d.col || col).concat([40]); }, stroked: true, getLineColor: function (d) { return (d.col || col).concat([210]); }, lineWidthUnits: 'pixels', getLineWidth: 2 });
   }
 
@@ -373,7 +373,7 @@
     }
     if (o('bus')) {
       var g = gates(); if (g.length) { out.push(dots('gr-gates', g, function (x) { return rgb(x.queue > 70 ? 'severe' : x.queue > 40 ? 'heavy' : 'free'); }, 8, function (x) { return [x.name, [['Queue', x.queue + ' vehicles'], ['Approach speed', x.a.kmh != null ? x.a.kmh + ' km/h' : '–']], 'Synthetic queue; simulated speed']; })); }
-      var a = airport(); if (a) { out.push(rings('gr-air', [{ at: a.at }], 1200, [40, 120, 200])); }
+      var a = airport(); if (a) { out.push(rings('gr-air', [{ at: a.at, name: a.name }], 1200, [40, 120, 200], function (x) { var acc = area(x.at, 5000); return [x.name, [['Landside roads', acc.kmh != null ? acc.kmh + ' km/h simulated' : 'outside the model'], ['Kerb in use', ($('grAirKerb') || {}).textContent || '–'], ['Taxi rank', ($('grAirTaxi') || {}).textContent || '–']], 'Estimated; see the Airport landside card']; })); }
     }
     if (o('anpr')) {
       out.push(dots('gr-border', crossings(), function (c) { return rgb(c.hits > 3 ? 'severe' : c.hits ? 'heavy' : 'info'); }, 8, function (c) { return [c.name, [['Trucks today', num(c.trucks)], ['Alerts', c.hits]], 'Real crossing point; synthetic counts']; }));
@@ -381,12 +381,12 @@
     }
     if (o('zones')) {
       out.push(dots('gr-ci', assets(), function (x) { return rgb(x.lvl); }, 7, function (x) { return [x.name, [['Sector', x.kind], ['Hazards', x.hz.join(', ') || 'none now']], 'Approximate position; real hazards']; }));
-      out.push(rings('gr-nofly', zonesU(), 800, [208, 59, 59]));
+      out.push(rings('gr-nofly', zonesU(), 800, [208, 59, 59], function (z) { return [z.name, [['Restricted radius', (z.r / 1000).toFixed(1) + ' km'], ['Drones inside now', drones().filter(function (d) { return d.zone === z.name; }).length]], 'Example zone, not the official HCAA zone']; }));
       var D = drones();
       out.push(new deck.PathLayer({ id: 'gr-uav-tr', data: D, getPath: function (d) { return d.trail; }, widthUnits: 'pixels', getWidth: 2, getColor: function (d) { return rgb(d.threat).concat([180]); }, updateTriggers: { getColor: Math.floor(state.t / 300) } }));
       out.push(dots('gr-uav', D, function (d) { return rgb(d.threat); }, 6, function (d) { return [d.id, [['Class', d.cls], ['Height', d.alt + ' m'], ['Zone', d.zone || 'none']], 'Synthetic track']; }));
     }
-    if (o('ped')) { out.push(rings('gr-sh', crossingsSH().slice(0, 60).map(function (x) { return { at: x.at, r: 250, col: rgb(x.risk >= 3 ? 'severe' : x.risk >= 2 ? 'heavy' : x.risk >= 1 ? 'moderate' : 'free') }; }), 250, [40, 160, 100])); }
+    if (o('ped')) { out.push(rings('gr-sh', crossingsSH().slice(0, 60).map(function (x) { return { at: x.at, r: 250, x: x, col: rgb(x.risk >= 3 ? 'severe' : x.risk >= 2 ? 'heavy' : x.risk >= 1 ? 'moderate' : 'free') }; }), 250, [40, 160, 100], function (d) { var x = d.x; return [x.name, [['Type', x.kind === 'school' ? 'School' : 'Hospital'], ['Vehicles within 250 m', x.veh], ['Speed nearby', x.kmh ? x.kmh + ' km/h' : '–'], ['Risk', x.risk >= 3 ? 'High' : x.risk >= 2 ? 'Raised' : x.risk >= 1 ? 'Moderate' : 'Low']], 'OpenStreetMap site; simulated traffic']; })); }
     if (o('dev')) { out.push(dots('gr-cams', cams(), function (c) { return rgb(c.st === 'offline' ? 'severe' : c.st === 'degraded' ? 'moderate' : 'free'); }, 5, function (c) { return [c.id + ' · ' + c.type, [['State', c.st || 'online'], ['Road', c.road]], 'Synthetic device state']; })); }
     return out;
   });

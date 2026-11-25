@@ -187,7 +187,7 @@
     if (sig.length) {
       var cell = 0.0015, grid = {};
       edges.forEach(function (e, i) { var p = e.path[e.path.length - 1], k = Math.floor(p[0] / cell) + ':' + Math.floor(p[1] / cell); (grid[k] = grid[k] || []).push(i); });
-      var kx = 111320 * Math.cos(24.4 * Math.PI / 180), ky = 110570;
+      var kx = 111320 * Math.cos(38.3 * Math.PI / 180), ky = 110570;
       sig.forEach(function (p, si) {
         var gx = Math.floor(p[0] / cell), gy = Math.floor(p[1] / cell), app = [];
         for (var dx = -1; dx <= 1; dx++) { for (var dy = -1; dy <= 1; dy++) { (grid[(gx + dx) + ':' + (gy + dy)] || []).forEach(function (i) {

@@ -1097,7 +1097,7 @@
     if (typeof syncFull === 'function') { syncFull(); }
     if (st.focus === 'most-congested-site' && map) {
       // Pick the major site (one of the chips) with the slowest traffic around it, and select it.
-      var sb = binOf(state.t), kxs = 111320 * Math.cos(24.4 * Math.PI / 180), worst = null;
+      var sb = binOf(state.t), kxs = 111320 * Math.cos(38.3 * Math.PI / 180), worst = null;
       SITES.forEach(function (site) {
         var occ = 0, free = 0;
         for (var ei = 0; ei < edges.length; ei++) {

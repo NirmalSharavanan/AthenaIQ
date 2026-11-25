@@ -8,7 +8,8 @@
 (function () {
   'use strict';
   var T = window.IntelliTwin, C = T.core, CFG = C.CFG, $ = C.$, num = C.num, clock = C.clock, state = T.state;
-  var B = CFG.buses, routes = [], show = true, selected = null, kx = 111320 * Math.cos(24.4 * Math.PI / 180), ky = 110570;
+  var B = CFG.buses, routes = [], show = true, selected = null, kx = 111320 * Math.cos((((C.meta() || {}).bbox || [0, 38, 0, 38])[1] + ((C.meta() || {}).bbox || [0, 38, 0, 38])[3]) / 2 * Math.PI / 180), ky = 110570;
+  function esc(x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   var BLUE = [57, 135, 229], HI = [255, 255, 255];
 
   function measure(path) {
@@ -96,15 +97,27 @@
   function nextStop(b) { var d = b.prog * b.route.len, st = b.route.stops; for (var i = 0; i < st.length; i++) { if (st[i].d >= d) { return st[i]; } } return st[st.length - 1]; }
 
   /* ---------- live tracking: the map follows one vehicle (a bus here; taxis and shuttles use it too) ---------- */
-  var tracked = null, lastCentre = null;
+  var tracked = null, lastCentre = null, trackBox = null, popAt = 0;
+  function trackPopup(now) {
+    if (!tracked || !now) { return; }
+    trackBox = C.showPopup([now.p[0], now.p[1]], tracked.label.charAt(0).toUpperCase() + tracked.label.slice(1), now.rows.map(function (r) { return [r[0], esc(String(r[1])) + (r[2] ? ' <span class="muted">' + esc(r[2]) + '</span>' : '')]; }), 'Synthetic vehicle · the map follows it until you press Stop tracking');
+    popAt = Date.now();
+  }
+  function reveal(id) {
+    setTimeout(function () {
+      var el = $(id), box = el && el.parentElement;
+      while (box && box.scrollHeight <= box.clientHeight + 2) { box = box.parentElement; }
+      if (el && box) { box.scrollTop += el.getBoundingClientRect().top - box.getBoundingClientRect().top - 8; }
+    }, 250);
+  }
   // item: { label, sub, find: function (t) -> { p, rows: [[label, value]...] } or null }
   function track(item) {
-    tracked = item || null; lastCentre = null;
+    tracked = item || null; lastCentre = null; if (!tracked && trackBox && trackBox.isConnected) { var pp = trackBox.closest('.maplibregl-popup'); if (pp) { pp.remove(); } } trackBox = null;
     $('trackCard').setAttribute('data-locked', tracked ? '0' : '1'); $('trackCard').hidden = !tracked;
     if (tracked) {
       var now = tracked.find(state.t), map = T.getMap();
       if (now && map) { map.easeTo({ center: [now.p[0], now.p[1]], zoom: Math.max(map.getZoom(), 15.5), duration: 700 }); }
-      C.showTab('bus'); if (T.audit) { T.audit('Tracking ' + tracked.label); }
+      C.showTab('bus'); trackPopup(now); reveal('trackCard'); if (T.audit) { T.audit('Tracking ' + tracked.label); }
     }
     renderTrack(); C.redraw();
   }
@@ -120,6 +133,7 @@
     if (!now || !map || map.isEasing()) { return; }
     if (lastCentre && Math.hypot((now.p[0] - lastCentre[0]) * kx, (now.p[1] - lastCentre[1]) * ky) < 3) { return; }
     lastCentre = [now.p[0], now.p[1]]; map.jumpTo({ center: lastCentre });
+    if (trackBox && trackBox.isConnected && Date.now() - popAt > 1500) { trackPopup(now); }
   }
   function trackBus(b) {
     var r = b.route, dep = b.dep;
@@ -138,6 +152,9 @@
     if (r) {
       var lons = r.path.map(function (p) { return p[0]; }), lats = r.path.map(function (p) { return p[1]; });
       if (T.getMap()) { T.getMap().fitBounds([[Math.min.apply(null, lons), Math.min.apply(null, lats)], [Math.max.apply(null, lons), Math.max.apply(null, lats)]], { padding: { top: 100, bottom: 130, left: 40, right: 40 }, maxZoom: 14, duration: 800 }); }
+      var mid = r.path[r.path.length >> 1], fa = r.stops || [];
+      C.showPopup(mid, 'Route ' + r.id + ' · ' + r.name, [['Stops', fa.length], ['Buses on the route now', busesOn(r, state.t).length], ['Length', (r.len / 1000).toFixed(1) + ' km']], 'Synthetic route · details in the Route card');
+      C.showTab('bus'); reveal('busDetail');
       if (T.audit) { T.audit('Bus route: ' + r.id); }
     }
     render(); C.redraw();
