@@ -59,7 +59,7 @@ t('the ANPR example: five rules, then suggestions complete the mapping', functio
   var s = seed('anpr-vendor'), e = entity('VehicleDetection'), p = M.parsePayload(s.sample, 'json'), schema = M.discover(p.records, p.infer);
   assert.deepStrictEqual(M.checkMapping(s.rules, schema, e), []);
   var out = M.apply(s.rules, p.records[0]);
-  assert.deepStrictEqual(out.out, { plateNumber: 'TS09EA1234', timestamp: '2026-11-17T00:40:22.000Z', cameraId: 'CAM-0012', confidence: 96.4, vehicleClass: 'Car' });
+  assert.deepStrictEqual(out.out, { plateNumber: 'IKA1234', timestamp: '2026-11-17T04:10:22.000Z', cameraId: 'CAM-0012', confidence: 96.4, vehicleClass: 'Car' });
   var res = M.test(s.rules, p.records, e);
   assert.strictEqual(res.records, 6); assert.strictEqual(res.valid, 4); assert.strictEqual(res.byCode.TRANSFORM, 1); assert.strictEqual(res.byCode.DUPLICATE, 1);
   var sug = M.suggest(schema, e, s.rules, p.records), by = {}; sug.forEach(function (x) { by[x.targetPath] = x.sourcePath; });
@@ -77,7 +77,7 @@ t('the published examples pass their own tests', function () {
     assert.ok(res.ok, id + ': ' + JSON.stringify(res.rows.filter(function (r) { return r.errors.length; }).map(function (r) { return r.errors; })));
   });
   var inc = seed('control-room-incidents'), p = M.parsePayload(inc.sample, 'csv');
-  assert.deepStrictEqual(M.apply(inc.rules, p.records[0]).out, { incidentId: 'INC-2026-118204', timestamp: '2026-11-17T00:12:00.000Z', type: 'Accident', severity: 'Critical', latitude: 17.4667, longitude: 78.3667, description: 'Two vehicles, lane 2 blocked', status: 'Open' });
+  assert.deepStrictEqual(M.apply(inc.rules, p.records[0]).out, { incidentId: 'INC-2026-118204', timestamp: '2026-11-17T03:42:00.000Z', type: 'Accident', severity: 'Critical', latitude: 37.9667, longitude: 23.7667, description: 'Two vehicles, lane 2 blocked', status: 'Open' });
 });
 t('validation: required, type, range, pattern, enum', function () {
   var e = entity('VehicleDetection');

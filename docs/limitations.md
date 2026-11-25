@@ -2,24 +2,24 @@
 
 ## Disclaimer
 
-UrbanIQ is an independent demonstrator built from open data. It is not an official model of the Government of Telangana, Hyderabad Traffic Police, GHMC, TGSRTC, the Census of India or any other government body, and it is not endorsed by them or by any data provider.
+AthenaIQ is an independent demonstrator built from open data. It is not an official model of the Government of Greece, Athens Traffic Police, the City of Athens, OASA, the Census of Greece or any other government body, and it is not endorsed by them or by any data provider.
 
 The traffic shown is simulated, not observed. Results are indicative and must not be used for planning, investment, operational, legal or safety decisions. The software and data are provided as is, without warranty.
 
 ## Calibration status
 
-**Not calibrated and not validated.** No traffic counts are public for Hyderabad, so nothing in the model has been compared with measured traffic. The total amount of traffic rests on one assumed number (see [methodology.md](methodology.md)). Treat every figure, and every individual road, as illustrative.
+**Not calibrated and not validated.** No traffic counts are public for Athens, so nothing in the model has been compared with measured traffic. The total amount of traffic rests on one assumed number (see [methodology.md](methodology.md)). Treat every figure, and every individual road, as illustrative.
 
 ## Known limits
 
 | Area | Limit |
 | --- | --- |
-| Coverage | Hyderabad inside and around the Outer Ring Road, plus nine other cities. Traffic from outside each area enters at boundary points with assumed volumes |
+| Coverage | Athens inside and around the Attiki Odos, plus nine other cities. Traffic from outside each area enters at boundary points with assumed volumes |
 | Network | Motorway to tertiary roads only. Residential and service streets are missing, so local access traffic is loaded onto the nearest larger street |
 | Demand total | Assumed, benchmarked only against another model's estimate |
 | Demand pattern | Homes and workplaces are not distinguished; origins and destinations share the same weights, so the tidal inbound morning flow is weaker than in reality |
 | Vehicle mix | One car type. No vans, lorries, taxis or motorcycles as separate classes |
-| Mixed traffic | Two-wheelers, auto-rickshaws and company cabs, a large part of the Hyderabad peak, are folded into car-equivalent trips; their own behaviour is not modelled |
+| Mixed traffic | Two-wheelers, auto-rickshaws and company cabs, a large part of the Athens peak, are folded into car-equivalent trips; their own behaviour is not modelled |
 | Signals | Positions from OpenStreetMap; timings are not public, so a generic delay and capacity penalty is applied |
 | Tolls | Darb toll gates are not modelled as a price |
 | Route choice | One simulated morning with periodic rerouting; no day-to-day equilibrium, no departure-time choice |
@@ -49,8 +49,8 @@ The traffic shown is simulated, not observed. Results are indicative and must no
 5. A demand model that separates homes, jobs, schools and freight.
 6. An equilibrium assignment with documented convergence.
 - **Public transport is invented.** Bus routes, stops, timetables and delays, taxis, taxi ranks and on-demand shuttles are example data, not real services or vehicle positions (see [buses.md](buses.md)).
-- **Live is not a live feed.** Live starts at India Standard Time and, at the default 30×, runs ahead of it; all traffic in it is synthetic.
+- **Live is not a live feed.** Live starts at Greece Standard Time and, at the default 30×, runs ahead of it; all traffic in it is synthetic.
 - **The operations modules are demonstrations.** Incidents, signal plans, events and roadworks, parking, evacuation estimates, plate reads, crossings, freight, weather and work orders are generated examples (see [operations-modules.md](operations-modules.md)).
 - **Platform monitoring is synthetic.** There are no servers or feeds behind this static app (see [platform-monitoring.md](platform-monitoring.md)).
-- **Regions other than Hyderabad** start on a synthetic traffic pattern, and their sites and example services are placed from approximate coordinates (see [regions.md](regions.md)).
+- **Regions other than Athens** start on a synthetic traffic pattern, and their sites and example services are placed from approximate coordinates (see [regions.md](regions.md)).
 - **TomTom features** are real and live but were tested with simulated responses only; they need a key in the browser (see [tomtom.md](tomtom.md)).

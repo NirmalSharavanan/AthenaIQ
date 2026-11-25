@@ -1,6 +1,6 @@
-/* UrbanIQ: the OSINT page.
+/* AthenaIQ: the OSINT page.
  *
- * OSINT opens as a page of its own, like Analytics: a 3D map of the open-source feeds on top (Telangana, world or the
+ * OSINT opens as a page of its own, like Analytics: a 3D map of the open-source feeds on top (Greece, world or the
  * open region), a symbol legend beside it, and the feed cards in a grid below. The cards are the ones built by
  * js/osint.js and js/livefeeds.js; this file lays them out as a page and gives the page its own map.
  */
@@ -27,9 +27,9 @@
   }
   // The camera for each view. "region" is street level over the open region, where the 3D buildings show.
   function camFor(v, at) {
-    var bb = (C.meta() || {}).bbox || [78.25, 17.22, 78.66, 17.58];
-    return v === 'world' ? { center: at || [78.5, 20], zoom: at ? 4.2 : 1.7, pitch: at ? 35 : 0, bearing: 0 } : v === 'region' ? { center: (C.sites()[0] ? [C.sites()[0][1], C.sites()[0][2]] : [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2]), zoom: 14.6, pitch: 60, bearing: -20 } :
-      { center: M.centre || [79.0, 17.85], zoom: M.zoom || 6.3, pitch: M.pitch || 52, bearing: M.bearing || -12 };
+    var bb = (C.meta() || {}).bbox || [23.55, 37.85, 23.98, 38.12];
+    return v === 'world' ? { center: at || [24, 38.5], zoom: at ? 4.2 : 1.7, pitch: at ? 35 : 0, bearing: 0 } : v === 'region' ? { center: (C.sites()[0] ? [C.sites()[0][1], C.sites()[0][2]] : [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2]), zoom: 14.6, pitch: 60, bearing: -20 } :
+      { center: M.centre || [23.9, 38.3], zoom: M.zoom || 5.7, pitch: M.pitch || 52, bearing: M.bearing || -12 };
   }
   // Fly the OSINT map to every point of one kind (legend click). Global incidents open the world view.
   function showKind(kind) {

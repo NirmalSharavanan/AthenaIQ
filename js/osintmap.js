@@ -8,7 +8,7 @@
  *   Weather                  sun, cloud, rain or dust symbol with the temperature, at each region
  *   Natural event            warning triangle
  *
- * "Telangana 3D view" lets the map zoom out far enough to see all of it at once; "Back to the region" returns.
+ * "Greece 3D view" lets the map zoom out far enough to see all of it at once; "Back to the region" returns.
  * All of it is real data from the published live files (js/livefeeds.js, js/osint.js).
  */
 (function () {
@@ -65,7 +65,7 @@
       var h = function (f) { return Math.max(300, f.alt * 0.3048 * EX); };
       out.push(new deck.LineLayer({ id: 'os-plane-stem', data: D.flights, widthUnits: 'pixels', getWidth: 1, getColor: [90, 110, 140, 120], getSourcePosition: function (f) { return [f.lon, f.lat, 0]; }, getTargetPosition: function (f) { return [f.lon, f.lat, h(f)]; } }));
       out.push(new deck.IconLayer({ id: 'os-plane', data: D.flights, pickable: true, billboard: false, sizeUnits: 'pixels', getSize: isz(28), getIcon: function () { return URLS.plane; },
-        getPosition: function (f) { return [f.lon, f.lat, h(f)]; }, getAngle: function (f) { return -f.track; }, getColor: function (f) { return /^(HYD)$/.test(f.to) ? COLR.planeIn : COLR.plane; }, onClick: function (i) { pickFlight(i, POP); } }));
+        getPosition: function (f) { return [f.lon, f.lat, h(f)]; }, getAngle: function (f) { return -f.track; }, getColor: function (f) { return /^(ATH|SKG|HER|CHQ|RHO|CFU|JTR|JMK|KGS|ZTH|EFL|KVA|IOA|VOL|GPA|PVK|KLX)$/.test(f.to) ? COLR.planeIn : COLR.plane; }, onClick: function (i) { pickFlight(i, POP); } }));
       if (labels) out.push(new deck.TextLayer({ id: 'os-plane-name', data: D.flights, getPosition: function (f) { return [f.lon, f.lat, h(f)]; }, getText: function (f) { return f.flight || f.call || ''; }, getSize: 11, getColor: [30, 45, 70], getPixelOffset: [0, -20],
         fontFamily: 'system-ui, sans-serif', fontWeight: 600, outlineWidth: 3, outlineColor: [255, 255, 255, 230], fontSettings: { sdf: true } }));
     }
@@ -99,10 +99,10 @@
     }
     return out;
   }
-  function uae(iso) { var d = new Date(Date.parse(iso) + 5.5 * 3600000); return C.pad(d.getUTCHours()) + ':' + C.pad(d.getUTCMinutes()); }
-  function pickFire(i, POP) { var f = i.object; if (f) { POP(f.at, 'Heat detection', [['Radiative power', f.frp.toFixed(1) + ' MW'], ['Seen', f.date + ' ' + uae(f.iso) + ' IST'], ['Confidence', f.conf === 'h' ? 'High' : f.conf === 'l' ? 'Low' : 'Nominal']], 'Real detection, NASA FIRMS. Column height follows the power.'); } }
+  function uae(iso) { var t = Date.parse(iso); if (isNaN(t)) { return '–'; } return new Date(t).toLocaleTimeString('en-GB', { timeZone: (CFG.time || {}).timeZone || 'Europe/Athens', hour: '2-digit', minute: '2-digit', hour12: false }); }
+  function pickFire(i, POP) { var f = i.object; if (f) { POP(f.at, 'Heat detection', [['Radiative power', f.frp.toFixed(1) + ' MW'], ['Seen', f.date + ' ' + uae(f.iso) + ' Athens time'], ['Confidence', f.conf === 'h' ? 'High' : f.conf === 'l' ? 'Low' : 'Nominal']], 'Real detection, NASA FIRMS. Column height follows the power.'); } }
   function pickShip(i, POP) { var s = i.object; if (s) { POP([s.lon, s.lat], s.name || 'MMSI ' + s.mmsi, [['Type', shipType(s.type)], ['Speed', (s.sog || 0).toFixed(1) + ' knots'], ['Course', Math.round(s.cog || 0) + '°'], ['Destination', s.dest || 'not reported']], 'Real position from AIS'); } }
-  function pickFlight(i, POP) { var f = i.object, a = T.live.flights(); if (f) { POP([f.lon, f.lat], (f.flight || f.call || 'Flight') + (f.airline ? ' · ' + f.airline : ''), [['Route', (f.from || '?') + ' → ' + (f.to || '?')], ['Aircraft', f.type || 'not reported'], ['Height', num(f.alt) + ' ft'], ['Ground speed', num(f.gs) + ' knots'], ['Position at', uae(a.updated) + ' IST']], 'Flightradar24 snapshot. Height on the map is exaggerated ' + EX + ' times.'); } }
+  function pickFlight(i, POP) { var f = i.object, a = T.live.flights(); if (f) { POP([f.lon, f.lat], (f.flight || f.call || 'Flight') + (f.airline ? ' · ' + f.airline : ''), [['Route', (f.from || '?') + ' → ' + (f.to || '?')], ['Aircraft', f.type || 'not reported'], ['Height', num(f.alt) + ' ft'], ['Ground speed', num(f.gs) + ' knots'], ['Position at', uae(a.updated) + ' Athens time']], 'Flightradar24 snapshot. Height on the map is exaggerated ' + EX + ' times.'); } }
   function pickSat(i, POP) { var s = i.object; if (s) { POP(s.at, s.name, [['Height', num(Math.round(s.alt)) + ' km'], ['Speed', num(Math.round(s.speed)) + ' km/h'], ['Elevation from here', Math.round(s.el) + '°']], 'Position computed now from N2YO orbits. Height on the map is scaled down.'); } }
   function pickQuake(i, POP) { var q = i.object; if (q) { POP([q.lon, q.lat], 'Earthquake M' + (q.mag || 0).toFixed(1), [['Place', q.place], ['Time', q.time.slice(0, 16).replace('T', ' ') + ' UTC'], ['Depth', q.depth + ' km']], 'USGS. Column height follows the magnitude.'); } }
   function pickWx(i, POP) { var p = i.object; if (p) { POP([p.lon, p.lat], p.name, [['Temperature', Math.round(p.now.temp) + ' °C'], ['Wind', Math.round(p.now.wind) + ' km/h, gusts ' + Math.round(p.now.gust)], ['Rain, next 48 h', p.rain.reduce(function (s, v) { return s + (v || 0); }, 0).toFixed(1) + ' mm'], ['Dust risk, next 6 h', ['Low', 'Moderate', 'High', 'Severe'][Math.max.apply(null, p.dustRisk.slice(0, 6))]]], 'Open-Meteo'); } }
@@ -111,7 +111,7 @@
   C.addLayers(function () { return layersFor(T.getMap(), { view: 'region', pop: C.showPopup }); });
   function legendRows(view) {
     var D = data(view || 'world');
-    return [['fire', COLR.fire, 'Fire or heat detection', D.fires.length, 'column height = power'], ['plane', COLR.plane, 'Flight', D.flights.length, 'green = arriving at Hyderabad'], ['ship', COLR.ship, 'Vessel', D.ships.length, 'colour = ship type'],
+    return [['fire', COLR.fire, 'Fire or heat detection', D.fires.length, 'column height = power'], ['plane', COLR.plane, 'Flight', D.flights.length, 'green = arriving in Greece'], ['ship', COLR.ship, 'Vessel', D.ships.length, 'colour = ship type'],
       ['sat', COLR.sat, 'Satellite', D.sats.length, 'moves in real time'], ['quake', COLR.quake, 'Earthquake', D.quakes.length, 'column height = magnitude'], ['sun', [230, 150, 0], 'Weather', D.wx.length, 'sun, cloud, rain or dust'],
       ['event', [199, 54, 47], 'Global incident', (T.osint.world() || []).length, 'world view; colour = alert level']].filter(function (r) { return !(r[0] === 'ship' && (CFG.live || {}).ais === false); }).map(function (r) { return { kind: r[0], pic: PIC[r[0]], color: r[1], name: r[2], count: r[3], note: r[4] }; });
   }

@@ -9,4 +9,4 @@ converted copies are shared under the same licence.
 - houston-highway.mp4: "Highway 610 near Braeswood Blvd in Houston Texas", Texas Army National Guard, public domain
 - city-street.mp4: "Causeway Bay Time-lapse videos (afternoon)" (Hong Kong), CC0
 
-The footage shows Chicago, Houston and Hong Kong. It is recorded, not live. It is used as stand-in camera video and is not Telangana.
+The footage shows Chicago, Houston and Hong Kong. It is recorded, not live. It is used as stand-in camera video and is not Greece.

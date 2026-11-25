@@ -23,7 +23,7 @@ FLOOR_M = 3.3
 
 
 def _get(url, timeout=180):
-    req = urllib.request.Request(url, headers={"User-Agent": "UrbanIQ-pipeline"})
+    req = urllib.request.Request(url, headers={"User-Agent": "AthenaIQ-pipeline"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read()
 
@@ -65,7 +65,7 @@ def _download(build_dir):
 
 
 def estimated_height(area_m2):
-    """Height guessed from footprint size when the dataset has none (most of Telangana)."""
+    """Height guessed from footprint size when the dataset has none (most of Greece)."""
     floors = min(15, max(1, round(1 + math.sqrt(area_m2) / 12)))
     return floors * FLOOR_M
 

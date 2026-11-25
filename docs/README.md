@@ -1,6 +1,6 @@
 # IntelliTwin documentation
 
-Technical and data-source documentation for UrbanIQ, the city digital twin for Hyderabad and nine other Telangana cities.
+Technical and data-source documentation for AthenaIQ, the city digital twin for Athens and nine other Greece cities.
 
 | Document | What it covers |
 | --- | --- |
@@ -16,7 +16,7 @@ Technical and data-source documentation for UrbanIQ, the city digital twin for H
 | [live-data.md](live-data.md) | Real live data: NASA FIRMS fire detections, aisstream.io vessels, N2YO satellites, and the workflow that fetches them |
 | [critical-use-cases.md](critical-use-cases.md) | Crowd safety, unified command, utility failure, adaptive control, site protection and the other critical cases; analytics charts and reports |
 | [operations-modules.md](operations-modules.md) | Incidents, signals, events and roadworks, parking, evacuation, vehicle search, pedestrians, freight, weather, assets, reports |
-| [regions.md](regions.md) | Telangana regions: what changes per region, the two kinds of traffic, building and adding a region |
+| [regions.md](regions.md) | Greece regions: what changes per region, the two kinds of traffic, building and adding a region |
 | [google-maps.md](google-maps.md) | Google Maps as the base map, 3D tiles, setting the key |
 | [tomtom.md](tomtom.md) | TomTom live data: features, setting the key, why the key is not in the repository |
 | [vlm.md](vlm.md) | Vision-language model sample in the camera window, and how to connect a real model |
@@ -29,7 +29,7 @@ Technical and data-source documentation for UrbanIQ, the city digital twin for H
 
 ## One-paragraph summary
 
-UrbanIQ is a static web application. A build pipeline downloads the OpenStreetMap road network for Hyderabad, converts it to an Eclipse SUMO network, generates an assumed morning-peak travel demand, runs a mesoscopic SUMO simulation for three demand cases, and exports compact files. The browser replays those files with deck.gl on a MapLibre map. The roads are real. The traffic is simulated from assumptions and has not been checked against measured traffic.
+AthenaIQ is a static web application. A build pipeline downloads the OpenStreetMap road network for Athens, converts it to an Eclipse SUMO network, generates an assumed morning-peak travel demand, runs a mesoscopic SUMO simulation for three demand cases, and exports compact files. The browser replays those files with deck.gl on a MapLibre map. The roads are real. The traffic is simulated from assumptions and has not been checked against measured traffic.
 
 ## Reference links
 
@@ -41,22 +41,22 @@ UrbanIQ is a static web application. A build pipeline downloads the OpenStreetMa
 - Mobility Database (GTFS catalogue): <https://mobilitydatabase.org/>
 - Geofabrik OpenStreetMap extracts: <https://download.geofabrik.de/>
 
-## Telangana use cases and interface (UrbanIQ)
+## Greece use cases and interface (AthenaIQ)
 
 Added as cards inside the existing sections (no new menu); each card says whether its figures are real, estimated or synthetic.
 
 | Section | Card | Data |
 | --- | --- | --- |
-| Dashboard | Telangana cities: weather, rain, simulated trip speed and fires for all ten cities; tap to open a city | Open-Meteo, NASA FIRMS, simulation |
+| Dashboard | Greece cities: weather, rain, simulated trip speed and fires for all ten cities; tap to open a city | Open-Meteo, NASA FIRMS, simulation |
 | Congestion | Mixed traffic: simulated car units split into two-wheelers, cars, autos, buses and goods vehicles | Assumed shares, IRC 106 PCUs |
-| Incidents | Outer Ring Road by sector, coloured on the map (Hyderabad) | Simulation; breakdowns synthetic |
+| Incidents | Attiki Odos by sector, coloured on the map (Athens) | Simulation; breakdowns synthetic |
 | Fines | E-challan by violation (no helmet, triple riding, wrong side …) with sample TS challans | Synthetic; placeholder fines |
-| Transit | Hyderabad Metro lines and crowding by hour | Published line facts; crowding synthetic |
+| Transit | Athens Metro lines and crowding by hour | Published line facts; crowding synthetic |
 | Planning | Festival plans: Ganesh immersion, Bonalu, Bathukamma, Sankranti exodus; areas on the map | Example templates |
 | Emergency | Monsoon waterlogging watch (with a 60 mm cloudburst exercise), heatwave operations, ambulance green corridor | Open-Meteo rain and heat; example points; route estimate |
-| Environment | Air quality in India AQI categories for all ten cities; CPCB station positions; lake and river levels | Open-Meteo CAMS particles; synthetic levels |
+| Environment | Air quality in Greece AQI categories for all ten cities; CPCB station positions; lake and river levels | Open-Meteo CAMS particles; synthetic levels |
 
 Interface: one search box (places, roads, cameras, sites, alerts, cities); numbered bubbles group nearby cameras and sites
 until zoomed in; one alert notification at a time with a "+N more" count and none on phones; a "More" menu on phones; a
-short guided tour (Tour button in the status bar); Live runs at 1×, with a "Replay speed" for faster playback; Telugu for
+short guided tour (Tour button in the status bar); Live runs at 1×, with a "Replay speed" for faster playback; Greek for
 section names and card headings. Settings are in `config.js` under `alerts`, `zones`, `analytics.targets` and `telangana`.

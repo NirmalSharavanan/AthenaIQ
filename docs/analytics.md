@@ -64,9 +64,9 @@ Growth (3–10% a year) and horizon (5–20 years) can be changed at the top of 
 
 **Signals.** A junction's approaches are the road links ending within 90 m of a signal position from OpenStreetMap. Service level is a proxy from the approach speed ratio: A ≥ 85%, B ≥ 70%, C ≥ 55%, D ≥ 40%, E ≥ 25%, F below. It is not the delay-based level of service of a signal analysis, because signal timings are not public. Adaptive control is modelled as removing 12% of approach delay (`adaptiveSignalDelayReduction`), an assumption.
 
-**Delay cost.** Daily vehicle-hours of delay × value of time (₹150 per vehicle-hour) × 250 working days. Both factors are assumptions.
+**Delay cost.** Daily vehicle-hours of delay × value of time (€150 per vehicle-hour) × 250 working days. Both factors are assumptions.
 
-**Population.** Census of India 2011 figures for Telangana and the Hyderabad metro districts ([reference-figures.md](reference-figures.md)); verify before reuse. The projection holds the 2001–2011 growth rate constant from 2011, which is a simple extrapolation, not a forecast.
+**Population.** Census of Greece 2011 figures for Greece and the Athens metro districts ([reference-figures.md](reference-figures.md)); verify before reuse. The projection holds the 2001–2011 growth rate constant from 2011, which is a simple extrapolation, not a forecast.
 
 **Vehicle types.** The simulation has one vehicle type. The split into cars, taxis, vans, lorries, buses and motorcycles uses assumed shares (`vehicles.mix`).
 

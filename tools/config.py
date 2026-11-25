@@ -1,19 +1,18 @@
-"""UrbanIQ pipeline configuration (Telangana, India). Every number here is documented in docs/methodology.md."""
+"""AthenaIQ pipeline configuration (Greece). Every number here is documented in docs/methodology.md."""
 
-# Study area: Hyderabad — the city inside and around the Outer Ring Road, out to the airport at Shamshabad (lon/lat).
-BBOX = (78.25, 17.22, 78.66, 17.58)  # west, south, east, north
+# Study area: Athens — the Athens basin from Piraeus and Aspropyrgos to Kifisia, out to the airport at Spata (lon/lat).
+BBOX = (23.55, 37.85, 23.98, 38.12)  # west, south, east, north
 
-# OpenStreetMap sources, tried in order until one downloads; the file is cut once to Telangana and cached.
+# OpenStreetMap sources, tried in order until one downloads; the file is cut once to Greece and cached.
 OSM_URLS = [
-    "https://download.openstreetmap.fr/extracts/asia/india/telangana-latest.osm.pbf",   # Telangana only (OpenStreetMap France)
-    "https://download.geofabrik.de/asia/india/southern-zone-latest.osm.pbf",           # Geofabrik India Southern Zone
-    "https://download.geofabrik.de/asia/india-latest.osm.pbf",                         # Geofabrik India (large)
+    "https://download.openstreetmap.fr/extracts/europe/greece-latest.osm.pbf",   # Greece (OpenStreetMap France)
+    "https://download.geofabrik.de/europe/greece-latest.osm.pbf",               # Greece (Geofabrik)
 ]
 OSM_URL = OSM_URLS[0]
-STATE_BBOX = (77.20, 15.80, 81.40, 19.95)  # Telangana: west, south, east, north
+STATE_BBOX = (19.30, 34.70, 29.70, 41.80)  # Greece: west, south, east, north
 
-# India drives on the left: the network is built left-hand (netconvert --lefthand).
-LEFTHAND = True
+# Greece drives on the right.
+LEFTHAND = False
 
 # OpenStreetMap road classes kept in the simulated network.
 HIGHWAY_CLASSES = [
@@ -28,10 +27,8 @@ SIM_END = 10 * 3600              # 10:00
 DISPLAY_BEGIN = 7 * 3600         # 07:00
 BIN_SECONDS = 300                # 5-minute road statistics
 
-# Demand (ASSUMPTIONS — no traffic counts or commuting table are public for Hyderabad).
-# Passenger-car equivalents: two-wheelers and auto-rickshaws are folded into car trips.
-# 650,000 gridlocked the model (08:00 network speed 12 km/h against about 20 km/h observed), so it was cut to 420,000.
-TOTAL_VEHICLE_TRIPS = 420_000    # vehicle trips on the modelled (major-road) network, 06:30–10:00, typical weekday
+# Demand (ASSUMPTIONS — no traffic counts or commuting table are used for Athens).
+TOTAL_VEHICLE_TRIPS = 400_000    # vehicle trips on the modelled (major-road) network, 06:30–10:00, typical weekday
 # Relative departures per 15 minutes from 06:30 to 10:00 (14 slots).
 DEPART_PROFILE = [0.55, 0.75, 0.95, 1.05, 1.10, 1.10, 1.05, 1.00, 0.92, 0.85, 0.78, 0.72, 0.66, 0.60]
 EXTERNAL_SHARE = 0.12            # trips with one end at the study-area boundary
@@ -64,7 +61,7 @@ REROUTE_PERIOD = 600            # seconds between re-plans
 SEED = 42
 
 # Bus timetable. Switched off: the app shows a synthetic bus network instead (js/buses.js).
-# No public GTFS feed is set up for TGSRTC city buses. Set GTFS_ENABLED and GTFS_URLS to import one.
+# OASA publishes a GTFS feed for Athens buses; it is not imported yet. Set GTFS_ENABLED and GTFS_URLS to import one.
 GTFS_ENABLED = False
 GTFS_FEED_ID = "mdb-1329"
 GTFS_URLS = [

@@ -1,4 +1,4 @@
-/* UrbanIQ: OSINT — open-source intelligence from public feeds, in its own menu section.
+/* AthenaIQ: OSINT — open-source intelligence from public feeds, in its own menu section.
  *
  *   Weather now, rain forecast, dust and heat forecast   Open-Meteo (no key)
  *   Earthquakes within 1,500 km                          USGS
@@ -13,13 +13,13 @@
   var T = window.IntelliTwin, C = T.core, CFG = C.CFG, $ = C.$, num = C.num, K = T.kit, esc = K.esc;
   var L = CFG.live || {}, O = CFG.osint || {}; if (L.enabled === false || !L.baseUrl) { return; }
   var wx = null, quakes = null, events = null, space = null, world = null, status = {}, loaded = false;
-  var bb = (C.meta() || {}).bbox || [78.25, 17.22, 78.66, 17.58], centre = [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2];
+  var bb = (C.meta() || {}).bbox || [23.55, 37.85, 23.98, 38.12], centre = [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2];
   function km(lon, lat) { var kx = 111.32 * Math.cos(centre[1] * Math.PI / 180); return Math.hypot((lon - centre[0]) * kx, (lat - centre[1]) * 110.57); }
   function ago(iso) { if (!iso) { return 'never'; } var m = Math.round((Date.now() - Date.parse(iso)) / 60000); return m < 1 ? 'just now' : m < 90 ? m + ' min ago' : m < 2880 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' days ago'; }
   function set(id, html) { var el = $(id); if (el) { el.innerHTML = html; } }
   // Weather places: the centre of each configured region (the Live data workflow fetches the same list).
   var CEN = {}; (CFG.regions || []).forEach(function (r) { var c = r.centre || (r.sites && r.sites[0] ? [r.sites[0][1], r.sites[0][2]] : null); if (c) { CEN[r.id] = c; } });
-  function place() { return wx && (wx.places[C.region.id] || wx.places[CFG.defaultRegion || 'hyderabad']); }
+  function place() { return wx && (wx.places[C.region.id] || wx.places[CFG.defaultRegion || 'athens']); }
   var WMO = { 0: 'Clear', 1: 'Mostly clear', 2: 'Partly cloudy', 3: 'Overcast', 45: 'Fog', 48: 'Fog', 51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle', 61: 'Light rain', 63: 'Rain', 65: 'Heavy rain', 80: 'Rain showers', 81: 'Rain showers', 82: 'Violent showers', 95: 'Thunderstorm', 96: 'Thunderstorm with hail', 99: 'Thunderstorm with hail' };
   var DIR = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'], RISK = ['Low', 'Moderate', 'High', 'Severe'], RCOL = ['#2e9e6b', '#d99a00', '#e0662b', '#c7362f'];
   function hourLabel(from, k) { var h = (Number(from.slice(11, 13)) + k) % 24; return C.pad(h) + ':00'; }
@@ -80,7 +80,7 @@
     $('osEvSub').textContent = events ? 'Updated ' + ago(events.updated) : loaded ? 'Not available yet' : 'Loading…'; if (!events) { return; }
     var ol = $('osEvList'); ol.innerHTML = '';
     events.events.map(function (x) { return Object.assign({ km: km(x.lon, x.lat) }, x); }).sort(function (a, b) { return a.km - b.km; }).slice(0, 6).forEach(function (x) { ol.appendChild(C.listButton(x.km < 300 ? 'severe' : x.km < 800 ? 'heavy' : 'moderate', x.title, x.kind + ' · ' + ago(x.date) + ' · ' + num(Math.round(x.km)) + ' km from here', '', function () { showEvent(x); })); });
-    if (!events.events.length) { ol.innerHTML = '<li class="muted">No natural event recorded across South Asia and the Bay of Bengal in the last 60 days.</li>'; }
+    if (!events.events.length) { ol.innerHTML = '<li class="muted">No natural event recorded across the Eastern Mediterranean and the Balkans in the last 60 days.</li>'; }
   }
   function renderSpace() {
     $('osSpSub').textContent = space ? 'Updated ' + ago(space.updated) : loaded ? 'Not available yet' : 'Loading…'; if (!space) { return; }
@@ -118,7 +118,7 @@
   // is then asked directly from this browser for the open region (no key), and the result is shaped the same way.
   function risk(dust, gust, vis) { dust = dust || 0; gust = gust || 0; vis = vis == null ? 99999 : vis; return dust >= 500 || (vis < 1000 && dust >= 100) ? 3 : dust >= 200 || (gust >= 50 && dust >= 100) || (vis < 3000 && dust >= 100) ? 2 : dust >= 100 || (gust >= 60 && dust >= 30) ? 1 : 0; }
   function direct() {
-    var c = CEN[C.region.id] || centre, q = 'latitude=' + c[1] + '&longitude=' + c[0] + '&forecast_days=3&timezone=Asia%2FKolkata';
+    var c = CEN[C.region.id] || centre, q = 'latitude=' + c[1] + '&longitude=' + c[0] + '&forecast_days=3&timezone=Europe%2FAthens';
     var j = function (u) { return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); };
     return Promise.all([j('https://api.open-meteo.com/v1/forecast?' + q + '&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m&hourly=temperature_2m,precipitation,precipitation_probability,wind_gusts_10m,visibility,weather_code'),
       j('https://air-quality-api.open-meteo.com/v1/air-quality?' + q + '&current=dust,pm10,pm2_5,aerosol_optical_depth&hourly=dust,pm10,aerosol_optical_depth')]).then(function (r) {

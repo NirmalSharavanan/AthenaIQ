@@ -9,7 +9,7 @@
   'use strict';
   var T = window.IntelliTwin, C = T.core, CFG = C.CFG, $ = C.$, num = C.num, clock = C.clock, state = T.state;
   var cams = [], dets = [], signs = [], show = { cams: true, det: false, vms: true, sig: true };
-  var KX = 111320 * Math.cos(17.9 * Math.PI / 180), KY = 110570;
+  var KX = 111320 * Math.cos(38.0 * Math.PI / 180), KY = 110570;
   function dist(a, b) { return Math.hypot((a[0] - b[0]) * KX, (a[1] - b[1]) * KY); }
   function mid(e) { return e.path[e.path.length >> 1]; }
 
@@ -164,7 +164,7 @@
         sample.sources.forEach(function (u) { var so = document.createElement('source'); so.src = u; sv.appendChild(so); });
         body.appendChild(sv);
         $('videoSub').textContent = 'Sample footage' + (sample.kind ? ' · ' + sample.kind : '') + ' · recorded, not this camera';
-        $('videoNote').textContent = 'Real traffic footage used as a stand-in until this camera has a stream in config.js. It is recorded, not live, not Telangana and not this camera\u2019s feed. ' + sample.credit + '.';
+        $('videoNote').textContent = 'Real traffic footage used as a stand-in until this camera has a stream in config.js. It is recorded, not live, not Greece and not this camera\u2019s feed. ' + sample.credit + '.';
         var failed = false, giveUp = function () {
           if (failed || open !== c) { return; }
           failed = true; body.innerHTML = ''; synthetic(c, body, 'The sample footage could not be played in this browser. ');

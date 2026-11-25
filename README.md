@@ -1,17 +1,17 @@
-# UrbanIQ
+# AthenaIQ
 
-City digital twin for Telangana, India: real-time urban mobility intelligence and predictive simulation.
+City digital twin for Greece: real-time urban mobility intelligence and predictive simulation.
 
-UrbanIQ is a static city digital twin demonstrator for Hyderabad and nine other Telangana cities (Warangal, Karimnagar, Nizamabad, Khammam, Ramagundam, Mahbubnagar, Nalgonda, Siddipet, Adilabad). It is built from the IntelliTwin code base. A build pipeline takes the OpenStreetMap road network, simulates a weekday morning peak with Eclipse SUMO, and exports compact files that the browser replays with deck.gl on a MapLibre map.
+AthenaIQ is a static city digital twin demonstrator for Athens and nine other Greece cities (Thessaloniki, Patras, Heraklion, Larissa, Volos, Ioannina, Chania, Rhodes, Kavala). It is built from the IntelliTwin code base. A build pipeline takes the OpenStreetMap road network, simulates a weekday morning peak with Eclipse SUMO, and exports compact files that the browser replays with deck.gl on a MapLibre map.
 
-> **Simulated, not observed.** The roads are real; the traffic comes from assumed demand. No traffic counts are public for Hyderabad, so the model is not calibrated or validated. It is not an official model of the Government of Telangana or any other authority and must not be used for planning, operational or safety decisions. See [docs/limitations.md](docs/limitations.md).
+> **Simulated, not observed.** The roads are real; the traffic comes from assumed demand. No traffic counts are public for Athens, so the model is not calibrated or validated. It is not an official model of the Government of Greece or any other authority and must not be used for planning, operational or safety decisions. See [docs/limitations.md](docs/limitations.md).
 
 ## What the app shows
 
 - **Full-view 3D map** on OpenStreetMap data with extruded buildings; every overlay minimises.
 - **Opening view:** by default the app opens in full view on the most congested major site, in 3D with the camera orbiting, in Live mode. The site is selected in the site chips, and replay runs at 30× by default. This is set in `config.js`.
 - **Pushed alerts:** each new alert appears as an on-screen notification, generated from the synthetic data.
-- **Camera video:** cameras play real traffic footage (sample clips from Wikimedia Commons, not Telangana) until a stream is configured.
+- **Camera video:** cameras play real traffic footage (sample clips from Wikimedia Commons, not Greece) until a stream is configured.
 - **Analytics and city KPIs:** opens inside the same page. A City scorecard compares 25 KPIs with example targets across six goals (smooth traffic, fewer accidents, fewer violations, safe and secure city, clean and liveable, city development), plus road expansion, traffic signals, population and fleet, environment, safety and demand sections.
 - **Critical zones:** traffic watched around defence sites, embassies, hospitals, schools and other sites from OpenStreetMap, with alerts.
 - **Response routing:** the quickest route from the nearest unit to a critical alert, drawn on the map with an arrival estimate.
@@ -20,15 +20,15 @@ UrbanIQ is a static city digital twin demonstrator for Hyderabad and nine other 
 - **Dark and light map**, with a pale green light theme; 3D cars with glass and wheels, and synthetic people on foot at street zoom.
 - **Individual vehicles:** one per vehicle on each road, dots when zoomed out and 3D cars at street level.
 - **Application shell:** one top bar (Live / Historical, road search, alerts, theme, language), a navigation rail for the sections, a docked panel and a status bar; dark and light themes; a bottom bar on phones. Four interface styles: **Standard** (default: navy and gold), **Military** (olive and khaki), **Police** (blue and silver) and **Enterprise**; each has a dark and a mid-tone light theme.
-- **Public transport (Transit):** bus routes with numbered and named stops, next-bus times, bus numbers and live tracking on the map; a taxi fleet with ranks and statuses; on-demand shuttle zones. Real flights to and from Hyderabad airport from Flightradar24. Telangana has no coast, so there are no ships. Buses, taxis and shuttles are synthetic, not TGSRTC's real services.
-- **Live and Historical, 24 hours:** Live starts at India Standard Time and plays at 30× by default (1× stays locked to the clock); Historical takes any date and a 24-hour time. Both use synthetic data.
+- **Public transport (Transit):** bus routes with numbered and named stops, next-bus times, bus numbers and live tracking on the map; a taxi fleet with ranks and statuses; on-demand shuttle zones. Real flights to and from Athens airport from Flightradar24. Greece has no coast, so there are no ships. Buses, taxis and shuttles are synthetic, not OASA's real services.
+- **Live and Historical, 24 hours:** Live starts at Greece Standard Time and plays at 30× by default (1× stays locked to the clock); Historical takes any date and a 24-hour time. Both use synthetic data.
 - **Dashboard:** KPIs, alerts, 15/30/60-minute forecast, day profile, demand cases.
 - **Congestion:** slowest roads, congestion by road class, and a what-if road closure (an estimate).
 - **Accidents and fines:** illustrative, generated and labelled as such.
 - **Devices:** CCTV cameras with a video window, enforcement cameras, detectors, message signs and traffic signals. Devices are synthetic unless listed in `config.js`; a camera without a stream shows a synthetic view.
 - **Reports:** CSV exports, a printable summary and an audit log.
-- **Sign-in with roles** (demo only), **Telugu interface** for fixed labels, and a built-in assistant, **Twin Advisor**.
-- **Telangana regions:** a region selector for Hyderabad (default), Warangal, Karimnagar, Nizamabad, Khammam, Ramagundam, Mahbubnagar, Nalgonda, Siddipet and Adilabad, each with real OpenStreetMap roads and sites, a site drop-down, and every module working on that region. Left-hand traffic, India Standard Time, rupees.
+- **Sign-in with roles** (demo only), **Greek interface** for fixed labels, and a built-in assistant, **Twin Advisor**.
+- **Greece regions:** a region selector for Athens (default), Thessaloniki, Patras, Heraklion, Larissa, Volos, Ioannina, Chania, Rhodes and Kavala, each with real OpenStreetMap roads and sites, a site drop-down, and every module working on that region. Left-hand traffic, Greece Standard Time, euros.
 - **Fuel and EV charging stations:** real locations from OpenStreetMap in Transit, with synthetic usage.
 - **TomTom live data:** live traffic on the map, live incidents, live speeds at sites, EV and fuel stations with charger availability, and live route times, with the key set in `config.js`.
 - **Google Maps base map:** road map, satellite or photorealistic 3D tiles as the background, with the key set in `config.js`. The twin's own roads and traffic remain on OpenStreetMap data.
@@ -63,3 +63,18 @@ Eclipse SUMO 1.28 (mesoscopic) · osmium · Python (NumPy, SciPy, sumolib) · de
 ## Attribution
 
 Roads and base map data © OpenStreetMap contributors (ODbL); vector tiles served by OpenFreeMap. Buildings: Microsoft Global ML Building Footprints. Buses: synthetic example network.
+
+## Greek use cases
+
+Added as cards inside the existing menus, each with a map layer and a label saying which figures are real, estimated or synthetic:
+
+| Menu | Use case |
+|---|---|
+| Freight | Waste collection, fleet and routing |
+| Environment | Street lighting and building energy · Water leakage (district metered areas) |
+| Fines | Traffic and parking tickets: city streets · Traffic tickets: prefecture roads and national highways |
+| Transit | Port and city interface (Piraeus gates) · Airport landside · Transport for Athens |
+| ANPR | Smuggling: border crossings, customs and silent vessels (live AIS) |
+| Zones | Civil protection and critical infrastructure · Counter-UAV and threat detection |
+| Pedestrians | School and hospital crossings |
+| Devices | Prefecture and highway cameras: monitoring |

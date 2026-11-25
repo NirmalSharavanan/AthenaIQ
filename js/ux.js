@@ -1,10 +1,10 @@
-/* UrbanIQ interface helpers.
+/* AthenaIQ interface helpers.
  *
  * - One search box in the top bar for places, roads, cameras, critical sites, alerts and cities.
  * - On phones, the less used top-bar controls move into a "More" menu.
  * - A short guided tour after the first sign-in (and from the Tour button in the status bar).
  * - Full text of the status line on hover; the reason when TomTom is not working.
- * - Telugu for section names and card headings when Telugu is chosen.
+ * - Greek for section names and card headings when Greek is chosen.
  */
 (function () {
   'use strict';
@@ -64,7 +64,7 @@
   /* ---------- guided tour ---------- */
   var STEPS = [
     ['#map', 'The map', 'Traffic on every main road, coloured by speed. Numbered bubbles group cameras and sites: tap one to zoom in.'],
-    ['#qSearch', 'Search', 'Find a place, road, camera, critical site, alert or another Telangana city.'],
+    ['#qSearch', 'Search', 'Find a place, road, camera, critical site, alert or another Greek city.'],
     ['#lyBtn', 'Scenario and layers', 'Choose the demand case and which layers show. Alerts follow these tick boxes.'],
     ['#alertBtn', 'Alerts', 'Every active alert. Only important ones pop up, one at a time.'],
     ['#osintBtn', 'OSINT', 'Live weather, rain, heat, fires, flights, satellites and earthquakes on a 3D map.'],
@@ -72,7 +72,7 @@
     ['#chatOpen', 'Twin Advisor', 'Ask a question about the traffic, alerts or KPIs.']
   ];
   var step = -1, tip = null;
-  function endTour() { if (tip) { tip.remove(); tip = null; } document.querySelectorAll('.tour-on').forEach(function (e) { e.classList.remove('tour-on'); }); step = -1; try { localStorage.setItem('urbaniq.tour', '1'); } catch (e) { /* ignore */ } }
+  function endTour() { if (tip) { tip.remove(); tip = null; } document.querySelectorAll('.tour-on').forEach(function (e) { e.classList.remove('tour-on'); }); step = -1; try { localStorage.setItem('athenaiq.tour', '1'); } catch (e) { /* ignore */ } }
   function showStep(i) {
     document.querySelectorAll('.tour-on').forEach(function (e) { e.classList.remove('tour-on'); });
     var s = STEPS[i]; if (!s) { endTour(); return; }
@@ -111,20 +111,75 @@
     var rate = $('rate'); if (rate && !document.querySelector('.rate-label')) { var l = document.createElement('span'); l.className = 'rate-label'; l.textContent = 'Replay speed'; rate.parentNode.insertBefore(l, rate); }
   }
 
-  /* ---------- Telugu for section names and card headings ---------- */
+  /* ---------- Greek for section names and card headings ---------- */
   var TE = {
-    'Dashboard': 'డాష్‌బోర్డ్', 'Congestion': 'రద్దీ', 'Incident management': 'సంఘటనల నిర్వహణ', 'Accidents': 'ప్రమాదాలు', 'Fines': 'జరిమానాలు', 'Signal control': 'సిగ్నల్ నియంత్రణ',
-    'Public transport': 'ప్రజా రవాణా', 'Transit': 'రవాణా', 'Parking': 'పార్కింగ్', 'Freight': 'సరుకు రవాణా', 'Pedestrians': 'పాదచారులు', 'Planning': 'ప్రణాళిక', 'Emergency': 'అత్యవసరం',
-    'Number plates': 'నంబర్ ప్లేట్లు', 'Critical zones': 'కీలక ప్రాంతాలు', 'Environment': 'పర్యావరణం', 'Devices': 'పరికరాలు', 'Reports': 'నివేదికలు', 'Configuration': 'కాన్ఫిగరేషన్', 'Model': 'నమూనా',
-    'OSINT': 'ఓపెన్-సోర్స్ సమాచారం', 'Analytics and city KPIs': 'విశ్లేషణ మరియు నగర సూచికలు', 'Weather now': 'ప్రస్తుత వాతావరణం', 'Rain forecast': 'వర్ష సూచన',
-    'Dust storm and air quality forecast': 'దుమ్ము తుఫాను మరియు గాలి నాణ్యత సూచన', 'Earthquakes': 'భూకంపాలు', 'Natural events': 'ప్రకృతి సంఘటనలు', 'Global incidents': 'ప్రపంచ సంఘటనలు',
-    'Space weather': 'అంతరిక్ష వాతావరణం', 'Fire and heat detections': 'అగ్ని మరియు వేడి గుర్తింపులు', 'Live flights': 'ప్రత్యక్ష విమానాలు', 'Satellites overhead': 'పైన ఉపగ్రహాలు', 'Sources': 'మూలాలు',
-    'Symbols': 'చిహ్నాలు', 'Alerts': 'హెచ్చరికలు', 'Telangana cities': 'తెలంగాణ నగరాలు', 'Monsoon waterlogging watch': 'వర్షాకాల నీటి నిల్వ పర్యవేక్షణ', 'Festival and event plans': 'పండుగ మరియు కార్యక్రమ ప్రణాళికలు',
-    'Search places, roads, cameras, alerts…': 'ప్రదేశాలు, రహదారులు, కెమెరాలు, హెచ్చరికలు వెతకండి…', 'More': 'మరిన్ని', 'Tour': 'పరిచయం', 'Replay speed': 'రీప్లే వేగం'
+    "Dashboard": "Πίνακας ελέγχου",
+    "Congestion": "Συμφόρηση",
+    "Incident management": "Διαχείριση συμβάντων",
+    "Accidents": "Ατυχήματα",
+    "Fines": "Πρόστιμα",
+    "Signal control": "Έλεγχος σηματοδοτών",
+    "Public transport": "Δημόσιες συγκοινωνίες",
+    "Transit": "Συγκοινωνίες",
+    "Parking": "Στάθμευση",
+    "Freight": "Εμπορευματικές μεταφορές",
+    "Pedestrians": "Πεζοί",
+    "Planning": "Σχεδιασμός",
+    "Emergency": "Έκτακτη ανάγκη",
+    "Number plates": "Πινακίδες κυκλοφορίας",
+    "Critical zones": "Κρίσιμες ζώνες",
+    "Environment": "Περιβάλλον",
+    "Devices": "Συσκευές",
+    "Reports": "Αναφορές",
+    "Configuration": "Ρυθμίσεις",
+    "Model": "Μοντέλο",
+    "OSINT": "Πληροφορίες ανοιχτών πηγών",
+    "Analytics and city KPIs": "Αναλύσεις και δείκτες πόλης",
+    "Weather now": "Καιρός τώρα",
+    "Rain forecast": "Πρόγνωση βροχής",
+    "Dust storm and air quality forecast": "Πρόγνωση σκόνης και ποιότητας αέρα",
+    "Earthquakes": "Σεισμοί",
+    "Natural events": "Φυσικά φαινόμενα",
+    "Global incidents": "Παγκόσμια συμβάντα",
+    "Space weather": "Διαστημικός καιρός",
+    "Fire and heat detections": "Ανιχνεύσεις πυρκαγιών και θερμότητας",
+    "Live flights": "Πτήσεις σε πραγματικό χρόνο",
+    "Satellites overhead": "Δορυφόροι από πάνω",
+    "Sources": "Πηγές",
+    "Symbols": "Σύμβολα",
+    "Alerts": "Ειδοποιήσεις",
+    "Greek cities": "Ελληνικές πόλεις",
+    "Flash-flood watch": "Παρακολούθηση πλημμυρών",
+    "Event and holiday plans": "Σχέδια εκδηλώσεων και εορτών",
+    "Heatwave and wildfire risk": "Καύσωνας και κίνδυνος πυρκαγιάς",
+    "Ambulance green corridor": "Πράσινος διάδρομος ασθενοφόρου",
+    "Air quality, European AQI": "Ποιότητα αέρα, ευρωπαϊκός δείκτης",
+    "Streams and reservoir levels": "Στάθμη ρεμάτων και ταμιευτήρων",
+    "Traffic mix": "Σύνθεση κυκλοφορίας",
+    "Attiki Odos": "Αττική Οδός",
+    "Athens Metro": "Μετρό Αθήνας",
+    "Traffic offences by type": "Παραβάσεις ανά τύπο",
+    "Waste collection, fleet and routing": "Αποκομιδή απορριμμάτων, στόλος και δρομολόγηση",
+    "Street lighting and building energy": "Οδοφωτισμός και ενέργεια κτιρίων",
+    "Traffic and parking tickets: city streets": "Κλήσεις κυκλοφορίας και στάθμευσης: δρόμοι πόλης",
+    "Traffic tickets: prefecture roads and national highways": "Κλήσεις: επαρχιακοί δρόμοι και εθνικές οδοί",
+    "Water leakage": "Διαρροές νερού",
+    "Port and city interface": "Λιμάνι και πόλη",
+    "Airport landside": "Αεροδρόμιο: χερσαία πλευρά",
+    "Smuggling: border and customs": "Λαθρεμπόριο: σύνορα και τελωνεία",
+    "Civil protection and critical infrastructure": "Πολιτική προστασία και κρίσιμες υποδομές",
+    "School and hospital crossings": "Διαβάσεις σχολείων και νοσοκομείων",
+    "Prefecture and highway cameras": "Κάμερες επαρχιακών δρόμων και αυτοκινητοδρόμων",
+    "Counter-UAV and threat detection": "Αντι-drone και ανίχνευση απειλών",
+    "Transport for Athens": "Συγκοινωνίες Αθήνας",
+    "Search places, roads, cameras, alerts\u2026": "Αναζήτηση τοποθεσιών, δρόμων, καμερών, ειδοποιήσεων…",
+    "More": "Περισσότερα",
+    "Tour": "Ξενάγηση",
+    "Replay speed": "Ταχύτητα αναπαραγωγής"
   };
   var orig = new WeakMap();
   function translate(lang) {
-    var te = lang === 'te';
+    var te = lang === 'el';
     document.querySelectorAll('.panel h2, .card-head h2, #panelTitle, .op-head h1, .op-head h2, #osintPage h1, #analytics h1, .rate-label, .tour-btn, #moreBtn').forEach(function (el) {
       if (el.children.length) { return; }
       if (!orig.has(el)) { orig.set(el, el.textContent); }
@@ -148,7 +203,7 @@
       C.onTab(function () { translate(window.IntelliTwinI18n.lang()); });
     }
     // First sign-in on this browser: offer the tour once the role is chosen.
-    var seen = false; try { seen = localStorage.getItem('urbaniq.tour') === '1'; } catch (e) { seen = true; }
+    var seen = false; try { seen = localStorage.getItem('athenaiq.tour') === '1'; } catch (e) { seen = true; }
     if (!seen && $('login')) {
       var obs = new MutationObserver(function () { if ($('login').hidden) { obs.disconnect(); setTimeout(startTour, 1800); } });
       obs.observe($('login'), { attributes: true, attributeFilter: ['hidden'] });

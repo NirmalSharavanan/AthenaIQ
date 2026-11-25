@@ -47,7 +47,7 @@
   function run() {
     if (running) { return Promise.resolve(results); }
     running = true; results = []; render();
-    var c = T.getMap() ? T.getMap().getCenter() : { lng: 78.47, lat: 17.39 };
+    var c = T.getMap() ? T.getMap().getCenter() : { lng: 23.73, lat: 37.98 };
     var z = 12, n = Math.pow(2, z), x = Math.floor((c.lng + 180) / 360 * n), s = Math.sin(c.lat * Math.PI / 180), y = Math.floor((0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n);
     var tk = encodeURIComponent(tKey()), gk = encodeURIComponent(gKey());
     var add = function (group, name, r, hint) { results.push({ group: group, name: name, ok: r.ok, status: r.status, msg: r.msg || '', hint: r.ok ? '' : hint(r.status, r.msg) }); render(); };
@@ -78,7 +78,7 @@
   }
   var WORD = { ok: 'connected', part: 'partly working', fail: 'not working', wait: 'checking…', none: 'not checked' };
   function report() {
-    var lines = ['UrbanIQ connection check · ' + location.origin + location.pathname + ' · ' + new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC',
+    var lines = ['AthenaIQ connection check · ' + location.origin + location.pathname + ' · ' + new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC',
       'Google Maps: ' + (G.enabled ? src('itw-google-key', G.key) : 'not used; the base map is the MapLibre vector map'), 'TomTom: ' + src('itw-tomtom-key', TT.key)];
     results.slice().sort(function (a, b) { return a.group < b.group ? -1 : a.group > b.group ? 1 : 0; }).forEach(function (r) { lines.push((r.ok ? 'OK   ' : 'FAIL ') + r.group + ' · ' + r.name + (r.ok ? '' : ' · ' + (r.status > 0 ? r.status + ' ' : '') + r.msg)); });
     return lines.join('\n');

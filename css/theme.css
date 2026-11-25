@@ -845,7 +845,7 @@ body.map-light .ig-chip.st-live { color: #0a6b4f; } body.map-light .ig-chip.st-w
 .os-tip { position: absolute; z-index: 8; pointer-events: none; white-space: nowrap; background: var(--surface, #fff); color: var(--text, #1d2a3a); border: 1px solid var(--line, #c9d3dc); border-radius: 6px; padding: 4px 8px; font: 600 12px/1.35 system-ui, sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
 .os-tip[hidden] { display: none; }
 
-/* ---------------------------------------------------------------- search, More menu, tour, notifications (UrbanIQ) */
+/* ---------------------------------------------------------------- search, More menu, tour, notifications (AthenaIQ) */
 .qsearch { position: relative; flex: 0 1 290px; min-width: 150px; }
 .qsearch input { width: 100%; height: 32px; padding: 0 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.14); color: inherit; font: inherit; font-size: 13px; }
 .qsearch input::placeholder { color: rgba(255,255,255,.8); }
@@ -904,7 +904,7 @@ body:not(.map-light) .toast.sev3 strong { color: #ff8a96; }
   .topbar-right { gap: 4px; }
 }
 
-/* Telangana use cases */
+/* Local use cases */
 .tg-cities { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .tg-city { display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 8px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2, #f4f6f5); color: var(--text); font: inherit; font-size: 11.5px; cursor: pointer; }
 .tg-city b { font-size: 13px; }

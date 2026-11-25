@@ -1,9 +1,9 @@
 /* IntelliTwin synthetic bus network.
  *
- * No usable public bus timetable could be obtained for Hyderabad, so this module builds an example
+ * No usable public bus timetable could be obtained for Athens, so this module builds an example
  * one. Routes run between major sites along the quickest road path, with stops every few hundred
  * metres, a fixed-headway timetable and buses that move to it. Route numbers, stops, timetables and
- * delays are SYNTHETIC; they are not TGSRTC's real bus services. See docs/buses.md.
+ * delays are SYNTHETIC; they are not OASA's real bus services. See docs/buses.md.
  */
 (function () {
   'use strict';

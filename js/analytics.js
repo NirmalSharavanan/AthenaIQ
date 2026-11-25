@@ -9,7 +9,7 @@
   'use strict';
   var T = window.IntelliTwin, C = T.core, CFG = C.CFG, $ = C.$, num = C.num, state = T.state;
   var A = CFG.analytics;
-  var CUR = ((C.CFG || {}).currency || {}).symbol || '\u20b9', VOT = (A.valueOfTimePerHour != null ? A.valueOfTimePerHour : A.valueOfTimeAedPerHour) || 0;
+  var CUR = ((C.CFG || {}).currency || {}).symbol || '\u20ac', VOT = (A.valueOfTimePerHour != null ? A.valueOfTimePerHour : A.valueOfTimeAedPerHour) || 0;
   // Categorical colours validated for the dark surface (blue, orange, aqua, yellow), assigned in this fixed order.
   // Categorical palette and status colours, stepped for the dark and the light surface. themeInk() fills them in.
   var PAL = { dark: ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#0ca30c'], light: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300'] };
@@ -434,7 +434,7 @@
     return { label: label, value: value, unit: unit, target: target, better: better, basis: basis, status: st, ratio: ratio, text: !ok ? '–' : (fmt ? fmt(value) : num(Math.round(value * 10) / 10)) };
   }
   var ST = { good: ['✓', 'On target'], warn: ['!', 'Watch'], bad: ['✕', 'Off target'], none: ['–', 'No data'] };
-  // Targets: counts are scaled to this city's assumed trips against the Hyderabad base, so a town is not judged as a metro.
+  // Targets: counts are scaled to this city's assumed trips against the Athens base, so a town is not judged as a metro.
   function targets() {
     var G = {}, base = A.targetsBaseTrips, meta = C.meta() || {}, sc = (meta.scenarios || []).filter(function (s) { return s.id === 'base'; })[0];
     var f = base && sc && sc.trips ? sc.trips / base : 1;
@@ -480,14 +480,14 @@
         var se = T.sea && (CFG.sea || {}).port ? T.sea.stats() : null, ai = T.air ? T.air.stats() : null;
         if (!(CFG.sea || {}).port) {
           return [
-            kpi('Aircraft to or from Hyderabad', ai && ai.live ? ai.inAir : null, '', null, 'high', ai && ai.updated ? 'Flightradar24 snapshot at ' + ai.updated : 'no flight data yet'),
-            kpi('Arriving at Hyderabad', ai && ai.live ? ai.arriving : null, '', null, 'high', 'in the same snapshot'),
-            kpi('Railway and metro in the area', M.railKm || null, 'km', C.region.isDefault ? G.railKm : null, 'high', 'OpenStreetMap, including Hyderabad Metro and MMTS')];
+            kpi('Aircraft to or from Greek airports', ai && ai.live ? ai.inAir : null, '', null, 'high', ai && ai.updated ? 'Flightradar24 snapshot at ' + ai.updated : 'no flight data yet'),
+            kpi('Arriving in Greece', ai && ai.live ? ai.arriving : null, '', null, 'high', 'in the same snapshot'),
+            kpi('Railway and metro in the area', M.railKm || null, 'km', C.region.isDefault ? G.railKm : null, 'high', 'OpenStreetMap, including metro, tram and suburban rail')];
         }
         if (ai && ai.live) {
           return [
-            kpi('Aircraft to or from Hyderabad', ai.inAir, '', null, 'high', ai.updated ? 'Flightradar24 snapshot at ' + ai.updated : 'no flight data yet'),
-            kpi('Arriving at Hyderabad', ai.arriving, '', null, 'high', 'in the same snapshot'),
+            kpi('Aircraft to or from Greek airports', ai.inAir, '', null, 'high', ai.updated ? 'Flightradar24 snapshot at ' + ai.updated : 'no flight data yet'),
+            kpi('Arriving in Greece', ai.arriving, '', null, 'high', 'in the same snapshot'),
             kpi('Departing', ai.departing, '', null, 'high', 'in the same snapshot'),
             kpi('Berths in use', se ? 100 * se.berthsUsed / se.berths : null, '%', G.berthUsePct, 'low', se ? se.berthsUsed + ' of ' + se.berths + ' berths' : '', pct),
             kpi('Vessel movements today', se ? se.callsToday : null, '', null, 'high', se ? se.moving + ' moving now' : '')];

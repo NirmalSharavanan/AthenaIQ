@@ -95,7 +95,7 @@
   function renderFreight() {
     if (!tabOpen('frt')) { return; }
     var t = state.t, k = C.kpiAt(state.scenario, t) || {}, mix = window.TwinCars.MIX, mt = window.TwinCars.mixTotal, lorry = (mix.filter(function (m) { return m.id === 'lorry'; })[0] || { share: 0.05 }).share / mt;
-    var lorries = Math.round((k.vehicles || 0) * lorry), ban = banNow(t), z = FR.zone || { at: [78.475, 17.395], radiusM: 5000 };
+    var lorries = Math.round((k.vehicles || 0) * lorry), ban = banNow(t), z = FR.zone || { at: [23.73, 37.98], radiusM: 3000 };
     var inside = ban ? Math.round(lorries * 0.3 * (FR.nonComplianceShare || 0.06) * (0.6 + 0.8 * rnd(seed(), Math.floor(t / 900)))) : 0;
     $('frLorries').textContent = num(lorries); $('frBan').textContent = ban ? 'In force' : 'Not in force';
     $('frViol').textContent = ban ? num(inside) : '0'; $('frHaz').textContent = hazmat(t).length;

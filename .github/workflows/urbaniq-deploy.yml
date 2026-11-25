@@ -2,13 +2,9 @@ name: UrbanIQ Deploy
 
 # Publishes the static site to S3 and clears the CloudFront cache.
 # Runs on every push to main, after the data-build workflows commit new data, and on demand.
+# In AthenaIQ this runs only by hand: it was copied from UrbanIQ and its AWS role, bucket and domain
+# (urbaniq.presight.click) belong to UrbanIQ. Point it at an AthenaIQ AWS setup before running it.
 on:
-  push:
-    branches: [main]
-  workflow_run:
-    workflows: ["Build twin data", "Build region data", "Add buildings to regions", "Fetch sample media"]
-    types: [completed]
-    branches: [main]
   workflow_dispatch:
 
 permissions:

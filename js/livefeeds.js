@@ -13,15 +13,15 @@
   var L = CFG.live || {}; if (L.enabled === false || !L.baseUrl) { return; }
   var fires = null, sats = null, ships = null, air = null, status = {}, satNow = [], loadedAt = 0, err = '';
   var show = { fires: L.fires !== false, vessels: L.vessels !== false, sats: L.satellites !== false, air: L.flights !== false };
-  // Airports in Telangana with scheduled flights (IATA code: name). Flights to or from these are counted as local.
-  var LOCAL_AP = { HYD: 'Hyderabad' };
+  // Greek airports with scheduled flights (IATA code: name). Flights to or from these are counted as local.
+  var LOCAL_AP = { ATH: 'Athens', SKG: 'Thessaloniki', HER: 'Heraklion', CHQ: 'Chania', RHO: 'Rhodes', CFU: 'Corfu', JTR: 'Santorini', JMK: 'Mykonos', KGS: 'Kos', ZTH: 'Zakynthos', EFL: 'Kefalonia', KVA: 'Kavala', IOA: 'Ioannina', VOL: 'Volos', GPA: 'Patras (Araxos)', PVK: 'Preveza', KLX: 'Kalamata' };
   var PLANE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path d="M12 2c.7 0 1.2.9 1.2 2v5.2l7.3 4.3v1.9l-7.3-2.2v4.4l2 1.5V21L12 20l-3.2 1v-1.9l2-1.5v-4.4l-7.3 2.2v-1.9l7.3-4.3V4c0-1.1.5-2 1.2-2z" fill="white"/></svg>');
-  var bb = (C.meta() || {}).bbox || [78.25, 17.22, 78.66, 17.58], centre = [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2];
+  var bb = (C.meta() || {}).bbox || [23.55, 37.85, 23.98, 38.12], centre = [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2];
   var kx = 111.32 * Math.cos(centre[1] * Math.PI / 180), ky = 110.57;
   function km(a, b) { return Math.hypot((a[0] - b[0]) * kx, (a[1] - b[1]) * ky); }
   function inRegion(p, pad) { pad = pad || 0; return p[0] >= bb[0] - pad && p[0] <= bb[2] + pad && p[1] >= bb[1] - pad && p[1] <= bb[3] + pad; }
   function ago(iso) { if (!iso) { return 'never'; } var m = Math.round((Date.now() - Date.parse(iso)) / 60000); return m < 1 ? 'just now' : m < 90 ? m + ' min ago' : m < 2880 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' days ago'; }
-  function uae(iso) { var d = new Date(Date.parse(iso) + 5.5 * 3600000); return C.pad(d.getUTCHours()) + ':' + C.pad(d.getUTCMinutes()); }
+  function uae(iso) { var t = Date.parse(iso); if (isNaN(t)) { return '–'; } return new Date(t).toLocaleTimeString('en-GB', { timeZone: (CFG.time || {}).timeZone || 'Europe/Athens', hour: '2-digit', minute: '2-digit', hour12: false }); }
   function tile(label, id) { return '<div class="kpi"><span class="k-label">' + label + '</span><span class="k-value" id="' + id + '">–</span></div>'; }
   function set(id, html) { var el = $(id); if (el) { el.innerHTML = html; } }
   function card(tab, id, title, notice, body) {
@@ -84,7 +84,7 @@
   var TCOL = { Tanker: [230, 90, 70], Cargo: [70, 150, 230], Passenger: [60, 190, 120], Fishing: [220, 170, 60], Tug: [170, 120, 220], 'Not reported': [150, 160, 175] };
   function shipCol(s) { return TCOL[shipType(s.type)] || [120, 200, 210]; }
   function showShip(s) {
-    C.showPopup([s.lon, s.lat], s.name || 'MMSI ' + s.mmsi, [['Type', shipType(s.type)], ['MMSI', s.mmsi], ['Speed', (s.sog || 0).toFixed(1) + ' knots'], ['Course', Math.round(s.cog || 0) + '°'], ['Destination', s.dest || 'not reported'], ['Length', s.len ? s.len + ' m' : 'not reported'], ['Heard', s.t ? uae(s.t.replace(' ', 'T') + 'Z') + ' IST' : '–']], 'Real position from AIS (aisstream.io)');
+    C.showPopup([s.lon, s.lat], s.name || 'MMSI ' + s.mmsi, [['Type', shipType(s.type)], ['MMSI', s.mmsi], ['Speed', (s.sog || 0).toFixed(1) + ' knots'], ['Course', Math.round(s.cog || 0) + '°'], ['Destination', s.dest || 'not reported'], ['Length', s.len ? s.len + ' m' : 'not reported'], ['Heard', s.t ? uae(s.t.replace(' ', 'T') + 'Z') + ' Athens time' : '–']], 'Real position from AIS (aisstream.io)');
   }
 
   /* ---------------------------------------------------------------- flights */
@@ -95,14 +95,14 @@
     return { inAir: up.length, arriving: up.filter(arriving).length, departing: up.filter(function (f) { return LOCAL_AP[f.from] && !arriving(f); }).length, total: fl.length, updated: uae(air.updated), limit: air.limit };
   }
   function showFlight(f) {
-    C.showPopup([f.lon, f.lat], (f.flight || f.call || 'Flight') + (f.airline ? ' · ' + f.airline : ''), [['Route', (f.from || '?') + ' → ' + (f.to || '?')], ['Aircraft', (f.type || 'not reported') + (f.reg ? ' · ' + f.reg : '')], ['Height', num(f.alt) + ' ft'], ['Ground speed', num(f.gs) + ' knots'], ['Heading', Math.round(f.track) + '°'], ['Climbing or descending', f.vs > 200 ? 'Climbing' : f.vs < -200 ? 'Descending' : 'Level'], ['Position at', uae(air.updated) + ' IST']], 'Real position from Flightradar24 at the time shown; the aircraft has moved since');
+    C.showPopup([f.lon, f.lat], (f.flight || f.call || 'Flight') + (f.airline ? ' · ' + f.airline : ''), [['Route', (f.from || '?') + ' → ' + (f.to || '?')], ['Aircraft', (f.type || 'not reported') + (f.reg ? ' · ' + f.reg : '')], ['Height', num(f.alt) + ' ft'], ['Ground speed', num(f.gs) + ' knots'], ['Heading', Math.round(f.track) + '°'], ['Climbing or descending', f.vs > 200 ? 'Climbing' : f.vs < -200 ? 'Descending' : 'Level'], ['Position at', uae(air.updated) + ' Athens time']], 'Real position from Flightradar24 at the time shown; the aircraft has moved since');
   }
   function renderAir() {
     $('lvAirSub').textContent = stateLine('flights', air);
     if (!air) { $('lvAirList').innerHTML = ''; return; }
     var st = flightStats(), fl = air.flights;
     set('lvAirAll', st.inAir); set('lvAirArr', st.arriving); set('lvAirDep', st.departing); set('lvAirAt', st.updated);
-    $('lvAirNote').textContent = 'Positions as they were at ' + st.updated + ' IST (' + ago(air.updated) + '). Each refresh returns at most ' + st.limit + ' flights to or from Hyderabad airport, to limit Flightradar24 credits.';
+    $('lvAirNote').textContent = 'Positions as they were at ' + st.updated + ' Athens time (' + ago(air.updated) + '). Each refresh returns at most ' + st.limit + ' flights to or from Greek airports, to limit Flightradar24 credits.';
     var by = {}; fl.forEach(function (f) { var a = LOCAL_AP[f.to] ? f.to : LOCAL_AP[f.from] ? f.from : ''; if (a) { by[a] = (by[a] || 0) + 1; } });
     var mx = Math.max.apply(null, Object.keys(by).map(function (k) { return by[k]; }).concat([1]));
     $('lvAirBars').innerHTML = Object.keys(by).sort(function (a, b) { return by[b] - by[a]; }).map(function (k) { return C.barRow(esc(LOCAL_AP[k] + ' (' + k + ')'), 'arriving or departing', by[k], by[k] / mx); }).join('');
@@ -120,11 +120,11 @@
     set('lvFireAll', num(fires.list.length)); set('lvFireHere', num(here.length)); set('lvFireTop', Math.round(top) + '<small>MW</small>'); set('lvFireLast', latest ? uae(latest.iso) : '–');
     var ol = $('lvFireList'); ol.innerHTML = '';
     (here.length ? here : fires.list).slice().sort(function (a, b) { return b.frp - a.frp; }).slice(0, 8).forEach(function (f) {
-      ol.appendChild(C.listButton(f.frp >= 30 ? 'severe' : f.frp >= 8 ? 'heavy' : 'moderate', f.at[1].toFixed(3) + '°N, ' + f.at[0].toFixed(3) + '°E', f.date + ' ' + uae(f.iso) + ' IST · ' + (f.dn === 'N' ? 'night' : 'day') + ' pass · ' + Math.round(km(f.at, centre)) + ' km from the region centre', f.frp.toFixed(1) + '<small>MW</small>', function () {
-        C.flyTo(f.at[0], f.at[1], 12.5); C.showPopup(f.at, 'Heat detection', [['Radiative power', f.frp.toFixed(1) + ' MW'], ['Seen', f.date + ' ' + uae(f.iso) + ' IST'], ['Satellite', f.sat === 'N' ? 'Suomi NPP' : f.sat === 'N20' ? 'NOAA-20' : f.sat === 'N21' ? 'NOAA-21' : f.sat], ['Confidence', f.conf === 'h' ? 'High' : f.conf === 'l' ? 'Low' : 'Nominal']], 'Real detection, NASA FIRMS (VIIRS 375 m)');
+      ol.appendChild(C.listButton(f.frp >= 30 ? 'severe' : f.frp >= 8 ? 'heavy' : 'moderate', f.at[1].toFixed(3) + '°N, ' + f.at[0].toFixed(3) + '°E', f.date + ' ' + uae(f.iso) + ' · ' + (f.dn === 'N' ? 'night' : 'day') + ' pass · ' + Math.round(km(f.at, centre)) + ' km from the region centre', f.frp.toFixed(1) + '<small>MW</small>', function () {
+        C.flyTo(f.at[0], f.at[1], 12.5); C.showPopup(f.at, 'Heat detection', [['Radiative power', f.frp.toFixed(1) + ' MW'], ['Seen', f.date + ' ' + uae(f.iso) + ' Athens time'], ['Satellite', f.sat === 'N' ? 'Suomi NPP' : f.sat === 'N20' ? 'NOAA-20' : f.sat === 'N21' ? 'NOAA-21' : f.sat], ['Confidence', f.conf === 'h' ? 'High' : f.conf === 'l' ? 'Low' : 'Nominal']], 'Real detection, NASA FIRMS (VIIRS 375 m)');
       }));
     });
-    $('lvFireNote').textContent = here.length ? '' : 'None inside this region in the last two days; the strongest across Telangana are listed.';
+    $('lvFireNote').textContent = here.length ? '' : 'None inside this region in the last two days; the strongest across Greece are listed.';
   }
   function renderShips() {
     if (!$('lvShipSub')) { return; }
@@ -169,7 +169,7 @@
     if (show.fires && fires) {
       out.push(new deck.ScatterplotLayer({ id: 'lv-fires', data: fires.list, pickable: true, radiusUnits: 'meters', radiusMinPixels: 4, radiusMaxPixels: 22, stroked: true, lineWidthUnits: 'pixels', getLineWidth: 1.5, getLineColor: [255, 235, 160],
         getPosition: function (f) { return f.at; }, getRadius: function (f) { return 250 + 60 * Math.sqrt(f.frp); }, getFillColor: function (f) { return f.frp >= 30 ? [235, 60, 40, 220] : f.frp >= 8 ? [245, 130, 40, 210] : [250, 190, 60, 200]; },
-        onClick: function (i) { if (i.object) { var f = i.object; C.showPopup(f.at, 'Heat detection', [['Radiative power', f.frp.toFixed(1) + ' MW'], ['Seen', f.date + ' ' + uae(f.iso) + ' IST']], 'Real detection, NASA FIRMS'); } } }));
+        onClick: function (i) { if (i.object) { var f = i.object; C.showPopup(f.at, 'Heat detection', [['Radiative power', f.frp.toFixed(1) + ' MW'], ['Seen', f.date + ' ' + uae(f.iso) + ' Athens time']], 'Real detection, NASA FIRMS'); } } }));
     }
     if (show.vessels && ships) {
       var mv = ships.ships.filter(function (s) { return (s.sog || 0) > 0.5; });
@@ -197,10 +197,10 @@
 
   C.onReady(function () {
     var REAL = '<strong>Real data.</strong> ';
-    card('osint', 'lvFire', 'Fire and heat detections', REAL + 'Heat seen by satellites in the last two days (NASA FIRMS, VIIRS). In Telangana most detections are crop-residue and forest fires (worst from February to May) and industrial sites such as thermal power plants. Shown at real time, not the twin’s clock.',
-      '<div class="kpis">' + tile('Detections, Telangana', 'lvFireAll') + tile('In this region', 'lvFireHere') + tile('Strongest', 'lvFireTop') + tile('Latest, IST', 'lvFireLast') + '</div><p class="muted" id="lvFireNote"></p><ol class="corridors" id="lvFireList"></ol>');
-    card('osint', 'lvAir', 'Live flights', REAL + 'Aircraft flying to or from Rajiv Gandhi International Airport, Hyderabad, from Flightradar24. This is a snapshot: positions are as they were at the time shown and are refreshed a few times a day, because each returned flight is billed. Synthetic flights are no longer shown.',
-      '<div class="kpis">' + tile('Aircraft in the air', 'lvAirAll') + tile('Arriving at Hyderabad', 'lvAirArr') + tile('Departing', 'lvAirDep') + tile('Snapshot, IST', 'lvAirAt') + '</div><p class="muted" id="lvAirNote"></p><div id="lvAirBars"></div><ol class="corridors" id="lvAirList"></ol>');
+    card('osint', 'lvFire', 'Fire and heat detections', REAL + 'Heat seen by satellites in the last two days (NASA FIRMS, VIIRS). In Greece most detections are wildfires (worst from June to September), agricultural burning and industrial sites such as refineries and power plants. Shown at real time, not the twin’s clock.',
+      '<div class="kpis">' + tile('Detections, Greece area', 'lvFireAll') + tile('In this region', 'lvFireHere') + tile('Strongest', 'lvFireTop') + tile('Latest, Athens time', 'lvFireLast') + '</div><p class="muted" id="lvFireNote"></p><ol class="corridors" id="lvFireList"></ol>');
+    card('osint', 'lvAir', 'Live flights', REAL + 'Aircraft flying to or from Greek airports, from Flightradar24. This is a snapshot: positions are as they were at the time shown and are refreshed a few times a day, because each returned flight is billed. Synthetic flights are no longer shown.',
+      '<div class="kpis">' + tile('Aircraft in the air', 'lvAirAll') + tile('Arriving in Greece', 'lvAirArr') + tile('Departing', 'lvAirDep') + tile('Snapshot, Athens time', 'lvAirAt') + '</div><p class="muted" id="lvAirNote"></p><div id="lvAirBars"></div><ol class="corridors" id="lvAirList"></ol>');
     if (L.ais !== false) card('osint', 'lvShip', 'Live vessels (AIS)', REAL + 'Vessels heard on AIS (aisstream.io) in the last few hours, each at its last reported position. Coverage depends on the receivers that feed aisstream.io and is thin, so this is not every ship. Shown at real time, not the twin’s clock.',
       '<div class="kpis">' + tile('Vessels heard', 'lvShipAll') + tile('Near this region', 'lvShipHere') + tile('Under way', 'lvShipMove') + tile('Tankers and cargo', 'lvShipTank') + '</div><div id="lvShipBars"></div><ol class="corridors" id="lvShipList"></ol>');
     card('osint', 'lvSat', 'Satellites overhead', REAL + 'Orbits from N2YO; each position is computed in this browser for the present moment, so the satellites move as you watch. Elevation is measured from the centre of this region.',

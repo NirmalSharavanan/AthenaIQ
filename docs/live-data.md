@@ -5,9 +5,9 @@ the twin's own clock shows.
 
 | Source | What | Where in the app |
 | --- | --- | --- |
-| NASA FIRMS | Fire and heat detections from the VIIRS satellites, last two days, Telangana | Emergency, "Fire and heat detections"; map layer |
-| aisstream.io | Off: Telangana has no coast. Set the repository variable `AIS_ENABLED` to 1 and `live.ais`/`live.vessels` in `config.js` to use it elsewhere | – |
-| Flightradar24 | Aircraft flying to or from Hyderabad airport, HYD (snapshot) | Transit, "Live flights"; map layer; Dashboard and Analytics figures. Synthetic flights are switched off (`air.synthetic: false`) |
+| NASA FIRMS | Fire and heat detections from the VIIRS satellites, last two days, Greece | Emergency, "Fire and heat detections"; map layer |
+| aisstream.io | Off: Greece has no coast. Set the repository variable `AIS_ENABLED` to 1 and `live.ais`/`live.vessels` in `config.js` to use it elsewhere | – |
+| Flightradar24 | Aircraft flying to or from Athens airport, HYD (snapshot) | Transit, "Live flights"; map layer; Dashboard and Analytics figures. Synthetic flights are switched off (`air.synthetic: false`) |
 | N2YO | Orbital elements of satellites; positions computed in the browser (satellite.js) | Transit, "Satellites overhead"; map layer |
 
 Each layer has a check option in the Scenario and layers card on the Dashboard.
@@ -29,7 +29,7 @@ attempt worked, when, and the error if it did not. A source that fails keeps its
 
 ## Notes
 
-- **Fires.** In Telangana most detections are crop-residue and forest fires (worst from February to May) and industrial heat sources such as thermal power plants. The value
+- **Fires.** In Greece most detections are crop-residue and forest fires (worst from February to May) and industrial heat sources such as thermal power plants. The value
   shown is the fire radiative power in megawatts.
 - **Vessels.** A snapshot of positions heard during about 150 seconds, so it is up to 30 minutes old. Coverage
   depends on the receivers that feed aisstream.io.
@@ -38,7 +38,7 @@ attempt worked, when, and the error if it did not. A source that fails keeps its
   be changed as repository variables. The app therefore shows a snapshot with its time, not a continuous feed; aircraft
   positions are not moved forward. `status.json` keeps the credits estimated for the day.
 - **Satellites.** A fixed list (space stations, Hubble, the VIIRS satellites behind FIRMS, Landsat, Sentinel,
-  Indian satellites INSAT-3DR, Cartosat-3, RISAT-2B, EOS-04) plus bright, weather and Earth-observation satellites that were above Telangana at the
+  Greek satellites INSAT-3DR, Cartosat-3, RISAT-2B, EOS-04) plus bright, weather and Earth-observation satellites that were above Greece at the
   last refresh. Elevation is measured from the centre of the open region.
 - Settings: `live` in `config.js` (`enabled`, `baseUrl`, `refreshMin`, layer defaults, `replaceSyntheticShips`).
 - To refresh at once: Actions, Live data, Run workflow.
@@ -51,7 +51,7 @@ that selects or clears everything under it (a dash means some are on); a second 
 
 ## OSINT menu
 
-**OSINT** opens from the menu as a page of its own, like Analytics: a 3D map of the feeds (Telangana 3D, World or the open
+**OSINT** opens from the menu as a page of its own, like Analytics: a 3D map of the feeds (Greece 3D, World or the open
 region), a symbol legend, and the feed cards in a grid. All of it is real and fetched by the Live data workflow.
 
 The page opens on **City 3D**: street level over the open region with the 3D buildings shown and the camera slowly orbiting. Touching the map pauses the orbit; the **Orbit** button turns it off. `osintMap.defaultView` (`region`, `uae` or `world`), `osintMap.orbit` and `osintMap.orbitDegPerSec` in `config.js` set this.
@@ -62,7 +62,7 @@ The page opens on **City 3D**: street level over the open region with the 3D bui
 | Rain forecast, 48 hours | Open-Meteo | none |
 | Sand and dust storm forecast, 48 hours | Open-Meteo air quality (CAMS dust), wind gusts and visibility | none |
 | Earthquakes, magnitude 4 and above within 2,000 km, 30 days | USGS | none |
-| Natural events, Red Sea to India, 60 days | NASA EONET | none |
+| Natural events, Red Sea to Greece, 60 days | NASA EONET | none |
 | Space weather (planetary K index) | NOAA SWPC | none |
 | Global incidents | USGS earthquakes of magnitude 5.5 and above, NASA EONET open events, GDACS orange and red alerts | none |
 | Fire and heat detections | NASA FIRMS | `FIRMS_API_KEY` |
@@ -131,7 +131,7 @@ background without buildings.
 - Every symbol on the OSINT map can be clicked: a pop-up shows its details (fire power and time, flight route and
   height, satellite height, earthquake place and depth, weather now and the 48-hour outlook, incident level and source).
   Hovering shows its name and a pointer.
-- Tap a row in the **Symbols** legend to show all points of that kind: the map switches to the Telangana view and
+- Tap a row in the **Symbols** legend to show all points of that kind: the map switches to the Greece view and
   zooms to fit them. Global incidents open the World view.
 - Tap an item in a feed card (fires, flights, satellites, earthquakes, natural events, global incidents) to fly the
   OSINT map to it and open its pop-up. Source pages (USGS, NASA EONET, GDACS) are links inside the pop-up.

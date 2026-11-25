@@ -7,7 +7,7 @@ Every external input, how it is obtained, its licence and how IntelliTwin uses i
 | | |
 | --- | --- |
 | Provider | OpenStreetMap contributors, extract by Geofabrik |
-| URL | <https://download.geofabrik.de/asia/india/southern-zone-latest.osm.pbf>, cut to Telangana (`STATE_BBOX` in `tools/config.py`) |
+| URL | <https://download.geofabrik.de/asia/india/southern-zone-latest.osm.pbf>, cut to Greece (`STATE_BBOX` in `tools/config.py`) |
 | Licence | Open Database Licence (ODbL) 1.0. Attribution: “© OpenStreetMap contributors” |
 | Fetched by | `tools/fetch_osm.sh` |
 | Used for | Road geometry, class, lanes, speed limits, one-way rules, signal positions, street names |
@@ -25,7 +25,7 @@ Residential and service streets are left out to keep the network and the browser
 | Licence | The repository README states CDLA-Permissive-2.0. Confirm against the repository at the time of use |
 | Fetched by | `tools/buildings.py`, which reads the current `dataset-links.csv` address from the repository README and downloads the zoom-9 quadkey tiles covering the study area |
 | Used for | (a) Floor space, to spread trip origins and destinations over the city. (b) The largest footprints, drawn as 3D blocks |
-| Heights | Taken from the dataset where present. Otherwise estimated from footprint size: `floors = clamp(1 + √area / 12, 1, 15)`, 3.3 m per floor. Most heights in Telangana are estimates |
+| Heights | Taken from the dataset where present. Otherwise estimated from footprint size: `floors = clamp(1 + √area / 12, 1, 15)`, 3.3 m per floor. Most heights in Greece are estimates |
 
 If the download fails, the build continues. Trip ends then fall back to road length × lanes, and `meta.json` records `buildings.available = false`.
 
@@ -54,7 +54,7 @@ Buses are **not** part of the traffic simulation. They follow the synthetic time
 
 ## Camera footage (sample clips)
 
-Cameras without a stream of their own show real traffic footage as a stand-in. The clips are loaded at run time from Wikimedia Commons and are **not Telangana and not the camera's feed**; the camera window states this and shows the credit.
+Cameras without a stream of their own show real traffic footage as a stand-in. The clips are loaded at run time from Wikimedia Commons and are **not Greece and not the camera's feed**; the camera window states this and shows the credit.
 
 | Clip | Used for | Author | Licence |
 | --- | --- | --- | --- |
@@ -75,15 +75,15 @@ The data build also reads railways (`railway=rail`, light rail, tram, subway), c
 
 The header shows the Presight logo from `assets/presight-logo.png` (496 × 142 px, white lettering on a transparent background, supplied by the project owner). It is displayed 34 px high, so it stays sharp on high-density screens. The logo is Presight's trademark; use it only where Presight has approved the branding. To change it, replace the file.
 
-## 5. Population — Census of India 2011 (reference only)
+## 5. Population — Census of Greece 2011 (reference only)
 
-Census figures are **not downloaded or used by the pipeline**. They are quoted in [reference-figures.md](reference-figures.md) as context for the demand assumption. Verify them against the Census of India tables before reuse.
+Census figures are **not downloaded or used by the pipeline**. They are quoted in [reference-figures.md](reference-figures.md) as context for the demand assumption. Verify them against the Census of Greece tables before reuse.
 
 ## 6. Not used
 
 | Source | Why not |
 | --- | --- |
-| Traffic counts | None are public for Hyderabad |
+| Traffic counts | None are public for Athens |
 | Accident records, fines, camera locations | None are public; the app shows generated, illustrative figures instead (see [methodology.md](methodology.md), section 10) |
 | Signal timings | Not public; a generic penalty is used instead |
 | Census commuting table | Not public |

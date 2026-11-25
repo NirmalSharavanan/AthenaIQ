@@ -21,9 +21,9 @@ For each sensor, the traffic on road links within 400 m is summarised into an in
 | Temperature | 26 + 6 × daily sine, peak mid-afternoon | °C |
 | Noise | CoRTN basic noise level at 10 m from flow, speed and heavy-vehicle share, as LAeq ≈ L10 − 3 | dB(A) |
 
-The coefficients are chosen to give plausible roadside values; they are not fitted to Hyderabad measurements.
+The coefficients are chosen to give plausible roadside values; they are not fitted to Athens measurements.
 
-**Air-quality index.** The highest of three sub-indices (PM2.5, PM10, NO₂), each interpolated between US EPA-style breakpoints, banded as Good (0–50), Moderate (51–100), Unhealthy for sensitive groups (101–150) and Unhealthy (over 150). India's National Air Quality Index (CPCB) uses different breakpoints, so it may differ.
+**Air-quality index.** The highest of three sub-indices (PM2.5, PM10, NO₂), each interpolated between US EPA-style breakpoints, banded as Good (0–50), Moderate (51–100), Unhealthy for sensitive groups (101–150) and Unhealthy (over 150). Greece's National Air Quality Index (CPCB) uses different breakpoints, so it may differ.
 
 **Alerts.** A sensor raises an alert when its index passes 150 or its noise passes 80 dB(A) (`alertAqiAbove`, `alertNoiseAboveDb`).
 

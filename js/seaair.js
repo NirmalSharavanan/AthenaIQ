@@ -144,7 +144,7 @@
     $('dSea').textContent = b.moving; $('dBerth').textContent = b.berthsUsed + ' of ' + b.berths;
     if (a.live) {
       $('dAir').textContent = a.inAir === null ? '–' : a.inAir; $('dAirOn').textContent = a.arriving === null ? '–' : a.arriving;
-      $('dAirLabel').innerHTML = 'Aircraft to or from Hyderabad airport <em>real</em>'; $('dAirOnLabel').innerHTML = 'Arriving at Hyderabad <em>real</em>';
+      $('dAirLabel').innerHTML = 'Aircraft to or from Greek airports <em>real</em>'; $('dAirOnLabel').innerHTML = 'Arriving in Greece <em>real</em>';
       $('dSeaAirNote').textContent = num(b.callsToday) + ' vessel movements so far today' + (a.updated ? ' · flights as of ' + a.updated : '');
       return;
     }

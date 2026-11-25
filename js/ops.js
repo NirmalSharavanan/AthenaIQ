@@ -187,7 +187,7 @@
     // Auto-close after alerts.pushSeconds; 0 keeps it until it is closed by hand.
     if (CFG.alerts.pushSeconds > 0) { setTimeout(function () { if (t.parentNode) { t.remove(); extra = 0; } }, CFG.alerts.pushSeconds * 1000); }
     if (document.hidden && window.Notification && Notification.permission === 'granted') {
-      try { new Notification('UrbanIQ alert', { body: al.title + ' — ' + al.sub + ' (synthetic data)', tag: 'itw-' + (toastCount++ % 6) }); } catch (e) { /* notifications unavailable */ }
+      try { new Notification('AthenaIQ alert', { body: al.title + ' — ' + al.sub + ' (synthetic data)', tag: 'itw-' + (toastCount++ % 6) }); } catch (e) { /* notifications unavailable */ }
     }
   }
   function pushNew(list) {
@@ -275,7 +275,7 @@
   }
   function printReport() {
     var k = C.kpiAt(state.scenario, state.t), e = C.eventTotals(state.scenario, state.t), roads = C.roadStats(C.binNow(), 15).slice(0, 10), day = C.day();
-    $('report').innerHTML = '<h1>UrbanIQ traffic summary</h1>' +
+    $('report').innerHTML = '<h1>AthenaIQ traffic summary</h1>' +
       '<p>' + esc(C.prettyDate(state.date)) + ' · ' + clock(state.t) + ' · ' + esc(C.scenarioMeta(state.scenario).label) + ' · ' + esc(day.typeLabel) + '</p>' +
       '<p class="warn">Synthetic data. Traffic is simulated from assumptions and placed on an assumed daily curve; accidents and fines are illustrative. Not for planning, operational or safety decisions.</p>' +
       '<h2>Network</h2><table><tr><th>Average speed</th><th>Vehicles moving</th><th>Extra travel time</th><th>Delay per hour</th></tr><tr><td>' + Math.round(k.speed || 0) + ' km/h</td><td>' + num(k.vehicles) +
@@ -285,7 +285,7 @@
       }).join('') + '</table>' +
       '<h2>Alerts</h2><ul>' + (current.length ? current.map(function (a) { return '<li>' + esc(a.title) + ' — ' + esc(a.sub) + '</li>'; }).join('') : '<li>None</li>') + '</ul>' +
       '<h2>Accidents and fines today (illustrative)</h2><p>' + num(e.seen.length) + ' accidents, ' + num(e.active.length) + ' active, ' + num(e.injury) + ' with injury. ' +
-      num(e.fines) + ' fines, \u20b9' + num(e.value) + ' at placeholder values.</p>';
+      num(e.fines) + ' fines, \u20ac' + num(e.value) + ' at placeholder values.</p>';
     window.print();
   }
 

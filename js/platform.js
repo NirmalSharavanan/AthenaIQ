@@ -57,7 +57,7 @@
     $('syFeeds').textContent = s.okFeeds + ' of ' + s.feeds.length; $('syQueue').textContent = num(s.queue);
     $('syCpu').innerHTML = Math.round(s.cpuAvg) + '<small>%</small>'; $('syGpu').innerHTML = s.gpu === null ? '–' : Math.round(s.gpu) + '<small>%</small>';
     spark('spRate', push('rate', s.total), accent); spark('spLatency', push('lat', s.latency), accent); spark('spQueue', push('queue', s.queue), accent); spark('spCpu', push('cpu', s.cpuAvg), accent); if (s.gpu !== null) { spark('spGpu', push('gpu', s.gpu), accent); }
-    $('syClock').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', { timeZone: (CFG.time || {}).timeZone || 'Asia/Kolkata', hour12: false }) + ' · every 2 s';
+    $('syClock').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', { timeZone: (CFG.time || {}).timeZone || 'Europe/Athens', hour12: false }) + ' · every 2 s';
     var fl = $('syFeedList'); fl.innerHTML = '';
     s.feeds.forEach(function (f) {
       var L = LABEL[f.status];

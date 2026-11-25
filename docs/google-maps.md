@@ -51,7 +51,7 @@ The time bar has a **2D / 3D / City view** switch.
 
 The 3D option draws Google's photorealistic 3D tiles with deck.gl. Points to know:
 
-- The 3D mesh uses real heights, while the twin draws roads and vehicles flat at zero height. `map.google.heightOffsetM` (27 by default) and `regions[].heightOffsetM` shift the mesh to meet them. This works on flat coastal areas; on sloping or inland ground (Al Ain, the Deccan plateau, about 500 m above sea level around Hyderabad) roads will float above or sink into the 3D ground. For that reason the 3D option is off by default.
+- The 3D mesh uses real heights, while the twin draws roads and vehicles flat at zero height. `map.google.heightOffsetM` (27 by default) and `regions[].heightOffsetM` shift the mesh to meet them. This works on flat coastal areas; on sloping or inland ground (Al Ain, the Deccan plateau, about 500 m above sea level around Athens) roads will float above or sink into the 3D ground. For that reason the 3D option is off by default.
 - 3D tiles are heavier to draw and to download than the 2D map, and are billed separately by Google.
 - Coverage depends on Google; where there is none, the app reports that the tiles could not be loaded.
 

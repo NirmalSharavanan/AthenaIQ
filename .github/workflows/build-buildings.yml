@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        region: [warangal, karimnagar, nizamabad, khammam, ramagundam, mahbubnagar, nalgonda, siddipet, adilabad]
+        region: [thessaloniki, patras, heraklion, larissa, volos, ioannina, chania, rhodes, kavala]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -37,9 +37,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: |
-            build/telangana.osm.pbf
+            build/state.osm.pbf
             build/osm_timestamp.txt
-          key: geofabrik-telangana-${{ steps.week.outputs.week }}
+          key: osm-greece-${{ steps.week.outputs.week }}
       - name: OpenStreetMap buildings
         if: steps.ms.outcome == 'failure'
         run: |
@@ -47,7 +47,7 @@ jobs:
           mkdir -p build
           bash tools/fetch_state.sh build
           BBOX="$(python3 -c 'import sys; sys.path.insert(0, "tools"); import regions; print(",".join(map(str, regions.REGIONS[sys.argv[1]]["bbox"])))' "${{ matrix.region }}")"
-          osmium extract --bbox "$BBOX" --strategy smart build/telangana.osm.pbf -o build/area.osm.pbf --overwrite
+          osmium extract --bbox "$BBOX" --strategy smart build/state.osm.pbf -o build/area.osm.pbf --overwrite
           osmium tags-filter build/area.osm.pbf wr/building -o build/bld.osm.pbf --overwrite
           osmium export build/bld.osm.pbf -f geojsonseq --geometry-types=polygon -o build/bld.geojsonseq --overwrite
           python .github/scripts/add_buildings.py --region "${{ matrix.region }}" --out "out/${{ matrix.region }}" --osm-geojson build/bld.geojsonseq

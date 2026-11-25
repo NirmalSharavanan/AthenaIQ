@@ -17,7 +17,7 @@
   var CFG = merge({
     map: { styleUrl: 'https://tiles.openfreemap.org/styles/dark', rasterTiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
       rasterAttribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', buildings3d: true },
-    time: { timeZone: 'Asia/Kolkata', weekendDays: [0], shortDay: 6 },
+    time: { timeZone: 'Europe/Athens', weekendDays: [6, 0], shortDay: 5 },
     feeds: { traffic: 'synthetic', accidentsUrl: null },
     devices: { cameras: [], syntheticCameras: 40, syntheticDetectors: 80, syntheticSigns: 15, hlsScript: null, signalCycleSeconds: 90 },
     alerts: { networkSpeedBelowKmh: 40, roadRatioBelow: 0.3, roadMinVehicles: 150, seriousAccident: true, maxShown: 12 },
@@ -42,8 +42,8 @@
     if (k) { try { localStorage.setItem('itw-google-key', k.trim()); } catch (e) { /* storage unavailable */ } q.delete('gmaps'); var qs = q.toString(); history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '')); }
   })();
   // Region (js/regions.js) and its major sites for quick navigation: [name, lon, lat, zoom]. Locations are approximate.
-  var CUR = CFG.currency || { code: 'INR', symbol: '\u20b9' };
-  var REGION = CFG.region || { id: 'hyderabad', name: 'Hyderabad', dataDir: 'data/', isDefault: true, sites: [] };
+  var CUR = CFG.currency || { code: 'EUR', symbol: '\u20ac' };
+  var REGION = CFG.region || { id: 'athens', name: 'Athens', dataDir: 'data/', isDefault: true, sites: [] };
   var SITES = REGION.sites;
 
   function level(r) { return r >= 0.8 ? 'free' : r >= 0.6 ? 'moderate' : r >= 0.4 ? 'heavy' : 'severe'; }
@@ -160,7 +160,7 @@
   }
 
   function setMode(m) {
-    // Live starts at the Hyderabad clock and plays at the configured speed (1× by default, locked to the clock); 30× and faster run ahead.
+    // Live starts at the Athens clock and plays at the configured speed (1× by default, locked to the clock); 30× and faster run ahead.
     state.mode = m;
     if (m === 'live') { setRate((CFG.start && CFG.start.rate) || 1); }
     Array.prototype.forEach.call($('mode').children, function (b) {
@@ -187,7 +187,7 @@
     $('dateLabel').textContent = prettyDate(state.date);
     $('clock').textContent = shown;
     if (state.mode === 'live') {
-      $('modeNote').textContent = REGION.name + ' · ' + (state.rate === 1 ? 'Live: following India Standard Time.' : 'Live: started at India Standard Time, playing at ' + state.rate + '× so it runs ahead of the clock.') + ' ' + (meta && meta.traffic === 'synthetic' ? 'Synthetic traffic pattern' : 'Simulated traffic') + ' for a ' + day.typeLabel + ', not measured traffic.';
+      $('modeNote').textContent = REGION.name + ' · ' + (state.rate === 1 ? 'Live: following Athens time.' : 'Live: started at Athens time, playing at ' + state.rate + '× so it runs ahead of the clock.') + ' ' + (meta && meta.traffic === 'synthetic' ? 'Synthetic traffic pattern' : 'Simulated traffic') + ' for a ' + day.typeLabel + ', not measured traffic.';
     } else {
       if (document.activeElement !== $('hHour') && document.activeElement !== $('hMin')) {
         $('hHour').value = pad(Math.floor(state.t / 3600) % 24); $('hMin').value = pad(Math.floor(state.t % 3600 / 300) * 5);
@@ -232,7 +232,7 @@
       var gSession = function (th, type) {
         var id = th + '|' + type, now = Date.now() / 1000;
         if (gSessions[id] && gSessions[id].expiry > now + 600) { return Promise.resolve(gSessions[id]); }
-        var body = { mapType: type === 'roadmap' ? 'roadmap' : 'satellite', language: 'en-US', region: 'AE', scale: 'scaleFactor2x', highDpi: true };
+        var body = { mapType: type === 'roadmap' ? 'roadmap' : 'satellite', language: 'en-US', region: 'GR', scale: 'scaleFactor2x', highDpi: true };
         if (type === 'roadmap') { body.styles = gStyles[th]; } else if (type === 'hybrid') { body.layerTypes = ['layerRoadmap']; }
         var post = function (b) { return fetch('https://tile.googleapis.com/v1/createSession?key=' + encodeURIComponent(gKey()), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) }); };
         return post(body)
@@ -643,7 +643,7 @@
     if (!g) { fx = null; roadLayer = null; redraw(); return null; }
     var n = edges.length, flag = new Uint8Array(n), f = new Float32Array(n), R = CFG.closure.radiusM, pts = [];
     g.idx.forEach(function (i) { flag[i] = 1; pts.push(edges[i].path[edges[i].path.length >> 1]); });
-    var kx = 111320 * Math.cos(17.9 * Math.PI / 180), ky = 110570;
+    var kx = 111320 * Math.cos(38.0 * Math.PI / 180), ky = 110570;
     for (var i = 0; i < n; i++) {
       if (flag[i]) { continue; }
       var m = edges[i].path[edges[i].path.length >> 1], best = Infinity;
@@ -769,7 +769,7 @@
     $('winLabel').textContent = clock(meta.sim_begin) + '–' + clock(meta.sim_end);
     if (meta.traffic === 'synthetic') {
       $('tripFacts').innerHTML = fact('Traffic in this region', 'a pattern by road class, lanes, distance from the centre and time of day; no simulation yet', 'Synthetic') +
-        fact('Assumed morning trips', 'scaled from Hyderabad by city size, not counted', num(sm.trips)) + fact('Rest of the day', 'synthetic: the morning pattern re-used on an assumed daily curve', '24 h');
+        fact('Assumed morning trips', 'scaled from Athens by city size, not counted', num(sm.trips)) + fact('Rest of the day', 'synthetic: the morning pattern re-used on an assumed daily curve', '24 h');
     } else {
     $('tripFacts').innerHTML =
       fact('Vehicle trips simulated', 'assumed total, not counted', num(sm.trips)) + fact('Trips completed in the window', '', num(s.completed || 0)) +
@@ -1139,7 +1139,7 @@
     // A region whose data has not been built yet: say so and offer the default region.
     if (!meta && !REGION.isDefault) {
       $('nodata').querySelector('h2').textContent = 'Data for ' + REGION.name + ' is not built yet';
-      $('nodata').querySelector('p').innerHTML = 'The "Build region data" workflow creates it. <button type="button" class="btn" id="backBtn">Open Hyderabad</button>';
+      $('nodata').querySelector('p').innerHTML = 'The "Build region data" workflow creates it. <button type="button" class="btn" id="backBtn">Open Athens</button>';
       $('backBtn').addEventListener('click', function () { location.href = location.pathname; });
       if ($('regionSel') && !$('regionSel').options.length) { (CFG.regions || []).forEach(function (r) { var o = document.createElement('option'); o.value = r.id; o.textContent = r.name; $('regionSel').appendChild(o); }); $('regionSel').value = REGION.id; $('regionSel').addEventListener('change', function () { var id = $('regionSel').value; location.href = location.pathname + (id === (CFG.defaultRegion || 'abudhabi') ? '' : '?region=' + id); }); }
     }

@@ -1,6 +1,6 @@
 /* IntelliTwin synthetic taxis and on-demand shuttles.
  *
- * There is no public feed of taxi or shuttle positions for Hyderabad, so this module builds an example
+ * There is no public feed of taxi or shuttle positions for Athens, so this module builds an example
  * fleet: taxis that move along corridors between the taxi ranks, and shuttles that circulate inside
  * their service zones. Vehicle numbers, positions, statuses and waiting times are SYNTHETIC.
  * See docs/buses.md.

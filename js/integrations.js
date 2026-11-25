@@ -147,7 +147,7 @@
   function show(v) { return v === undefined ? '—' : typeof v === 'string' ? v : JSON.stringify(v); }
   function short(v, n) { var s = show(v); return s.length > (n || 28) ? s.slice(0, (n || 28) - 1) + '…' : s; }
   function pathHtml(p) { var k = p.lastIndexOf('.'); return k < 0 ? esc(p) : '<i>' + esc(p.slice(0, k + 1)) + '</i>' + esc(p.slice(k + 1)); }
-  function when(iso) { return new Date(iso).toLocaleString('en-GB', { timeZone: (CFG.time || {}).timeZone || 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }); }
+  function when(iso) { return new Date(iso).toLocaleString('en-GB', { timeZone: (CFG.time || {}).timeZone || 'Europe/Athens', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }); }
   function tile(label, value, sub) { return '<div class="kpi"><span class="k-label">' + esc(label) + '</span><span class="k-value">' + value + '</span>' + (sub ? '<span class="muted">' + esc(sub) + '</span>' : '') + '</div>'; }
 
   /* ---------- view: all integrations ---------- */

@@ -1,13 +1,13 @@
-"""Fetch live data for UrbanIQ (Telangana, India) and write small JSON files for the site.
+"""Fetch live data for AthenaIQ (Greece) and write small JSON files for the site.
 
 Sources (each optional; a missing key or a failed call leaves the previous file in place):
   NASA FIRMS   fire and heat detections from satellites     FIRMS_API_KEY
-  N2YO         orbital elements of satellites over Telangana   N2YO_API_KEY
-  aisstream.io vessel positions (AIS): off, Telangana has no coast (set AIS_ENABLED=1 to use it)   AIS_API_KEY
-  Flightradar24 aircraft to and from Hyderabad (HYD)        FLIGHT_RADAR (billed: 8 credits for each flight returned)
+  N2YO         orbital elements of satellites over Greece      N2YO_API_KEY
+  aisstream.io vessel positions (AIS) in Greek waters          AIS_API_KEY
+  Flightradar24 aircraft to and from Greek airports           FLIGHT_RADAR (billed: 8 credits for each flight returned)
   Open-Meteo   weather now, rain and dust forecast per region   no key
-  USGS         earthquakes within 2,000 km, last 30 days        no key
-  NASA EONET   natural events across South Asia and the Bay of Bengal   no key
+  USGS         earthquakes within 1,000 km, last 30 days        no key
+  NASA EONET   natural events across the Eastern Mediterranean and the Balkans   no key
   NOAA SWPC    planetary K index (space weather)                no key
   World        strong earthquakes, natural events, GDACS alerts  no key
 
@@ -25,14 +25,13 @@ import urllib.error
 import urllib.request
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else "out"
-BBOX = (77.2, 15.8, 81.4, 19.95)                 # Telangana: west, south, east, north
-CENTRE = (17.9, 79.0)                            # observer for "satellites above": lat, lon (centre of Telangana)
+BBOX = (19.3, 34.7, 29.7, 41.8)                  # Greece and its seas: west, south, east, north
+CENTRE = (38.3, 23.9)                            # observer for "satellites above": lat, lon (central Greece)
 NOW = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 # Satellites always followed (NORAD numbers); the name shown is the one N2YO returns for the number.
 ALWAYS = [25544, 48274, 20580,                   # International Space Station, Chinese space station, Hubble
           37849, 43013, 54234,                   # Suomi NPP, NOAA-20, NOAA-21: the satellites behind the FIRMS detections
-          25994, 27424, 39084, 49260, 40697,     # Terra, Aqua, Landsat 8, Landsat 9, Sentinel-2A
-          41752, 44804, 44233, 51656]            # Indian satellites: INSAT-3DR (weather), Cartosat-3, RISAT-2B, EOS-04
+          25994, 27424, 39084, 49260, 40697]     # Terra, Aqua, Landsat 8, Landsat 9, Sentinel-2A
 CATEGORIES = [1, 3, 6]                           # N2YO groups also sampled for what is overhead: brightest, weather, Earth resources
 os.makedirs(OUT, exist_ok=True)
 
@@ -49,7 +48,7 @@ def scrub(text):
 
 def get(url, timeout=30, tries=5):
     """GET with a few retries: public services sometimes time out or refuse a first connection."""
-    req = urllib.request.Request(url, headers={"User-Agent": "UrbanIQ live data (github.com/thirumald/UrbanIQ)"})
+    req = urllib.request.Request(url, headers={"User-Agent": "AthenaIQ live data (github.com/thirumald/AthenaIQ)"})
     for attempt in range(tries):
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:
@@ -128,7 +127,7 @@ def satellites():
     if not sats:
         raise RuntimeError("no orbital elements were returned")
     save("satellites.json", {"updated": NOW, "source": "N2YO.com orbital elements (TLE); positions are computed in the browser", "observer": CENTRE, "sats": sats})
-    return f"{len(sats)} satellites ({len(ALWAYS)} always followed, {count} bright, weather and Earth-observation satellites above Telangana at the time)"
+    return f"{len(sats)} satellites ({len(ALWAYS)} always followed, {count} bright, weather and Earth-observation satellites above Greece at the time)"
 
 
 async def ais_collect(key, seconds, box=None):
@@ -176,8 +175,8 @@ async def ais_collect(key, seconds, box=None):
 
 
 def vessels():
-    if os.environ.get("AIS_ENABLED") != "1":
-        raise Skip("Telangana has no coast; the AIS feed is off (set AIS_ENABLED=1 to use it)")
+    if os.environ.get("AIS_ENABLED") == "0":
+        raise Skip("the AIS feed is switched off (AIS_ENABLED=0)")
     key = os.environ.get("AIS_API_KEY")
     if not key:
         raise RuntimeError("AIS_API_KEY is not set")
@@ -208,8 +207,8 @@ def vessels():
     return f"{len(kept)} vessels in the last {keep_hours:g} h ({len(ships)} heard now from {msgs} messages in {seconds} s)" + (f", {len(log)} reconnects" if log else "")
 
 
-# Airports in Telangana with scheduled flights: Rajiv Gandhi International, Hyderabad.
-LOCAL_AIRPORTS = ["HYD"]
+# Greek airports with scheduled flights; flights to or from any of them are fetched.
+LOCAL_AIRPORTS = ["ATH", "SKG", "HER", "CHQ", "RHO", "CFU", "JTR", "JMK", "KGS", "ZTH", "EFL", "KVA", "IOA", "VOL", "GPA", "PVK", "KLX"]
 
 
 class Skip(Exception):
@@ -217,7 +216,7 @@ class Skip(Exception):
 
 
 def flights(prev):
-    """Aircraft flying to or from Hyderabad airport. Flightradar24 bills 8 credits for each flight returned, so the
+    """Aircraft flying to or from Greek airports. Flightradar24 bills 8 credits for each flight returned, so the
     number of flights per call (FR24_LIMIT) and the time between calls (FR24_MIN_HOURS) are both capped."""
     key = (os.environ.get("FLIGHT_RADAR") or "").strip()
     if not key:
@@ -232,7 +231,7 @@ def flights(prev):
     url = ("https://fr24api.flightradar24.com/api/live/flight-positions/full?bounds="
            f"{BBOX[3]},{BBOX[1]},{BBOX[0]},{BBOX[2]}&airports=" + ",".join("both:" + a for a in LOCAL_AIRPORTS) + f"&limit={limit}")
     req = urllib.request.Request(url, headers={"Accept": "application/json", "Accept-Version": "v1", "Authorization": "Bearer " + key,
-                                               "User-Agent": "UrbanIQ live data (github.com/thirumald/UrbanIQ)"})
+                                               "User-Agent": "AthenaIQ live data (github.com/thirumald/AthenaIQ)"})
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
             data = json.loads(r.read().decode("utf-8", "replace"))
@@ -247,22 +246,22 @@ def flights(prev):
                      "reg": f.get("reg") or "", "airline": f.get("operating_as") or f.get("painted_as") or "", "from": f.get("orig_iata") or "", "to": f.get("dest_iata") or "",
                      "eta": f.get("eta") or "", "t": f.get("timestamp") or ""})
     credits = max(1, 8 * len(rows))
-    save("flights.json", {"updated": NOW, "source": "Flightradar24 API, aircraft to or from Hyderabad airport inside the Telangana area", "airports": LOCAL_AIRPORTS,
+    save("flights.json", {"updated": NOW, "source": "Flightradar24 API, aircraft to or from Greek airports inside the Greece area", "airports": LOCAL_AIRPORTS,
                           "limit": limit, "flights": rows})
     return f"{len(rows)} flights (limit {limit}), about {credits} credits", credits
 
 
-PLACES = [("hyderabad", "Hyderabad", 78.4747, 17.3916), ("warangal", "Warangal", 79.5600, 18.0000), ("karimnagar", "Karimnagar", 79.1288, 18.4386),
-          ("nizamabad", "Nizamabad", 78.0940, 18.6725), ("khammam", "Khammam", 80.1514, 17.2473), ("ramagundam", "Ramagundam", 79.5100, 18.7900),
-          ("mahbubnagar", "Mahbubnagar", 78.0030, 16.7370), ("nalgonda", "Nalgonda", 79.2671, 17.0500), ("siddipet", "Siddipet", 78.8520, 18.1018),
-          ("adilabad", "Adilabad", 78.5320, 19.6640)]
+PLACES = [("athens", "Athens", 23.7348, 37.9755), ("thessaloniki", "Thessaloniki", 22.9410, 40.6328), ("patras", "Patras", 21.7346, 38.2466),
+          ("heraklion", "Heraklion", 25.1335, 35.3387), ("larissa", "Larissa", 22.4191, 39.6390), ("volos", "Volos", 22.9420, 39.3610),
+          ("ioannina", "Ioannina", 20.8510, 39.6650), ("chania", "Chania", 24.0170, 35.5170), ("rhodes", "Rhodes", 28.2250, 36.4440),
+          ("kavala", "Kavala", 24.4120, 40.9370)]
 
 
 def dust_risk(dust, gust, vis):
     """Indicative dust risk for one hour, from forecast dust (ug/m3), wind gusts (km/h) and visibility (m).
     0 low, 1 moderate, 2 high, 3 severe. Not an official warning."""
     dust, gust, vis = dust or 0, gust or 0, vis if vis is not None else 99999
-    # Low visibility counts only when there is dust in the air: in Telangana, winter haze and fog lower visibility without any dust.
+    # Low visibility counts only when there is dust in the air: haze and fog lower visibility without any dust.
     if dust >= 500 or (vis < 1000 and dust >= 100):
         return 3
     if dust >= 200 or (gust >= 50 and dust >= 100) or (vis < 3000 and dust >= 100):
@@ -277,9 +276,9 @@ def weather():
     lon = ",".join(str(p[2]) for p in PLACES)
     wx = json.loads(get("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon +
                         "&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m"
-                        "&hourly=temperature_2m,precipitation,precipitation_probability,wind_gusts_10m,visibility,weather_code&forecast_days=3&timezone=Asia%2FKolkata"))
+                        "&hourly=temperature_2m,precipitation,precipitation_probability,wind_gusts_10m,visibility,weather_code&forecast_days=3&timezone=Europe%2FAthens"))
     aq = json.loads(get("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + lat + "&longitude=" + lon +
-                        "&current=dust,pm10,pm2_5,aerosol_optical_depth&hourly=dust,pm10,aerosol_optical_depth&forecast_days=3&timezone=Asia%2FKolkata"))
+                        "&current=dust,pm10,pm2_5,aerosol_optical_depth&hourly=dust,pm10,aerosol_optical_depth&forecast_days=3&timezone=Europe%2FAthens"))
     wx = wx if isinstance(wx, list) else [wx]
     aq = aq if isinstance(aq, list) else [aq]
     if len(wx) != len(PLACES) or "hourly" not in wx[0]:
@@ -302,13 +301,13 @@ def weather():
                          "gust": gust, "vis": vis, "code": (h.get("weather_code") or [])[start:start + n], "dust": dust[:n],
                          "dustRisk": [dust_risk(dust[k], gust[k] if k < len(gust) else None, vis[k] if k < len(vis) else None) for k in range(n)]}
     save("weather.json", {"updated": NOW, "source": "Open-Meteo weather and air-quality forecast (CC BY 4.0); dust from CAMS", "hours": 48, "places": out})
-    a = out["hyderabad"]
-    return f"{len(out)} places; Hyderabad now {a['now']['temp']} C, rain next 48 h {round(sum(v or 0 for v in a['rain']), 1)} mm, highest dust risk {max(a['dustRisk'])}"
+    a = out["athens"]
+    return f"{len(out)} places; Athens now {a['now']['temp']} C, rain next 48 h {round(sum(v or 0 for v in a['rain']), 1)} mm, highest dust risk {max(a['dustRisk'])}"
 
 
 def quakes():
     start = time.strftime("%Y-%m-%d", time.gmtime(time.time() - 30 * 86400))
-    d = json.loads(get(f"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime={start}&minmagnitude=4&latitude=17.9&longitude=79.0&maxradiuskm=2000&orderby=time"))
+    d = json.loads(get(f"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime={start}&minmagnitude=4&latitude=38.3&longitude=23.9&maxradiuskm=1000&orderby=time"))
     rows = []
     for f in d.get("features") or []:
         p, c = f.get("properties") or {}, (f.get("geometry") or {}).get("coordinates") or [None, None, None]
@@ -316,12 +315,12 @@ def quakes():
             continue
         rows.append({"mag": p.get("mag"), "place": p.get("place") or "", "time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime((p.get("time") or 0) / 1000)),
                      "lon": round(c[0], 3), "lat": round(c[1], 3), "depth": round(c[2] or 0, 1), "url": p.get("url") or ""})
-    save("quakes.json", {"updated": NOW, "source": "USGS earthquake catalogue, magnitude 4 and above within 2,000 km of Telangana, last 30 days", "quakes": rows})
+    save("quakes.json", {"updated": NOW, "source": "USGS earthquake catalogue, magnitude 4 and above within 1,000 km of central Greece, last 30 days", "quakes": rows})
     return f"{len(rows)} earthquakes" + (f", strongest M{max(r['mag'] or 0 for r in rows)}" if rows else "")
 
 
 def events():
-    d = json.loads(get("https://eonet.gsfc.nasa.gov/api/v3/events?days=60&bbox=60,35,100,0"))
+    d = json.loads(get("https://eonet.gsfc.nasa.gov/api/v3/events?days=60&bbox=12,47,36,30"))
     rows = []
     for e in d.get("events") or []:
         g = (e.get("geometry") or [{}])[-1]
@@ -330,7 +329,7 @@ def events():
             continue
         rows.append({"title": e.get("title") or "", "kind": ((e.get("categories") or [{}])[0]).get("title") or "", "date": (g.get("date") or "")[:19] + "Z",
                      "lon": round(c[0], 3), "lat": round(c[1], 3), "url": e.get("link") or ""})
-    save("events.json", {"updated": NOW, "source": "NASA EONET natural events across South Asia and the Bay of Bengal, last 60 days", "events": rows})
+    save("events.json", {"updated": NOW, "source": "NASA EONET natural events across the Eastern Mediterranean and the Balkans, last 60 days", "events": rows})
     return f"{len(rows)} open natural events"
 
 

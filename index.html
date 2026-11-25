@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>UrbanIQ — Telangana Urban Mobility Intelligence &amp; Predictive Simulation</title>
-<meta name="description" content="UrbanIQ: a city digital twin demonstrator for Hyderabad and nine other Telangana cities on OpenStreetMap roads, with a SUMO simulation, live open-data feeds and a synthetic live traffic feed. Simulated and synthetic data are labelled.">
+<title>AthenaIQ — Greece Urban Mobility Intelligence &amp; Predictive Simulation</title>
+<meta name="description" content="AthenaIQ: a city digital twin demonstrator for Athens and nine other Greek cities on OpenStreetMap roads, with a SUMO simulation, live open-data feeds and a synthetic live traffic feed. Simulated and synthetic data are labelled.">
 <meta name="theme-color" content="#0b1220">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1220'/%3E%3Cpath d='M6 22 L13 12 L19 18 L26 8' fill='none' stroke='%232dd4a7' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="vendor/maplibre-gl.css">
-<link rel="stylesheet" href="css/styles.css?v=20261124j">
-<link rel="stylesheet" href="css/theme.css?v=20261124j">
+<link rel="stylesheet" href="css/styles.css?v=20261125a">
+<link rel="stylesheet" href="css/theme.css?v=20261125a">
 </head>
 <body>
 <header class="topbar">
@@ -17,7 +17,7 @@
     <!-- Presight logo (white lettering for dark backgrounds), self-hosted in assets/. -->
     <img class="brand-logo" src="assets/presight-logo.png" alt="Presight" width="496" height="142">
     <div>
-      <h1>UrbanIQ</h1>
+      <h1>AthenaIQ</h1>
       <p data-i18n="tagline">Real-time transportation intelligence and predictive simulation</p>
     </div>
   </div>
@@ -44,7 +44,7 @@
     <button type="button" class="btn small icon-btn" id="integTopBtn" aria-pressed="false" aria-label="Integration Studio" title="Integration Studio: connect devices and data sources"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h5v4H4zM4 14h5v4H4zM15 10h5v4h-5zM9 8h3v4h3M9 16h3v-4"/></svg></button>
     <button class="alert-btn" id="themeBtn" title="Switch between the dark and the light map">Light map</button>
     <button class="alert-btn" id="alertBtn" title="Open alerts"><span data-i18n="alerts">Alerts</span> <b id="alertCount">0</b></button>
-    <button class="btn small" id="langBtn" title="Switch language">తెలుగు</button>
+    <button class="btn small" id="langBtn" title="Switch language">Ελληνικά</button>
     <button class="btn small user" id="userBtn" hidden></button>
     <span class="now"><span class="now-date" id="dateLabel"></span><span class="clock" id="clock" aria-live="off">--:--</span></span>
   </div>
@@ -680,8 +680,8 @@
       <p class="insight" id="osRainNote"></p>
     </section>
     <section class="card" data-tab="osint" hidden>
-      <p class="notice"><strong>Indicative forecast.</strong> Risk is worked out here from forecast dust, wind gusts and visibility. It is not an official warning; the India Meteorological Department (IMD) issues those.</p>
-      <div class="card-head"><h2>Dust storm and air quality forecast</h2><span class="muted">Next 48 hours</span></div>
+      <p class="notice"><strong>Indicative forecast.</strong> Risk is worked out here from forecast dust, wind gusts and visibility. It is not an official warning; the Hellenic National Meteorological Service (EMY) issues those.</p>
+      <div class="card-head"><h2>Saharan dust and air quality forecast</h2><span class="muted">Next 48 hours</span></div>
       <div class="kpis"><div class="kpi"><span class="k-label">Highest risk</span><span class="k-value" id="osDustRisk">–</span></div><div class="kpi"><span class="k-label">Peak dust</span><span class="k-value" id="osDustMax">–</span></div><div class="kpi"><span class="k-label">Strongest gusts</span><span class="k-value" id="osDustGust">–</span></div><div class="kpi"><span class="k-label">Lowest visibility</span><span class="k-value" id="osDustVis">–</span></div></div>
       <div id="osDustChart" class="os-chart"></div>
       <div class="os-key" id="osDustKey"></div>
@@ -689,13 +689,13 @@
     </section>
     <section class="card" data-tab="osint" hidden>
       <div class="card-head"><h2>Earthquakes</h2><span class="muted" id="osQkSub"></span></div>
-      <p class="muted">Magnitude 4 and above within 2,000 km, last 30 days (USGS). Telangana lies in a low seismic zone (zone II); strong earthquakes in the Himalaya and Myanmar are rarely felt here.</p>
+      <p class="muted">Magnitude 4 and above within 1,000 km, last 30 days (USGS). Greece is the most earthquake-active country in Europe; magnitude 4 to 5 events are felt every few weeks.</p>
       <div class="kpis"><div class="kpi"><span class="k-label">Earthquakes</span><span class="k-value" id="osQkN">–</span></div><div class="kpi"><span class="k-label">Strongest</span><span class="k-value" id="osQkTop">–</span></div><div class="kpi"><span class="k-label">Nearest</span><span class="k-value" id="osQkNear">–</span></div><div class="kpi"><span class="k-label">Magnitude 5 and above</span><span class="k-value" id="osQk5">–</span></div></div>
       <ol class="corridors" id="osQkList"></ol>
     </section>
     <section class="card" data-tab="osint" hidden>
       <div class="card-head"><h2>Natural events</h2><span class="muted" id="osEvSub"></span></div>
-      <p class="muted">Events across South Asia and the Bay of Bengal in the last 60 days, from NASA EONET: cyclones and storms, floods, dust and haze, wildfires.</p>
+      <p class="muted">Events across the Eastern Mediterranean and the Balkans in the last 60 days, from NASA EONET: wildfires, storms, floods, dust and volcanoes.</p>
       <ol class="corridors" id="osEvList"></ol>
     </section>
     <section class="card" data-tab="osint" hidden>
@@ -806,8 +806,8 @@
     </section>
     <section class="card about" data-tab="model" hidden>
       <h2>About this demonstrator</h2>
-      <p>UrbanIQ shows traffic on the OpenStreetMap road network of Hyderabad and nine other Telangana cities. The roads are real. The <strong>traffic is simulated</strong> with Eclipse SUMO from assumed demand, and the live and historical views are a <strong>synthetic feed</strong> built from those simulated states. Accidents, fines, devices and camera views are illustrative.</p>
-      <p>It is an independent demonstrator, not an official model of the Government of Telangana or any other authority, and must not be used for planning, investment, operational, legal or safety decisions.</p>
+      <p>AthenaIQ shows traffic on the OpenStreetMap road network of Athens and nine other Greek cities. The roads are real. The <strong>traffic is simulated</strong> with Eclipse SUMO from assumed demand, and the live and historical views are a <strong>synthetic feed</strong> built from those simulated states. Accidents, fines, devices and camera views are illustrative.</p>
+      <p>It is an independent demonstrator, not an official model of the Hellenic Government, the Region of Attica or any other authority, and must not be used for planning, investment, operational, legal or safety decisions.</p>
       <p>Sources, method, configuration and limits are in the <a href="docs/README.md">docs folder</a>.</p>
       <p class="muted">Roads © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL). Base map: OpenStreetMap data, vector tiles by OpenFreeMap. Buildings: Microsoft Global ML Building Footprints. Buses: synthetic example network. Software: Eclipse SUMO, deck.gl, MapLibre GL JS.</p>
     </section>
@@ -816,7 +816,7 @@
   <header class="an-head">
     <div><h2>OSINT</h2><p>Open-source intelligence from public feeds: weather, hazards, flights, vessels, satellites and incidents. Real data, shown at real time.</p></div>
     <div class="op-tools">
-      <div class="seg" id="opViews" role="radiogroup" aria-label="Map view"><button type="button" data-v="region" role="radio" class="on" aria-checked="true">City 3D, buildings</button><button type="button" data-v="state" role="radio" aria-checked="false">Telangana 3D</button><button type="button" data-v="world" role="radio" aria-checked="false">World</button></div>
+      <div class="seg" id="opViews" role="radiogroup" aria-label="Map view"><button type="button" data-v="region" role="radio" class="on" aria-checked="true">City 3D, buildings</button><button type="button" data-v="state" role="radio" aria-checked="false">Greece 3D</button><button type="button" data-v="world" role="radio" aria-checked="false">World</button></div>
       <button type="button" class="btn" id="opOrbit" aria-pressed="true" title="Slowly circle the camera around the view">Orbit</button>
       <button type="button" class="btn" id="opClose">Close</button>
     </div>
@@ -927,8 +927,8 @@
     <div data-an-sec="pop" hidden>
       <div class="an-tiles" id="anPopTiles"></div>
       <div class="an-grid">
-        <figure class="an-card"><figcaption>Residents, Hyderabad metro districts (Census 2011)<span class="an-key" id="anPopRegKey"></span></figcaption><canvas id="anPopReg" class="an-chart"></canvas></figure>
-        <figure class="an-card"><figcaption>Telangana residents, projected, millions<span class="an-key" id="anPopLineKey"></span></figcaption><canvas id="anPopLine" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Residents, largest regions (ELSTAT 2021 census)<span class="an-key" id="anPopRegKey"></span></figcaption><canvas id="anPopReg" class="an-chart"></canvas></figure>
+        <figure class="an-card"><figcaption>Greece residents, projected, millions<span class="an-key" id="anPopLineKey"></span></figcaption><canvas id="anPopLine" class="an-chart"></canvas></figure>
         <figure class="an-card"><figcaption>Vehicles moving at the peak, by type (assumed mix)</figcaption><canvas id="anFleet" class="an-chart"></canvas></figure>
         <figure class="an-card"><figcaption>Network length by mode, km</figcaption><canvas id="anModes" class="an-chart"></canvas></figure>
       </div>
@@ -976,7 +976,7 @@
   <button type="button" class="svc svc-none" id="svcG">Google Maps</button>
   <button type="button" class="svc svc-none" id="svcTt">TomTom</button>
   <button type="button" class="style-btn" id="styleBtn" title="Change the interface style: Standard, Military, Police or Enterprise">Style</button>
-  <span class="status-right">UrbanIQ · Telangana · Real-time urban mobility intelligence and predictive simulation</span>
+  <span class="status-right">AthenaIQ · Greece · Real-time urban mobility intelligence and predictive simulation</span>
 </footer>
 
 <!-- Demo sign-in -->
@@ -985,7 +985,7 @@
 <div class="login" id="login" hidden>
   <div class="login-card">
     <img src="assets/presight-logo.png" alt="Presight" width="496" height="142">
-    <h2>UrbanIQ</h2>
+    <h2>AthenaIQ</h2>
     <p>Choose a role to continue.</p>
     <label class="field"><span>Your name (optional, for the audit log)</span><input id="loginName" type="text" maxlength="40" autocomplete="off"></label>
     <div class="btn-col" id="loginRoles"></div>
@@ -996,48 +996,49 @@
 <!-- Printed summary -->
 <div id="report" class="report" aria-hidden="true"></div>
 
-<script src="config.js?v=20261124j"></script>
-<script src="js/regions.js?v=20261124j"></script>
+<script src="config.js?v=20261125a"></script>
+<script src="js/regions.js?v=20261125a"></script>
 <script src="vendor/maplibre-gl.js"></script>
 <script src="vendor/deck.gl.min.js"></script>
 <script src="vendor/satellite.min.js"></script>
-<script src="js/daymodel.js?v=20261124j"></script>
-<script src="js/events.js?v=20261124j"></script>
-<script src="js/vehicles3d.js?v=20261124j"></script>
-<script src="js/app.js?v=20261124j"></script>
-<script src="js/ops.js?v=20261124j"></script>
-<script src="js/devices.js?v=20261124j"></script>
-<script src="js/i18n.js?v=20261124j"></script>
-<script src="js/response.js?v=20261124j"></script>
-<script src="js/zones.js?v=20261124j"></script>
-<script src="js/environment.js?v=20261124j"></script>
-<script src="js/buses.js?v=20261124j"></script>
-<script src="js/transit.js?v=20261124j"></script>
-<script src="js/operations.js?v=20261124j"></script>
-<script src="js/mobility.js?v=20261124j"></script>
-<script src="js/support.js?v=20261124j"></script>
-<script src="js/seaair.js?v=20261124j"></script>
-<script src="js/energy.js?v=20261124j"></script>
-<script src="js/tomtom.js?v=20261124j"></script>
-<script src="js/citycases.js?v=20261124j"></script>
-<script src="js/osint.js?v=20261124j"></script>
-<script src="js/livefeeds.js?v=20261124j"></script>
-<script src="js/osintmap.js?v=20261124j"></script>
-<script src="js/layertree.js?v=20261124j"></script>
-<script src="js/camwall.js?v=20261124j"></script>
-<script src="js/map3d.js?v=20261124j"></script>
-<script src="js/osintpage.js?v=20261124j"></script>
-<script src="js/diagnostics.js?v=20261124j"></script>
-<script src="js/platform.js?v=20261124j"></script>
-<script src="js/mapping-engine.js?v=20261124j"></script>
-<script src="js/integrations.js?v=20261124j"></script>
-<script src="js/vlm.js?v=20261124j"></script>
-<script src="js/analytics.js?v=20261124j"></script>
-<script src="js/analytics-ops.js?v=20261124j"></script>
-<script src="js/analytics-nav.js?v=20261124j"></script>
-<script src="js/telangana.js?v=20261124j"></script>
-<script src="js/ux.js?v=20261124j"></script>
-<script src="js/assistant.js?v=20261124j"></script>
-<script src="js/shell.js?v=20261124j"></script>
+<script src="js/daymodel.js?v=20261125a"></script>
+<script src="js/events.js?v=20261125a"></script>
+<script src="js/vehicles3d.js?v=20261125a"></script>
+<script src="js/app.js?v=20261125a"></script>
+<script src="js/ops.js?v=20261125a"></script>
+<script src="js/devices.js?v=20261125a"></script>
+<script src="js/i18n.js?v=20261125a"></script>
+<script src="js/response.js?v=20261125a"></script>
+<script src="js/zones.js?v=20261125a"></script>
+<script src="js/environment.js?v=20261125a"></script>
+<script src="js/buses.js?v=20261125a"></script>
+<script src="js/transit.js?v=20261125a"></script>
+<script src="js/operations.js?v=20261125a"></script>
+<script src="js/mobility.js?v=20261125a"></script>
+<script src="js/support.js?v=20261125a"></script>
+<script src="js/seaair.js?v=20261125a"></script>
+<script src="js/energy.js?v=20261125a"></script>
+<script src="js/tomtom.js?v=20261125a"></script>
+<script src="js/citycases.js?v=20261125a"></script>
+<script src="js/osint.js?v=20261125a"></script>
+<script src="js/livefeeds.js?v=20261125a"></script>
+<script src="js/osintmap.js?v=20261125a"></script>
+<script src="js/layertree.js?v=20261125a"></script>
+<script src="js/camwall.js?v=20261125a"></script>
+<script src="js/map3d.js?v=20261125a"></script>
+<script src="js/osintpage.js?v=20261125a"></script>
+<script src="js/diagnostics.js?v=20261125a"></script>
+<script src="js/platform.js?v=20261125a"></script>
+<script src="js/mapping-engine.js?v=20261125a"></script>
+<script src="js/integrations.js?v=20261125a"></script>
+<script src="js/vlm.js?v=20261125a"></script>
+<script src="js/analytics.js?v=20261125a"></script>
+<script src="js/analytics-ops.js?v=20261125a"></script>
+<script src="js/analytics-nav.js?v=20261125a"></script>
+<script src="js/localcases.js?v=20261125a"></script>
+<script src="js/greece.js?v=20261125a"></script>
+<script src="js/ux.js?v=20261125a"></script>
+<script src="js/assistant.js?v=20261125a"></script>
+<script src="js/shell.js?v=20261125a"></script>
 </body>
 </html>

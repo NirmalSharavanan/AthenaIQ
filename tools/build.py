@@ -509,7 +509,7 @@ def main():
     ap.add_argument("--osm-timestamp", default="")
     ap.add_argument("--scale", type=float, default=1.0, help="scale demand (for small test networks)")
     ap.add_argument("--extra", default="", help="OSM file with railways, cycle tracks and critical sites")
-    ap.add_argument("--region", default="", help="region id from tools/regions.py; empty = Hyderabad (the default study area)")
+    ap.add_argument("--region", default="", help="region id from tools/regions.py; empty = Athens (the default study area)")
     ap.add_argument("--mode", default="sumo", choices=["sumo", "synthetic"], help="sumo = run the simulation; synthetic = traffic pattern without a simulation")
     ap.add_argument("--no-buildings", action="store_true", help="skip the building footprints")
     args = ap.parse_args()
@@ -598,7 +598,7 @@ def main():
         "built": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "osm_timestamp": args.osm_timestamp.strip() or "unknown",
         "sumo": subprocess.run(["sumo", "--version"], capture_output=True, text=True).stdout.splitlines()[0].strip(),
-        "region": args.region or "hyderabad", "region_name": region["name"] if region else "Hyderabad", "traffic": "simulated" if args.mode == "sumo" else "synthetic",
+        "region": args.region or "athens", "region_name": region["name"] if region else "Athens", "traffic": "simulated" if args.mode == "sumo" else "synthetic",
         "bbox": C.BBOX, "sim_begin": C.SIM_BEGIN, "sim_end": C.SIM_END,
         "display_begin": C.DISPLAY_BEGIN, "bin_seconds": C.BIN_SECONDS, "bins": n_bins,
         "trip_sample": C.TRIP_SAMPLE, "sim_sample": C.SIM_SAMPLE,

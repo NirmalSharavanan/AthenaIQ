@@ -38,9 +38,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: |
-            build/telangana.osm.pbf
+            build/state.osm.pbf
             build/osm_timestamp.txt
-          key: geofabrik-telangana-${{ steps.week.outputs.week }}
+          key: osm-greece-${{ steps.week.outputs.week }}
       - name: Fetch and filter OpenStreetMap roads
         run: bash tools/fetch_osm.sh build
       - name: Save OpenStreetMap extract
@@ -48,9 +48,9 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: |
-            build/telangana.osm.pbf
+            build/state.osm.pbf
             build/osm_timestamp.txt
-          key: geofabrik-telangana-${{ steps.week.outputs.week }}
+          key: osm-greece-${{ steps.week.outputs.week }}
       - name: Build network, simulate, export
         run: python tools/build.py --osm build/roads.osm --build build --out data --extra build/extra.osm --osm-timestamp "$(cat build/osm_timestamp.txt)"
       - name: Summary
@@ -58,7 +58,7 @@ jobs:
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
           m = json.load(open('data/meta.json'))
-          print('### UrbanIQ data build: Hyderabad')
+          print('### AthenaIQ data build: Athens')
           print('network:', m['network'])
           print('\ndemand:', m['demand'])
           for s in m['scenarios']:

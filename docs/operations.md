@@ -5,7 +5,7 @@
 The workflow `.github/workflows/build-data.yml` runs when files under `tools/` or the workflow itself change, and on manual dispatch.
 
 1. It installs `osmium-tool` and the Python packages in `tools/requirements.txt` (including Eclipse SUMO).
-2. It downloads the Geofabrik India Southern Zone extract, cuts it to Telangana (cached for a week) and filters it.
+2. It downloads the Geofabrik Greece Southern Zone extract, cuts it to Greece (cached for a week) and filters it.
 3. It runs `tools/build.py`: network, demand, three simulations, export.
 4. It commits the result to `data/` on the same branch with the message `Rebuild twin data [skip ci]`.
 

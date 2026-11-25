@@ -97,7 +97,7 @@
   }
   function renderIncidents() {
     $('lyTtIncN').textContent = incidentsAt ? '(' + incidents.length + ' now)' : '';
-    $('ttIncNote').textContent = !has() ? 'Add a TomTom key in Reports to see live incidents.' : lastError ? lastError : incidentsAt ? incidents.length + ' live incidents · updated ' + new Date(incidentsAt).toLocaleTimeString('en-GB', { hour12: false, timeZone: (CFG.time || {}).timeZone || 'Asia/Kolkata' }) : 'Loading…';
+    $('ttIncNote').textContent = !has() ? 'Add a TomTom key in Reports to see live incidents.' : lastError ? lastError : incidentsAt ? incidents.length + ' live incidents · updated ' + new Date(incidentsAt).toLocaleTimeString('en-GB', { hour12: false, timeZone: (CFG.time || {}).timeZone || 'Europe/Athens' }) : 'Loading…';
     $('ttIncCount').textContent = has() && incidentsAt ? incidents.length : '–';
     $('dLiveInc').textContent = has() && incidentsAt ? incidents.length : '–';
     var ol = $('ttIncList'); ol.innerHTML = '';
@@ -123,7 +123,7 @@
         ol.appendChild(C.listButton(r.closed ? 'severe' : C.level(ratio), r.st[0], r.closed ? 'Road closed' : Math.round(100 * ratio) + '% of free flow (' + Math.round(r.free) + ' km/h)', Math.round(r.now) + '<small>km/h</small>', function () { T.api && T.api.goSite ? T.api.goSite(r.st[0]) : null; }));
       });
       if (!rows.length) { ol.innerHTML = '<li class="muted">' + (lastError || 'No live speeds were returned.') + '</li>'; }
-      $('ttSpeedNote').textContent = rows.length ? 'Live, slowest first · ' + new Date().toLocaleTimeString('en-GB', { hour12: false, timeZone: (CFG.time || {}).timeZone || 'Asia/Kolkata' }) : '';
+      $('ttSpeedNote').textContent = rows.length ? 'Live, slowest first · ' + new Date().toLocaleTimeString('en-GB', { hour12: false, timeZone: (CFG.time || {}).timeZone || 'Europe/Athens' }) : '';
       $('ttCredit').hidden = false;
     });
   }

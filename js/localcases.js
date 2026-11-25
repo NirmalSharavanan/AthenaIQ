@@ -1,24 +1,24 @@
-/* UrbanIQ: Telangana use cases, added as cards to the existing menu sections (no new menu).
+/* AthenaIQ: Greek use cases, added as cards to the existing menu sections (no new menu).
  *
- *   Dashboard    Telangana cities: one tile per city (weather, rain, traffic, fires), opens that city
- *   Congestion   mixed traffic: simulated car units split into two-wheelers, autos, cars, buses, goods
- *   Incidents    Outer Ring Road by sector (Hyderabad)
- *   Fines        helmet, triple-riding and other e-challan types, with sample TS challans
- *   Transit      Hyderabad Metro lines and crowding by hour
- *   Planning     festival and event traffic plans (Ganesh immersion, Bonalu, Bathukamma, Sankranti)
- *   Emergency    monsoon waterlogging watch; heatwave operations; ambulance green corridor
- *   Environment  air quality in India AQI categories; lake and river levels
+ *   Dashboard    Greek cities: one tile per city (weather, rain, traffic, fires), opens that city
+ *   Congestion   traffic mix: simulated car units split into cars, motorcycles, buses and vans
+ *   Incidents    Attiki Odos by sector (Athens)
+ *   Fines        offences by type with sample tickets
+ *   Transit      Athens Metro (Thessaloniki Metro in Thessaloniki) and crowding by hour
+ *   Planning     event and holiday plans (Athens Marathon, Easter and August exodus, parades, cruise days)
+ *   Emergency    flash-flood watch; heatwave and wildfire risk; ambulance green corridor
+ *   Environment  air quality in European AQI bands; streams and reservoir levels
  *
- * Real inputs: OpenStreetMap roads, signals and sites; Open-Meteo weather, rain and particles; NASA FIRMS fires.
+ * Real inputs: OpenStreetMap roads, signals and sites; Open-Meteo weather, rain, wind and particles; NASA FIRMS fires.
  * Everything else is estimated from the simulation or synthetic, and each card says which.
  */
 (function () {
   'use strict';
   var T = window.IntelliTwin, C = T.core, CFG = C.CFG, $ = C.$, num = C.num, clock = C.clock, state = T.state, K = T.kit;
-  var TG = CFG.telangana || {}, rnd = K.rnd, hashStr = K.hashStr, esc = K.esc, HYD = C.region.isDefault;
+  var TG = CFG.local || {}, rnd = K.rnd, hashStr = K.hashStr, esc = K.esc, HYD = C.region.isDefault;
   var bb = (C.meta() || {}).bbox, kx = 111320 * Math.cos((bb ? (bb[1] + bb[3]) / 2 : 17.9) * Math.PI / 180), ky = 110570;
   function metres(a, b) { return Math.hypot((a[0] - b[0]) * kx, (a[1] - b[1]) * ky); }
-  var SYN = '<strong>Synthetic data.</strong> ', EST = '<strong>Estimated.</strong> ', EXA = '<strong>Example list, positions approximate.</strong> ';
+  var CUR = (CFG.currency || {}).symbol || '\u20ac', SYN = '<strong>Synthetic data.</strong> ', EST = '<strong>Estimated.</strong> ', EXA = '<strong>Example list, positions approximate.</strong> ';
   function tile(label, id) { return '<div class="kpi"><span class="k-label">' + label + '</span><span class="k-value" id="' + id + '">–</span></div>'; }
   function set(id, html) { var el = $(id); if (el) { el.innerHTML = html; } }
   function card(tab, id, title, sub, notice, body, first) {
@@ -38,7 +38,7 @@
   function sum(a, n) { var t = 0; for (var i = 0; i < Math.min(n, (a || []).length); i++) { t += a[i] || 0; } return t; }
   var shown = {};   // map overlays of the cards that are open
 
-  /* ============================== Dashboard: Telangana cities ============================== */
+  /* ============================== Dashboard: cities ============================== */
   var metas = {};
   function loadMetas() {
     (CFG.regions || []).forEach(function (r) {
@@ -62,7 +62,7 @@
     }).join('');
   }
 
-  /* ============================== Congestion: mixed traffic ============================== */
+  /* ============================== Congestion: traffic mix ============================== */
   function renderMix() {
     var k = C.kpiAt(state.scenario, state.t) || {}, pcu = k.vehicles || 0, mix = TG.mix || [], avg = mix.reduce(function (a, m) { return a + m[1] * m[2]; }, 0) || 1;
     var veh = pcu / avg;
@@ -72,14 +72,14 @@
     set('tgMixBars', mix.map(function (m) { var v = veh * m[1]; return C.barRow(esc(m[0]), Math.round(m[1] * 100) + '% of vehicles', num(Math.round(v)), v / max); }).join(''));
   }
 
-  /* ============================== Incidents: Outer Ring Road ============================== */
+  /* ============================== Incidents: ring motorway ============================== */
   var orr = null, SECT = ['North', 'North-east', 'East', 'South-east', 'South', 'South-west', 'West', 'North-west'];
   function orrEdges() {
     if (orr) { return orr; }
-    var names = C.names(), ctr = HYD ? [78.47, 17.39] : null; orr = [];
+    var R = TG.ring || {}, names = C.names(), ctr = HYD && R.centre ? R.centre : null, re = new RegExp(R.match || '^$', 'i'); orr = [];
     if (!ctr) { return orr; }
     C.edges().forEach(function (e, i) {
-      var n = names[e.n] || ''; if (!/^(Nehru )?ORR$|^(Nehru )?Outer Ring Road$/i.test(n)) { return; }
+      var n = names[e.n] || ''; if (!re.test(n)) { return; }
       var p = e.path[e.path.length >> 1], ang = (Math.atan2((p[1] - ctr[1]) * ky, (p[0] - ctr[0]) * kx) * 180 / Math.PI + 360) % 360;
       orr.push({ i: i, sec: Math.round(((90 - ang + 360) % 360) / 45) % 8, m: e.m, path: e.path });
     });
@@ -105,26 +105,27 @@
   }
 
   /* ============================== Fines: e-challan types ============================== */
-  function plate(seed, n) { var d = ['09', '10', '11', '12', '13', '07', '08', '15'], L = 'ABCDEFGHJKMNPRSTUVWXYZ'; return 'TS ' + d[Math.floor(rnd(seed, n) * d.length)] + ' ' + L[Math.floor(rnd(seed, n + 1) * L.length)] + L[Math.floor(rnd(seed, n + 2) * L.length)] + ' ' + String(1000 + Math.floor(rnd(seed, n + 3) * 9000)); }
+  function plate(seed, n) { var L = (TG.plate || {}).letters || 'ABEZHIKMNOPTYX'; return L[Math.floor(rnd(seed, n) * L.length)] + L[Math.floor(rnd(seed, n + 1) * L.length)] + L[Math.floor(rnd(seed, n + 2) * L.length)] + '-' + String(1000 + Math.floor(rnd(seed, n + 3) * 9000)); }
   function renderChallan() {
     var et = C.eventTotals(state.scenario, state.t), total = et ? et.fines : 0, types = TG.challan || [];
-    var twoW = (types[0] ? types[0][1] : 0) + (types[1] ? types[1][1] : 0) + (types[2] ? types[2][1] : 0);
+    var twoW = types.filter(function (t) { return (TG.twoWheelerTypes || []).indexOf(t[0]) >= 0; }).reduce(function (a, t) { return a + t[1]; }, 0);
     set('tgChTot', num(total)); set('tgCh2w', Math.round(twoW * 100) + '<small>%</small>');
-    set('tgChVal', '₹' + num(Math.round(types.reduce(function (a, t) { return a + total * t[1] * t[2]; }, 0))));
+    set('tgChVal', CUR + num(Math.round(types.reduce(function (a, t) { return a + total * t[1] * t[2]; }, 0))));
     var max = 1; types.forEach(function (t) { max = Math.max(max, total * t[1]); });
-    set('tgChBars', types.map(function (t) { var v = Math.round(total * t[1]); return C.barRow(esc(t[0]), '₹' + num(t[2]) + ' each', num(v), v / max); }).join(''));
+    set('tgChBars', types.map(function (t) { var v = Math.round(total * t[1]); return C.barRow(esc(t[0]), CUR + num(t[2]) + ' each', num(v), v / max); }).join(''));
     var seed = hashStr('ch' + C.region.id + state.date + Math.floor(state.t / 600)), sp = sites();
     list('tgChList', [0, 1, 2, 3, 4, 5].map(function (n) {
       var t = types[Math.floor(rnd(seed, n * 7) * types.length)] || ['Violation', 1, 0], s = sp[Math.floor(rnd(seed, n * 7 + 5) * sp.length)] || { name: '–', at: null };
       var tm = Math.max(0, state.t - Math.floor(rnd(seed, n * 7 + 6) * 3000));
-      return row('moderate', plate(seed, n * 7) + ' · ' + t[0], s.name + ' · ' + clock(tm) + ' · ₹' + num(t[2]) + ' · synthetic', '', function () { if (s.at) { C.flyTo(s.at[0], s.at[1], 15); } });
+      return row('moderate', plate(seed, n * 7) + ' · ' + t[0], s.name + ' · ' + clock(tm) + ' · ' + CUR + num(t[2]) + ' · synthetic', '', function () { if (s.at) { C.flyTo(s.at[0], s.at[1], 15); } });
     }));
   }
 
-  /* ============================== Transit: Hyderabad Metro ============================== */
+  /* ============================== Transit: metro ============================== */
+  function metro() { return HYD ? TG.metro : (TG.metroByRegion || {})[C.region.id]; }
   function metroLoad(h) { return 0.18 + 0.75 * Math.exp(-Math.pow((h - 9.2) / 1.3, 2)) + 0.7 * Math.exp(-Math.pow((h - 18.6) / 1.6, 2)) + (h < 6 || h > 23 ? -0.15 : 0); }
   function renderMetro() {
-    var M = TG.metro; if (!M) { return; }
+    var M = metro(); if (!M) { return; }
     var h = state.t / 3600, load = Math.max(0, Math.min(1.15, metroLoad(h)));
     set('tgMeKm', '~' + M.totalKm + '<small>km</small>'); set('tgMeSt', M.stations); set('tgMeLoad', Math.round(load * 100) + '<small>%</small>');
     var seed = hashStr('metro' + state.date);
@@ -138,6 +139,7 @@
   var fest = null;
   function festivals() {
     if (HYD) { return TG.festivals || []; }
+    if ((TG.festivalsByRegion || {})[C.region.id]) { return TG.festivalsByRegion[C.region.id]; }
     var c = sites(['centre'])[0] || sites()[0]; if (!c) { return []; }
     return [{ id: 'proc', name: 'Festival procession, ' + c.name + ' (example)', season: 'any', crowd: 20000, at: c.at, radiusM: 1200, areas: [{ name: c.name, at: c.at }],
       actions: ['Close the procession route to vehicles during the slot', 'Signed diversions around the town centre', 'Parking at the edge of town with shuttle buses', 'Medical posts and lost-and-found on the route'] }];
@@ -173,15 +175,28 @@
       return row(p.st === 'alert' ? 'severe' : p.st === 'watch' ? 'heavy' : 'free', p.name + (p.under ? ' (underpass)' : ''), (p.st === 'alert' ? 'Likely waterlogging: close and divert' : p.st === 'watch' ? 'Watch: pumps on standby' : 'No action') + ' · ' + num(Math.round(p.load.veh)) + ' vehicles nearby', p.st === 'ok' ? 'OK' : p.st === 'alert' ? 'Alert' : 'Watch', function () { C.flyTo(p.at[0], p.at[1], 15.5); C.showPopup(p.at, p.name, [['Status', p.st === 'alert' ? 'Likely waterlogging' : p.st === 'watch' ? 'Watch' : 'Normal'], ['Rain, next 6 h', w.rain6.toFixed(0) + ' mm' + (cloudburst ? ' (exercise)' : '')], ['Vehicles within 600 m', num(Math.round(p.load.veh))]], 'Rain from Open-Meteo; the point list is an example'); });
     }));
   }
+  // Heat and wildfire weather: hottest hour and strongest gust in the next 48 hours. Indicative only.
+  function fireRisk(p) {
+    var H = TG.heat || {}, mx = -99, gmax = 0, risk = 0;
+    for (var i = 0; i < Math.min(48, (p.temp || []).length); i++) {
+      var t = p.temp[i], g = (p.gust || [])[i] || 0; if (t == null) { continue; }
+      mx = Math.max(mx, t); gmax = Math.max(gmax, g);
+      var r = t >= 35 && g >= (H.fireWindKmh || 40) + 15 ? 3 : t >= 30 && g >= (H.fireWindKmh || 40) ? 2 : t >= 30 && g >= 25 ? 1 : 0;
+      risk = Math.max(risk, r);
+    }
+    if (p.now && p.now.humidity != null && p.now.humidity < 25 && risk >= 1) { risk = Math.min(3, risk + 1); }
+    return { mx: mx, gust: gmax, risk: risk };
+  }
   function renderHeat() {
-    var H = TG.heat || {}, places = T.osint && T.osint.places ? (T.osint.places() || []) : [];
-    var rows = places.map(function (p) { var mx = Math.max.apply(null, (p.temp || []).slice(0, 48).map(function (v) { return v == null ? -99 : v; })); return { name: p.name, mx: mx, at: [p.lon, p.lat] }; }).sort(function (a, b) { return b.mx - a.mx; });
-    var hot = rows.filter(function (r) { return r.mx >= (H.heatC || 40); }).length;
-    set('tgHtMax', rows.length ? Math.round(rows[0].mx) + '<small>°C</small>' : '–'); set('tgHtN', hot);
-    $('tgHtSub').textContent = rows.length ? 'Highest in the next 48 h: ' + rows[0].name : '';
-    list('tgHtList', rows.map(function (r) { var lv = r.mx >= (H.severeC || 45) ? 'severe' : r.mx >= (H.heatC || 40) ? 'heavy' : r.mx >= 37 ? 'moderate' : 'free';
-      return row(lv, r.name, 'Up to ' + Math.round(r.mx) + ' °C in the next 48 hours' + (lv === 'severe' ? ' · severe heat' : lv === 'heavy' ? ' · heat: apply the heat plan' : ''), '', null); }));
-    // Busiest junctions now: where traffic police need shade and water first.
+    var H = TG.heat || {}, places = T.osint && T.osint.places ? (T.osint.places() || []) : [], fires = (T.live && T.live.fires() || {}).list || [];
+    var rows = places.map(function (p) { var f = fireRisk(p); var c = [p.lon, p.lat]; return { name: p.name, mx: f.mx, gust: f.gust, risk: f.risk, at: c, fires: fires.filter(function (x) { return metres(x.at, c) <= 30000; }).length }; })
+      .sort(function (a, b) { return b.risk - a.risk || b.mx - a.mx; });
+    var hot = rows.filter(function (r) { return r.mx >= (H.heatC || 40); }).length, fr = rows.filter(function (r) { return r.risk >= 2; }).length;
+    set('tgHtMax', rows.length ? Math.round(Math.max.apply(null, rows.map(function (r) { return r.mx; }))) + '<small>°C</small>' : '–'); set('tgHtN', hot); set('tgHtF', fr);
+    $('tgHtSub').textContent = rows.length ? 'Next 48 hours, ' + rows.length + ' cities' : '';
+    var RL = ['Low', 'Moderate', 'High', 'Very high'];
+    list('tgHtList', rows.map(function (r) { var lv = r.risk >= 3 || r.mx >= (H.severeC || 44) ? 'severe' : r.risk >= 2 || r.mx >= (H.heatC || 40) ? 'heavy' : r.risk >= 1 || r.mx >= 35 ? 'moderate' : 'free';
+      return row(lv, r.name, 'Up to ' + Math.round(r.mx) + ' °C, gusts ' + Math.round(r.gust) + ' km/h · fire weather ' + RL[r.risk] + (r.fires ? ' · ' + r.fires + ' satellite heat detection' + (r.fires > 1 ? 's' : '') + ' within 30 km' : ''), RL[r.risk], function () { C.flyTo(r.at[0], r.at[1], 11); }); }));
     var sig = C.signals() || [], scored = sig.slice(0, 400).map(function (s) { return { at: s, l: areaLoad(s, 150) }; }).sort(function (a, b) { return b.l.veh - a.l.veh; }).slice(0, 5);
     var names = C.names();
     set('tgHtJ', scored.map(function (s) { var near = roadsNear(s.at, 120)[0], nm = near != null ? names[C.edges()[near].n] || 'Junction' : 'Junction'; return '<li>' + esc(nm) + ' · ' + num(Math.round(s.l.veh)) + ' vehicles nearby</li>'; }).join(''));
@@ -206,12 +221,13 @@
     C.redraw();
   }
 
-  /* ============================== Environment: India AQI, lakes ============================== */
-  var BP = { pm25: [[0, 30, 0, 50], [30, 60, 51, 100], [60, 90, 101, 200], [90, 120, 201, 300], [120, 250, 301, 400], [250, 500, 401, 500]],
-    pm10: [[0, 50, 0, 50], [50, 100, 51, 100], [100, 250, 101, 200], [250, 350, 201, 300], [350, 430, 301, 400], [430, 600, 401, 500]] };
-  var AQC = ['Good', 'Satisfactory', 'Moderate', 'Poor', 'Very poor', 'Severe'], AQD = ['free', 'free', 'moderate', 'heavy', 'severe', 'severe'];
+  /* ============================== Environment: European AQI, streams and reservoirs ============================== */
+  // European Air Quality Index bands (EEA, as used by Open-Meteo): index 0–20 good … above 100 extremely poor.
+  var BP = { pm25: [[0, 10, 0, 20], [10, 20, 20, 40], [20, 25, 40, 60], [25, 50, 60, 80], [50, 75, 80, 100], [75, 800, 100, 500]],
+    pm10: [[0, 20, 0, 20], [20, 40, 20, 40], [40, 50, 40, 60], [50, 100, 60, 80], [100, 150, 80, 100], [150, 1200, 100, 500]] };
+  var AQC = ['Good', 'Fair', 'Moderate', 'Poor', 'Very poor', 'Extremely poor'], AQD = ['free', 'free', 'moderate', 'heavy', 'severe', 'severe'];
   function sub(v, bps) { if (v == null) { return null; } for (var i = 0; i < bps.length; i++) { var b = bps[i]; if (v <= b[1] || i === bps.length - 1) { return Math.round(b[2] + (Math.min(v, b[1]) - b[0]) * (b[3] - b[2]) / (b[1] - b[0])); } } return null; }
-  function aqi(n) { var a = sub(n.pm25, BP.pm25), b = sub(n.pm10, BP.pm10); if (a == null && b == null) { return null; } var v = Math.max(a || 0, b || 0); return { v: v, cat: v <= 50 ? 0 : v <= 100 ? 1 : v <= 200 ? 2 : v <= 300 ? 3 : v <= 400 ? 4 : 5, by: (a || 0) >= (b || 0) ? 'PM2.5' : 'PM10' }; }
+  function aqi(n) { var a = sub(n.pm25, BP.pm25), b = sub(n.pm10, BP.pm10); if (a == null && b == null) { return null; } var v = Math.max(a || 0, b || 0); return { v: v, cat: v <= 20 ? 0 : v <= 40 ? 1 : v <= 60 ? 2 : v <= 80 ? 3 : v <= 100 ? 4 : 5, by: (a || 0) >= (b || 0) ? 'PM2.5' : 'PM10' }; }
   function renderAqi() {
     var places = T.osint && T.osint.places ? (T.osint.places() || []) : [], here = wx();
     var a = here ? aqi(here.now) : null;
@@ -223,7 +239,7 @@
   }
   function lakes() {
     if (HYD) { return TG.lakes || []; }
-    return C.sites().filter(function (s) { return /lake|cheruvu|dam|tank|sagar/i.test(s[0]); }).map(function (s) { return { name: s[0], at: [s[1], s[2]] }; });
+    return C.sites().filter(function (s) { return /lake|reservoir|river|stream|λίμνη|ποταμ/i.test(s[0]); }).map(function (s) { return { name: s[0], at: [s[1], s[2]] }; });
   }
   function renderLakes() {
     var L = lakes(), p = wx(), rain24 = cloudburst ? 60 : p ? sum(p.rain, 24) : 0, seed = hashStr('lake' + C.region.id + state.date);
@@ -236,37 +252,37 @@
 
   /* ============================== cards ============================== */
   function build() {
-    card('dash', 'tgCity', 'Telangana cities', 'Tap a city to open it', '<strong>Real weather and fires; simulated traffic.</strong> Trip speed is the simulated average over the morning, not a measurement.',
+    card('dash', 'tgCity', TG.citiesTitle || 'Cities', 'Tap a city to open it', '<strong>Real weather and fires; simulated traffic.</strong> Trip speed is the simulated average over the morning, not a measurement.',
       '<div class="tg-cities" id="tgCities"></div>', true);
-    card('cong', 'tgMix', 'Mixed traffic', 'Vehicles moving now', EST + 'The simulation counts car units; they are split into vehicle types with assumed shares and IRC passenger-car units.',
+    card('cong', 'tgMix', 'Traffic mix', 'Vehicles moving now', EST + (TG.mixNote || ''),
       '<div class="kpis">' + tile('Vehicles, all types', 'tgMixTot') + tile('Car units simulated', 'tgMixPcu') + '</div><div class="bars" id="tgMixBars"></div>');
     if (HYD && orrEdges().length) {
-      card('inc', 'tgOrr', 'Outer Ring Road', 'By sector', EST + 'Speeds from the simulation; breakdowns are synthetic.',
-        '<div class="kpis">' + tile('ORR modelled', 'tgOrrKm') + tile('Vehicles on it', 'tgOrrVeh') + tile('Breakdowns now', 'tgOrrBr') + '</div><ol class="corridors" id="tgOrrList"></ol>');
+      card('inc', 'tgOrr', (TG.ring || {}).title || 'Ring road', 'By sector', EST + 'Speeds from the simulation; breakdowns are synthetic.',
+        '<div class="kpis">' + tile('Length modelled', 'tgOrrKm') + tile('Vehicles on it', 'tgOrrVeh') + tile('Breakdowns now', 'tgOrrBr') + '</div><ol class="corridors" id="tgOrrList"></ol>');
     }
-    card('fines', 'tgCh', 'E-challan by violation', 'Helmet, triple riding and more', SYN + 'Violation shares are assumed and fine values are placeholders; the challans below are generated.',
-      '<div class="kpis">' + tile('Challans today', 'tgChTot') + tile('Two-wheeler offences', 'tgCh2w') + tile('Value', 'tgChVal') + '</div><div class="bars" id="tgChBars"></div><h3 class="sub-h">Latest challans</h3><ol class="corridors" id="tgChList"></ol>');
-    if (HYD && TG.metro) {
-      card('bus', 'tgMe', 'Hyderabad Metro', 'Lines and crowding', '<strong>Line facts as published; crowding is synthetic.</strong> Metro and MMTS tracks on the map come from OpenStreetMap (Railway layer).',
+    card('fines', 'tgCh', TG.challanTitle || 'Offences by type', TG.challanSub || '', SYN + 'Offence shares are assumed and fine values are placeholders; the tickets below are generated.',
+      '<div class="kpis">' + tile('Tickets today', 'tgChTot') + tile('Two-wheeler offences', 'tgCh2w') + tile('Value', 'tgChVal') + '</div><div class="bars" id="tgChBars"></div><h3 class="sub-h">Latest tickets</h3><ol class="corridors" id="tgChList"></ol>');
+    if (metro()) {
+      card('bus', 'tgMe', HYD ? 'Athens Metro' : C.region.name + ' Metro', 'Lines and crowding', '<strong>Line facts as published; crowding is synthetic.</strong> Metro and rail tracks on the map come from OpenStreetMap (Railway layer). Source: ' + esc(metro().source) + '.',
         '<div class="kpis">' + tile('Network', 'tgMeKm') + tile('Stations', 'tgMeSt') + tile('Average train load now', 'tgMeLoad') + '</div><ol class="corridors" id="tgMeList"></ol>');
     }
-    card('plan', 'tgFe', 'Festival and event plans', '', EXA + 'Plans are templates for the exercise; crowds are examples. Use them with the Traffic Police’s own plans.',
+    card('plan', 'tgFe', 'Event and holiday plans', '', EXA + 'Plans are templates for the exercise; crowds are examples. Use them with the Traffic Police’s own plans.',
       '<label class="field"><span>Plan</span><select id="tgFeSel"></select></label><div class="kpis">' + tile('Expected crowd', 'tgFeCrowd') + tile('Roads in the area', 'tgFeRoads') + tile('Speed there now', 'tgFeSpeed') + '</div>' +
       '<div id="tgFeActs"></div><div class="search-row"><button type="button" class="btn small" id="tgFeShow">Show on the map</button></div>');
-    card('emg', 'tgWl', 'Monsoon waterlogging watch', '', EXA + 'Rain is the real Open-Meteo forecast; ' + (HYD ? 'replace the points with GHMC’s waterlogging list.' : 'the points are this city’s site list; replace them with the municipality’s waterlogging points.'),
+    card('emg', 'tgWl', (TG.waterlogging || {}).title || 'Flash-flood watch', '', EXA + 'Rain is the real Open-Meteo forecast; ' + (HYD ? 'replace the points with ' + ((TG.waterlogging || {}).authority || 'the official list') + '.' : 'the points are this city’s site list; replace them with the municipality’s flood-prone points.'),
       '<div class="kpis">' + tile('Rain, next 6 h', 'tgWlRain') + tile('Points on alert', 'tgWlAl') + tile('Points to watch', 'tgWlWa') + '</div><ol class="corridors" id="tgWlList"></ol>' +
       '<div class="search-row"><button type="button" class="btn small" id="tgWlEx" aria-pressed="false">Exercise: 60 mm cloudburst</button></div>');
-    card('emg', 'tgHt', 'Heatwave operations', '', '<strong>Real forecast, not an IMD warning.</strong> Temperatures from Open-Meteo for the ten cities; IMD issues the official heatwave warnings.',
-      '<div class="kpis">' + tile('Hottest, next 48 h', 'tgHtMax') + tile('Cities at 40 °C or more', 'tgHtN') + '</div><ol class="corridors" id="tgHtList"></ol>' +
+    card('emg', 'tgHt', 'Heatwave and wildfire risk', '', '<strong>Real forecast, indicative risk.</strong> Temperatures and gusts from Open-Meteo and heat detections from NASA FIRMS for the ten cities. The official fire-risk map comes from the General Secretariat for Civil Protection; heat warnings from ' + esc(TG.weatherService || 'the national weather service') + '.',
+      '<div class="kpis">' + tile('Hottest, next 48 h', 'tgHtMax') + tile('Cities at 40 °C or more', 'tgHtN') + tile('High fire weather', 'tgHtF') + '</div><ol class="corridors" id="tgHtList"></ol>' +
       '<h3 class="sub-h">Busiest junctions now: shade and water for traffic police first</h3><ol class="plain" id="tgHtJ"></ol>' +
-      '<ol class="steps"><li>Shaded halts and drinking water at the busiest junctions</li><li>Roadworks only before 11:00 and after 16:00</li><li>Extra breakdown patrols on the Outer Ring Road and highways</li><li>Watch camera feeds for vehicle fires</li></ol>');
-    card('emg', 'tgGc', 'Ambulance green corridor', '108 ambulance to hospital', EST + 'Route and time from the simulated speeds; hospitals from OpenStreetMap.',
+      '<ol class="steps"><li>Send ' + esc(TG.emergencyNumber || '112') + ' messages before evacuations, not during</li><li>Keep evacuation routes one-way outbound and hold traffic for fire engines</li><li>Roadworks only in the early morning; extra breakdown patrols on the motorways</li><li>Cooled spaces at metro stations and town halls</li></ol>');
+    card('emg', 'tgGc', 'Ambulance green corridor', (TG.ambulance || 'Ambulance') + ' to hospital', EST + 'Route and time from the simulated speeds; hospitals from OpenStreetMap.',
       '<label class="field"><span>From</span><select id="tgGcFrom"></select></label><label class="field"><span>To hospital</span><select id="tgGcHosp"></select></label>' +
       '<div class="search-row"><button type="button" class="btn small primary" id="tgGcGo">Plan green corridor</button><button type="button" class="btn small" id="tgGcClr" hidden>Clear</button></div><p class="muted" id="tgGcOut"></p>');
-    card('env', 'tgAq', 'Air quality, India AQI', 'Modelled now', '<strong>Modelled, not station readings.</strong> PM2.5 and PM10 from Open-Meteo (CAMS), shown in CPCB AQI categories from current hourly values; the official AQI uses 24-hour averages.',
+    card('env', 'tgAq', 'Air quality, European AQI', 'Modelled now', '<strong>Modelled, not station readings.</strong> PM2.5 and PM10 from Open-Meteo (CAMS), shown in European Air Quality Index bands from current hourly values. Saharan dust episodes show up as high PM10.',
       '<div class="kpis">' + tile('AQI here', 'tgAqV') + tile('Category', 'tgAqC') + tile('Led by', 'tgAqBy') + '</div><ol class="corridors" id="tgAqList"></ol>' +
-      '<p class="muted" id="tgAqSt">Official stations (CPCB CAAQMS) in Hyderabad are shown on the map when this card is open; connecting their readings needs a data.gov.in API key in the Live data workflow.</p>');
-    card('env', 'tgLk', 'Lake and river levels', '', SYN + 'Levels are synthetic and rise with the rain forecast; connect real gauges through Integration Studio.',
+      '<p class="muted" id="tgAqSt">Stations of the ' + esc(TG.aqNetwork || 'official network') + ' are shown on the map when this card is open (approximate positions); connecting their readings needs ' + esc(TG.aqConnect || 'an open-data feed') + '.</p>');
+    card('env', 'tgLk', 'Streams and reservoir levels', '', SYN + 'Levels are synthetic and rise with the rain forecast; connect real gauges through Integration Studio.',
       '<ol class="corridors" id="tgLkList"></ol>');
 
     // Controls.
@@ -316,7 +332,7 @@
     }
     if (K.tabOpen('env') && HYD) {
       out.push(new deck.ScatterplotLayer({ id: 'tg-aq', data: TG.aqStations || [], pickable: true, radiusUnits: 'pixels', getPosition: function (s) { return s.at; }, getRadius: 6, getFillColor: [120, 90, 200, 230], stroked: true, getLineColor: [255, 255, 255], lineWidthUnits: 'pixels', getLineWidth: 2,
-        onClick: function (i) { if (i.object) { C.showPopup(i.object.at, i.object.name + ' station', [['Network', 'CPCB CAAQMS'], ['Readings', 'not connected']], 'Approximate position; connect readings with a data.gov.in API key'); } } }));
+        onClick: function (i) { if (i.object) { C.showPopup(i.object.at, i.object.name + ' station', [['Network', TG.aqNetwork || 'Air-quality network'], ['Readings', 'not connected']], 'Approximate position; readings not connected yet'); } } }));
       out.push(new deck.ScatterplotLayer({ id: 'tg-lakes', data: lakes(), radiusUnits: 'pixels', getPosition: function (l) { return l.at; }, getRadius: 7, getFillColor: [30, 140, 210, 230], stroked: true, getLineColor: [255, 255, 255], lineWidthUnits: 'pixels', getLineWidth: 2 }));
     }
     if (K.tabOpen('inc') && HYD) {
@@ -333,5 +349,5 @@
     C.onTab(function () { render(); C.redraw(); });
     C.onMinute(render);
   });
-  T.telangana = { render: render, waterStatus: waterStatus, aqi: aqi };
+  T.local = { render: render, waterStatus: waterStatus, aqi: aqi };
 })();

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Get the Telangana OpenStreetMap extract (tools/fetch_state.sh), then cut the study area to major roads. Requires: curl, osmium-tool, python3. Output: build/roads.osm and build/extra.osm (XML, read by netconvert).
+# Get the Greece OpenStreetMap extract (tools/fetch_state.sh), then cut the study area to major roads. Requires: curl, osmium-tool, python3. Output: build/roads.osm and build/extra.osm (XML, read by netconvert).
 set -euo pipefail
 
 BUILD="${1:-build}"
 cfg() { python3 -c 'import sys; sys.path.insert(0, "tools"); import config; print(eval(sys.argv[1], vars(config)))' "$1"; }
-# ITW_REGION selects a region from tools/regions.py; without it the default study area (Hyderabad) is used.
+# ITW_REGION selects a region from tools/regions.py; without it the default study area (Athens) is used.
 REGION="${ITW_REGION:-}"
 if [ -n "$REGION" ]; then
   BBOX="$(python3 -c 'import sys; sys.path.insert(0, "tools"); import regions; print(",".join(map(str, regions.REGIONS[sys.argv[1]]["bbox"])))' "$REGION")"
@@ -14,14 +14,14 @@ fi
 CLASSES="$(cfg '",".join(HIGHWAY_CLASSES)')"
 
 mkdir -p "$BUILD"
-# build/telangana.osm.pbf is the cached state extract (the workflows keep it for a week).
+# build/state.osm.pbf is the cached state extract (the workflows keep it for a week).
 bash tools/fetch_state.sh "$BUILD"
 [ -s "$BUILD/osm_timestamp.txt" ] || echo "unknown" > "$BUILD/osm_timestamp.txt"
 
-osmium extract --bbox "$BBOX" --strategy complete_ways "$BUILD/telangana.osm.pbf" -o "$BUILD/area.osm.pbf" --overwrite
+osmium extract --bbox "$BBOX" --strategy complete_ways "$BUILD/state.osm.pbf" -o "$BUILD/area.osm.pbf" --overwrite
 osmium tags-filter "$BUILD/area.osm.pbf" "w/highway=$CLASSES" -o "$BUILD/roads.osm.pbf" --overwrite
 osmium cat "$BUILD/roads.osm.pbf" -o "$BUILD/roads.osm" --overwrite
-# Railways (including the Hyderabad Metro), cycle tracks, critical sites (schools, hospitals, consulates, defence,
+# Railways (including the Athens Metro, tram and suburban rail), cycle tracks, critical sites (schools, hospitals, consulates, defence,
 # government …), fuel and EV charging stations.
 osmium tags-filter "$BUILD/area.osm.pbf" \
   w/railway=rail,light_rail,subway,tram,monorail w/highway=cycleway \

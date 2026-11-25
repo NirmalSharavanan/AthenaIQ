@@ -31,7 +31,8 @@ There is no server-side component at run time. The simulation runs once, at buil
 | `js/daymodel.js` | The synthetic 24-hour day |
 | `js/ops.js` | Alerts, forecast, what-if closure, exports, audit log, demo sign-in |
 | `js/devices.js` | Cameras, detectors, message signs, signals and the camera view |
-| `js/i18n.js` | Arabic labels and right-to-left switch |
+| `js/i18n.js` | Greek labels and language switch |
+| `js/greece.js` | The 13 Greek use cases (waste, lighting and energy, tickets, water leakage, port, airport, smuggling, civil protection, crossings, highway cameras, counter-UAV, Transport for Athens) |
 | `js/vehicles3d.js` | Individual vehicles: per-link placement and the 3D car mesh |
 | `js/events.js` | Illustrative accidents and fines generated from the simulation |
 | `js/assistant.js` | The built-in assistant |

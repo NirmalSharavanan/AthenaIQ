@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   var T = window.IntelliTwin, C = T.core, CFG = C.CFG, $ = C.$, num = C.num, state = T.state;
-  var Z = CFG.zones, sites = [], show = true, filter = '', kx = 111320 * Math.cos(17.9 * Math.PI / 180), ky = 110570;
+  var Z = CFG.zones, sites = [], show = true, filter = '', kx = 111320 * Math.cos(38.0 * Math.PI / 180), ky = 110570;
   var COLOR = { ok: [12, 163, 12], watch: [250, 178, 25], alert: [208, 59, 59] }, WORD = { ok: 'Normal', watch: 'Watch', alert: 'Alert' };
 
   function label(type) { return (Z.types[type] || {}).label || type.charAt(0).toUpperCase() + type.slice(1); }

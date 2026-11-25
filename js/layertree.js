@@ -20,7 +20,7 @@
     ['People and safety', [['showPeople'], ['showBases'], ['showZones', 'Critical sites'], ['lyLvFire']]],
     ['City and environment', [['showBld'], ['showEnv', 'Environment sensors <span class="muted">(synthetic)</span>'], ['lyOsWx'], ['lyOsQk']]]
   ];
-  // A landlocked region (no port, AIS off) has no Sea group.
+  // A region without a port and with AIS off has no Sea group.
   var CF = C.CFG || {}; if ((CF.live || {}).ais === false && !(CF.sea || {}).port) { TREE = TREE.filter(function (g) { return g[0] !== 'Sea'; }); }
   var groups = [], allBox = null, busy = false, top = { last: null };
 

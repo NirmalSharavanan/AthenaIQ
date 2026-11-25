@@ -98,7 +98,7 @@
     }
     if (/\bcamera|\bcctv|\bvideo|\bfootage/.test(q)) {
       var dv = window.IntelliTwin.devices, cam = dv ? dv.openCamera(findByName(dv.cameras().map(function (c) { return c.name; }), q) || '') : null;
-      return cam ? 'Opened ' + cam.id + ' on ' + cam.name + '. ' + (cam.stream ? 'It is playing the configured stream.' : 'No stream is configured for it, so it plays sample traffic footage (not this camera, not Telangana), or a synthetic view if the footage cannot load.') : 'No cameras are available.';
+      return cam ? 'Opened ' + cam.id + ' on ' + cam.name + '. ' + (cam.stream ? 'It is playing the configured stream.' : 'No stream is configured for it, so it plays sample traffic footage (not this camera, not Greece), or a synthetic view if the footage cannot load.') : 'No cameras are available.';
     }
 
     // View controls
@@ -108,7 +108,7 @@
     if (/\b3d\b|\btilt/.test(q)) { a.tilt(true); return 'Switched to the tilted 3D view. Zoom in to street level to see 3D vehicles.'; }
     if (/\bpause|\bstop\b|\bfreeze/.test(q)) { a.play(false); return 'Paused at ' + a.timeText() + '.'; }
     if (/\bplay|\bresume|\bstart\b/.test(q)) { a.play(true); return 'Playing.'; }
-    if (/\blive\b|\bright now\b|current time/.test(q) && !/traffic|speed/.test(q)) { a.live(); return 'Live mode: the twin follows India Standard Time. The feed is synthetic, not measured traffic.'; }
+    if (/\blive\b|\bright now\b|current time/.test(q) && !/traffic|speed/.test(q)) { a.live(); return 'Live mode: the twin follows Athens time. The feed is synthetic, not measured traffic.'; }
     if (/whole|entire|overview|zoom out|all of|full (map|area)/.test(q)) { a.goAll(); return 'Showing the whole study area.'; }
 
     // Navigation
@@ -131,7 +131,7 @@
     if (/fine|violation|speeding|red light|enforcement|camera|penalt|ticket/.test(q)) {
       a.setTab('fines');
       var ef = a.events();
-      return out.join(' ') + (ef ? num(ef.fines) + ' fines today, worth \u20b9' + num(ef.value) + ' at the assumed values. Largest type: ' + ef.topType + '. ' : '') +
+      return out.join(' ') + (ef ? num(ef.fines) + ' fines today, worth \u20ac' + num(ef.value) + ' at the assumed values. Largest type: ' + ef.topType + '. ' : '') +
         'These are illustrative: generated from simulated flow at assumed sites, with placeholder fine values.';
     }
     if (/\b(ship|ships|vessel|vessels|port|berth|berths|sea|marine)\b/.test(q) && window.IntelliTwin.sea) {
@@ -140,7 +140,7 @@
     }
     if (/\b(flight|flights|aircraft|plane|planes|airport|airline|airlines|air)\b/.test(q) && window.IntelliTwin.air) {
       a.setTab('bus'); var ai = window.IntelliTwin.air.stats();
-      if (ai.live) { return ai.inAir === null ? 'No flight data has been published yet. Real flights come from Flightradar24 a few times a day.' : ai.inAir + ' aircraft were flying to or from Hyderabad airport at ' + ai.updated + ' IST: ' + ai.arriving + ' arriving and ' + ai.departing + ' departing. This is a real Flightradar24 snapshot, not a live position feed.'; }
+      if (ai.live) { return ai.inAir === null ? 'No flight data has been published yet. Real flights come from Flightradar24 a few times a day.' : ai.inAir + ' aircraft were flying to or from Greek airports at ' + ai.updated + ' Athens time: ' + ai.arriving + ' arriving and ' + ai.departing + ' departing. This is a real Flightradar24 snapshot, not a live position feed.'; }
       return ai.inAir + ' aircraft are in the air near the airport; ' + ai.movementsHour + ' movements this hour' + (ai.onTimePct === null ? '' : ', ' + Math.round(ai.onTimePct) + '% on time, average delay ' + Math.round(ai.avgDelayMin) + ' min') + '; ' + ai.movementsToday + ' movements so far today. These flight movements are synthetic.';
     }
     if (/slow|worst|congest|jam|bottleneck|busiest|queue/.test(q)) {
@@ -152,7 +152,7 @@
     }
     if (/real|accura|source|data|trust|calibrat|valid|official|how (does|do) (it|you|this) work|simulat|sumo/.test(q)) {
       a.setTab('model');
-      return 'The roads are real, from OpenStreetMap. The traffic is simulated with Eclipse SUMO from an assumed morning demand, and the live and historical views are a synthetic 24-hour feed built from those simulated states. Nothing is measured or calibrated, because no traffic counts are public for Hyderabad. Accidents, fines, devices and camera views are illustrative. Details are in the docs folder.';
+      return 'The roads are real, from OpenStreetMap. The traffic is simulated with Eclipse SUMO from an assumed morning demand, and the live and historical views are a synthetic 24-hour feed built from those simulated states. Nothing is measured or calibrated, because no traffic counts are public for Athens. Accidents, fines, devices and camera views are illustrative. Details are in the docs folder.';
     }
     if (/traffic|speed|status|summary|how (is|are)|vehicle|delay|travel time|network|overview|kpi|dashboard/.test(q) || out.length) {
       if (!out.length) { a.setTab('dash'); }

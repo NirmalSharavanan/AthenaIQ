@@ -1,4 +1,4 @@
-/* UrbanIQ configuration (Telangana, India).
+/* AthenaIQ configuration (Greece).
  *
  * Edit this file to connect real systems. Every value has a working default, so the app runs
  * without changes. Anything left as null uses the built-in synthetic data, and the app labels
@@ -10,8 +10,8 @@
  */
 window.INTELLITWIN_CONFIG = {
   /* ---- Product ---------------------------------------------------------------------------------- */
-  product: { name: 'UrbanIQ', state: 'Telangana', country: 'India' },
-  currency: { code: 'INR', symbol: '\u20b9' },   // shown before money values
+  product: { name: 'AthenaIQ', state: 'Greece', country: 'Greece' },
+  currency: { code: 'EUR', symbol: '\u20ac' },   // shown before money values
   /* ---- Base map ---------------------------------------------------------------------------- */
   map: {
     // Base map: a MapLibre vector map with 3D buildings, built the way the MapLibre example "Display buildings in 3D"
@@ -42,53 +42,52 @@ window.INTELLITWIN_CONFIG = {
   ui: { style: 'enterprise', menu: 'minimised' },
 
   /* ---- Regions ------------------------------------------------------------------------------- */
-  // The region selector in the top bar: Hyderabad and nine other Telangana cities. Hyderabad is the default and keeps
+  // The region selector in the top bar: Athens and nine other Greek cities. Athens is the default and keeps
   // the settings in this file.
   // For the other regions the app derives its example data (bus routes, taxi ranks, parking, freight, emergency,
   // ships, flights) from the sites listed here; see js/regions.js. Site positions are APPROXIMATE: check them
   // on the map. Site: [name, longitude, latitude, zoom, kind]. Kinds: centre, business, residential, leisure,
-  // mall, university, industrial, open, airport. Telangana has no coast, so there are no port or coastal sites.
+  // mall, university, industrial, open, airport, port; a sixth value `true` marks a coastal site (storm-surge exercise).
   // port.seaBearing and airport.runwayBearing are compass bearings used to draw example sea lanes and flight paths.
-  defaultRegion: 'hyderabad',
+  defaultRegion: 'athens',
   regions: [
-    { id: 'hyderabad', name: 'Hyderabad', dir: '', centre: [78.4747, 17.3916], airport: { name: 'Rajiv Gandhi International Airport', at: [78.4294, 17.2403], runwayBearing: 90 }, sites: [
-      ['Abids', 78.4747, 17.3916, 14.5, 'centre'], ['Charminar', 78.4747, 17.3616, 15, 'leisure'], ['Hussain Sagar', 78.4740, 17.4239, 14.5, 'leisure'],
-      ['Secunderabad', 78.5016, 17.4337, 14.5, 'business'], ['Begumpet', 78.4670, 17.4440, 14.5, 'business'], ['Ameerpet', 78.4480, 17.4375, 14.5, 'business'],
-      ['Banjara Hills', 78.4400, 17.4150, 14.5, 'residential'], ['Jubilee Hills', 78.4075, 17.4300, 14.5, 'residential'], ['HITEC City', 78.3810, 17.4474, 14.5, 'business'],
-      ['Financial District', 78.3420, 17.4160, 14.5, 'business'], ['Gachibowli Stadium', 78.3480, 17.4470, 14.5, 'leisure'], ['Inorbit Mall', 78.3860, 17.4340, 15, 'mall'],
-      ['Kukatpally', 78.4070, 17.4840, 14, 'residential'], ['Golconda Fort', 78.4011, 17.3833, 15, 'leisure'], ['Mehdipatnam', 78.4390, 17.3950, 14.5, 'residential'],
-      ['Osmania University', 78.5280, 17.4130, 14.5, 'university'], ['University of Hyderabad', 78.3350, 17.4590, 14, 'university'], ['Uppal', 78.5590, 17.4010, 14, 'residential'],
-      ['LB Nagar', 78.5520, 17.3460, 14, 'residential'], ['Jeedimetla', 78.4500, 17.5100, 13.5, 'industrial'], ['Rajiv Gandhi International Airport', 78.4294, 17.2403, 13, 'airport']] },
-    { id: 'warangal', name: 'Warangal', dir: 'warangal', centre: [79.5600, 18.0000], sites: [
-      ['Hanamkonda', 79.5600, 18.0070, 14.5, 'centre'], ['Thousand Pillar Temple', 79.5745, 18.0037, 15, 'leisure'], ['Warangal Fort', 79.6100, 17.9580, 14.5, 'leisure'],
-      ['Warangal Railway Station', 79.6000, 17.9700, 14.5, 'business'], ['Kazipet', 79.5000, 17.9770, 14, 'residential'], ['NIT Warangal', 79.5300, 17.9840, 14.5, 'university'],
-      ['Bhadrakali Lake', 79.5850, 17.9950, 14.5, 'open'], ['Madikonda', 79.5200, 18.0300, 14, 'industrial'], ['Mamnoor', 79.6020, 17.9140, 14, 'residential']] },
-    { id: 'karimnagar', name: 'Karimnagar', dir: 'karimnagar', centre: [79.1288, 18.4386], sites: [
-      ['Town Centre', 79.1288, 18.4386, 14.5, 'centre'], ['Bus Station', 79.1300, 18.4370, 15, 'business'], ['Lower Manair Dam', 79.1500, 18.4100, 14, 'open'],
-      ['Kothirampur', 79.1250, 18.4300, 14.5, 'residential'], ['Alugunur', 79.1700, 18.4200, 14, 'residential'], ['Satavahana University', 79.1100, 18.4600, 14, 'university'],
-      ['Industrial Area', 79.1000, 18.4250, 14, 'industrial']] },
-    { id: 'nizamabad', name: 'Nizamabad', dir: 'nizamabad', centre: [78.0940, 18.6725], sites: [
-      ['Town Centre', 78.0940, 18.6725, 14.5, 'centre'], ['Railway Station', 78.1000, 18.6700, 15, 'business'], ['Nizamabad Fort', 78.0920, 18.6760, 15, 'leisure'],
-      ['Pragathi Nagar', 78.1100, 18.6850, 14.5, 'residential'], ['Kanteshwar', 78.0950, 18.6850, 14.5, 'residential'], ['Government Medical College', 78.1050, 18.6650, 14.5, 'university'],
-      ['Autonagar', 78.1150, 18.6600, 14, 'industrial']] },
-    { id: 'khammam', name: 'Khammam', dir: 'khammam', centre: [80.1514, 17.2473], sites: [
-      ['Town Centre', 80.1514, 17.2473, 14.5, 'centre'], ['Khammam Fort', 80.1570, 17.2440, 15, 'leisure'], ['Railway Station', 80.1500, 17.2390, 15, 'business'],
-      ['Lakaram Lake', 80.1460, 17.2560, 14.5, 'open'], ['Wyra Road', 80.1650, 17.2600, 14.5, 'residential'], ['Industrial Area', 80.1350, 17.2300, 14, 'industrial']] },
-    { id: 'ramagundam', name: 'Ramagundam', dir: 'ramagundam', centre: [79.5100, 18.7900], sites: [
-      ['Godavarikhani', 79.5100, 18.7900, 14.5, 'centre'], ['Ramagundam Railway Station', 79.4720, 18.7550, 14.5, 'business'], ['NTPC Ramagundam', 79.4500, 18.7600, 13.5, 'industrial'],
-      ['NTPC Township', 79.4400, 18.7700, 14, 'residential'], ['Fertiliser Plant', 79.4150, 18.7400, 14, 'industrial'], ['Basantnagar', 79.3950, 18.7000, 14, 'residential']] },
-    { id: 'mahbubnagar', name: 'Mahbubnagar', dir: 'mahbubnagar', centre: [78.0030, 16.7370], sites: [
-      ['Town Centre', 78.0030, 16.7370, 14.5, 'centre'], ['Railway Station', 78.0000, 16.7400, 15, 'business'], ['Pillalamarri', 78.0160, 16.7650, 14.5, 'leisure'],
-      ['Palamuru University', 78.0350, 16.7300, 14, 'university'], ['New Town', 77.9900, 16.7500, 14.5, 'residential'], ['Industrial Area', 78.0200, 16.7150, 14, 'industrial']] },
-    { id: 'nalgonda', name: 'Nalgonda', dir: 'nalgonda', centre: [79.2671, 17.0500], sites: [
-      ['Clock Tower', 79.2671, 17.0500, 14.5, 'centre'], ['Railway Station', 79.2700, 17.0450, 15, 'business'], ['Latif Saheb Gutta', 79.2850, 17.0650, 14.5, 'leisure'],
-      ['Mahatma Gandhi University', 79.2200, 17.0200, 14, 'university'], ['Ramagiri', 79.2550, 17.0600, 14.5, 'residential'], ['Industrial Area', 79.2500, 17.0350, 14, 'industrial']] },
-    { id: 'siddipet', name: 'Siddipet', dir: 'siddipet', centre: [78.8520, 18.1018], sites: [
-      ['Town Centre', 78.8520, 18.1018, 14.5, 'centre'], ['Komati Cheruvu', 78.8600, 18.0980, 15, 'leisure'], ['Bus Station', 78.8530, 18.1040, 15, 'business'],
-      ['Ponnala', 78.8300, 18.0800, 14, 'residential'], ['Rangadhampally', 78.8700, 18.1200, 14, 'residential'], ['Industrial Area', 78.8400, 18.1200, 14, 'industrial']] },
-    { id: 'adilabad', name: 'Adilabad', dir: 'adilabad', centre: [78.5320, 19.6640], sites: [
-      ['Town Centre', 78.5320, 19.6640, 14.5, 'centre'], ['Railway Station', 78.5350, 19.6680, 15, 'business'], ['RIMS Adilabad', 78.5250, 19.6720, 14.5, 'university'],
-      ['Mavala', 78.5500, 19.6550, 14, 'residential'], ['Kachkanti', 78.5200, 19.6500, 14, 'residential'], ['Industrial Area', 78.5450, 19.6800, 14, 'industrial']] }
+    { id: 'athens', name: 'Athens', dir: '', centre: [23.7348, 37.9755], airport: { name: 'Athens International Airport', at: [23.9445, 37.9364], runwayBearing: 35 }, sites: [
+      ['Syntagma Square', 23.7348, 37.9755, 15, 'centre'], ['Omonia', 23.7281, 37.9841, 15, 'business'], ['Acropolis', 23.7257, 37.9715, 15, 'leisure'],
+      ['Monastiraki', 23.7255, 37.9761, 15.5, 'leisure'], ['Panathenaic Stadium', 23.7411, 37.9683, 15, 'leisure'], ['Larissis station', 23.7208, 37.9920, 15, 'business'],
+      ['University of Athens', 23.7333, 37.9806, 15, 'university'], ['NTUA Zografou campus', 23.7820, 37.9780, 14.5, 'university'], ['Kolonaki', 23.7420, 37.9790, 15, 'residential'],
+      ['Piraeus port', 23.6375, 37.9420, 14, 'port', true], ['Faliro seafront', 23.6800, 37.9330, 14.5, 'open', true], ['SNFCC, Kallithea', 23.6920, 37.9420, 14.5, 'leisure', true],
+      ['Glyfada', 23.7536, 37.8650, 14, 'residential', true], ['Elliniko', 23.7300, 37.8890, 14, 'business', true], ['Peristeri', 23.6880, 38.0130, 14, 'residential'],
+      ['Marousi, OAKA', 23.7866, 38.0363, 14.5, 'leisure'], ['The Mall Athens', 23.7896, 38.0444, 15, 'mall'], ['Kifisia', 23.8105, 38.0742, 14.5, 'residential'],
+      ['Aspropyrgos industrial area', 23.5900, 38.0600, 13.5, 'industrial'], ['Athens International Airport', 23.9445, 37.9364, 13, 'airport']] },
+    { id: 'thessaloniki', name: 'Thessaloniki', dir: 'thessaloniki', centre: [22.9410, 40.6328], airport: { name: 'Thessaloniki Macedonia Airport', at: [22.9709, 40.5197], runwayBearing: 100 }, sites: [
+      ['Aristotelous Square', 22.9410, 40.6328, 15, 'centre', true], ['White Tower', 22.9484, 40.6264, 15, 'leisure', true], ['Port of Thessaloniki', 22.9230, 40.6340, 14, 'port', true],
+      ['Aristotle University', 22.9590, 40.6300, 14.5, 'university'], ['Toumba', 22.9690, 40.6130, 14.5, 'leisure'], ['Kalamaria', 22.9500, 40.5820, 14.5, 'residential', true],
+      ['Evosmos', 22.9080, 40.6650, 14, 'residential'], ['Sindos industrial area', 22.8100, 40.6700, 13.5, 'industrial'], ['Mediterranean Cosmos', 22.9940, 40.5470, 14.5, 'mall'],
+      ['Thessaloniki Macedonia Airport', 22.9709, 40.5197, 13, 'airport']] },
+    { id: 'patras', name: 'Patras', dir: 'patras', centre: [21.7346, 38.2466], sites: [
+      ['Georgiou Square', 21.7346, 38.2466, 15, 'centre'], ['Port of Patras', 21.7230, 38.2330, 14, 'port', true], ['Patras Castle', 21.7430, 38.2440, 15, 'leisure'],
+      ['University of Patras', 21.7880, 38.2900, 14, 'university'], ['Rio–Antirrio Bridge', 21.7750, 38.3210, 14, 'open', true], ['Industrial area', 21.7700, 38.2000, 14, 'industrial']] },
+    { id: 'heraklion', name: 'Heraklion', dir: 'heraklion', centre: [25.1335, 35.3387], airport: { name: 'Heraklion Airport', at: [25.1803, 35.3397], runwayBearing: 90 }, sites: [
+      ['Lions Square', 25.1335, 35.3387, 15, 'centre'], ['Port of Heraklion', 25.1400, 35.3440, 14, 'port', true], ['Knossos', 25.1631, 35.2980, 14.5, 'leisure'],
+      ['University of Crete, Voutes', 25.0720, 35.3060, 14, 'university'], ['Industrial area', 25.1950, 35.3280, 14, 'industrial'], ['Heraklion Airport', 25.1803, 35.3397, 13.5, 'airport']] },
+    { id: 'larissa', name: 'Larissa', dir: 'larissa', centre: [22.4191, 39.6390], sites: [
+      ['Central Square', 22.4191, 39.6390, 15, 'centre'], ['Ancient Theatre', 22.4180, 39.6400, 15, 'leisure'], ['Pineios riverside', 22.4100, 39.6450, 14.5, 'open'],
+      ['University of Thessaly', 22.4000, 39.6260, 14.5, 'university'], ['Industrial area', 22.4400, 39.6200, 14, 'industrial']] },
+    { id: 'volos', name: 'Volos', dir: 'volos', centre: [22.9420, 39.3610], sites: [
+      ['Town Centre', 22.9420, 39.3610, 15, 'centre', true], ['Port of Volos', 22.9440, 39.3580, 14, 'port', true], ['Nea Ionia', 22.9300, 39.3800, 14.5, 'residential'],
+      ['University of Thessaly', 22.9520, 39.3600, 14.5, 'university', true], ['Industrial area', 22.8900, 39.3700, 14, 'industrial']] },
+    { id: 'ioannina', name: 'Ioannina', dir: 'ioannina', centre: [20.8510, 39.6650], airport: { name: 'Ioannina Airport', at: [20.8225, 39.6964], runwayBearing: 140 }, sites: [
+      ['Town Centre', 20.8510, 39.6650, 15, 'centre'], ['Lake Pamvotis', 20.8800, 39.6650, 14.5, 'open'], ['Ioannina Castle', 20.8590, 39.6680, 15, 'leisure'],
+      ['University of Ioannina', 20.8420, 39.6180, 14, 'university'], ['Industrial area', 20.8300, 39.6300, 14, 'industrial'], ['Ioannina Airport', 20.8225, 39.6964, 13.5, 'airport']] },
+    { id: 'chania', name: 'Chania', dir: 'chania', centre: [24.0170, 35.5170], sites: [
+      ['Old Harbour', 24.0170, 35.5170, 15.5, 'centre', true], ['Municipal Market', 24.0190, 35.5140, 15.5, 'business'], ['Nea Chora beach', 24.0050, 35.5150, 15, 'open', true],
+      ['Halepa', 24.0350, 35.5130, 14.5, 'residential', true], ['Industrial area', 23.9900, 35.4950, 14, 'industrial']] },
+    { id: 'rhodes', name: 'Rhodes', dir: 'rhodes', centre: [28.2250, 36.4440], sites: [
+      ['Old Town', 28.2250, 36.4440, 15.5, 'centre', true], ['Port of Rhodes', 28.2300, 36.4470, 14.5, 'port', true], ['Mandraki Harbour', 28.2270, 36.4510, 15, 'leisure', true],
+      ['New Town', 28.2200, 36.4500, 15, 'business', true], ['Ialysos', 28.1600, 36.4100, 14, 'residential', true]] },
+    { id: 'kavala', name: 'Kavala', dir: 'kavala', centre: [24.4120, 40.9370], sites: [
+      ['Town Centre', 24.4120, 40.9370, 15, 'centre', true], ['Port of Kavala', 24.4050, 40.9350, 14.5, 'port', true], ['Kamares Aqueduct', 24.4130, 40.9390, 15, 'leisure'],
+      ['Panagia old town', 24.4180, 40.9340, 15, 'leisure', true], ['Industrial area', 24.3700, 40.9200, 14, 'industrial']] }
   ],
 
   // Check options: which map layers are switched on when the app opens. Each can still be changed on screen.
@@ -102,7 +101,7 @@ window.INTELLITWIN_CONFIG = {
   },
 
   start: {
-    mode: 'live',               // 'live' = start at the Hyderabad clock and play at the rate below; 'replay' = today from now, as Historical
+    mode: 'live',               // 'live' = start at the Athens clock and play at the rate below; 'replay' = today from now, as Historical
     rate: 1,                    // playback speed, Live included: 1 (Live stays locked to the clock), 30, 120 or 600
     fullView: true,             // open with the panel, legend and site shortcuts minimised
     focus: 'most-congested-site', // select the major site (map chip) with the slowest traffic; 'most-congested' = slowest road; 'all' = whole area
@@ -115,9 +114,9 @@ window.INTELLITWIN_CONFIG = {
 
   /* ---- Time ---------------------------------------------------------------------------------- */
   time: {
-    timeZone: 'Asia/Kolkata',   // India Standard Time, UTC+05:30
-    weekendDays: [0],           // Sunday (0 = Sunday)
-    shortDay: 6                 // Saturday: lighter traffic than a working day
+    timeZone: 'Europe/Athens',  // Eastern European Time, UTC+02:00 (UTC+03:00 in summer)
+    weekendDays: [6, 0],        // Saturday and Sunday (0 = Sunday)
+    shortDay: 5                 // Friday: lighter afternoon traffic
   },
 
   /* ---- Feeds --------------------------------------------------------------------------------- */
@@ -125,7 +124,7 @@ window.INTELLITWIN_CONFIG = {
     // Live and historical traffic. 'synthetic' builds a 24-hour day from the simulated traffic states.
     // A real feed is an integration point, not implemented yet: see docs/configuration.md.
     traffic: 'synthetic',
-    // URL returning accidents as JSON: [{ "time": "08:15", "lon": 78.47, "lat": 17.39, "road": "…",
+    // URL returning accidents as JSON: [{ "time": "08:15", "lon": 23.73, "lat": 37.98, "road": "…",
     // "severity": "Damage only", "durationMin": 30 }]. null = illustrative accidents.
     accidentsUrl: null
   },
@@ -138,7 +137,7 @@ window.INTELLITWIN_CONFIG = {
     // synthetic view drawn from the simulated traffic at that location.
     cameras: [],
     // Real traffic footage shown by cameras that have no stream of their own. These clips are filmed
-    // in other cities, not Telangana, are recorded (not live) and are not the camera's feed; the camera window says so.
+    // in other cities, not Greece, are recorded (not live) and are not the camera's feed; the camera window says so.
     // The first source is an MP4 copy kept in this repository (made by the "Fetch sample media" workflow),
     // which plays on every browser including iPhones; the others are the Wikimedia originals.
     // Each entry: { kind, classes: road classes it suits (0 motorway … 4 tertiary), sources: [urls tried in order], credit }. Set to [] to use the synthetic view only.
@@ -162,7 +161,7 @@ sampleVideos: [
 
   /* ---- Alerts -------------------------------------------------------------------------------- */
   alerts: {
-    // Thresholds set for Telangana's mixed traffic, where roads normally run well below their limits.
+    // Thresholds set for Greek city traffic, where central roads normally run well below their limits.
     networkSpeedBelowKmh: 15,        // network average speed
     roadRatioBelow: 0.25,             // road speed as a share of its limit …
     roadMinVehicles: 120,           // … with at least this many vehicles on it
@@ -210,16 +209,16 @@ sampleVideos: [
     delayShare: 0.35,             // share of the route's extra traffic time that delays its buses
     onTimeWithinMin: 3,
     routes: [
-      { id: '101', name: 'Abids – HITEC City', from: [78.4747, 17.3916], to: [78.3810, 17.4474], headwayMin: 10 },
-      { id: '102', name: 'Secunderabad – Mehdipatnam', from: [78.5016, 17.4337], to: [78.4390, 17.3950], headwayMin: 8 },
-      { id: '103', name: 'Charminar – Kukatpally', from: [78.4747, 17.3616], to: [78.4070, 17.4840], headwayMin: 12 },
-      { id: '110', name: 'LB Nagar – Ameerpet', from: [78.5520, 17.3460], to: [78.4480, 17.4375], headwayMin: 10 },
-      { id: '120', name: 'Uppal – Gachibowli', from: [78.5590, 17.4010], to: [78.3480, 17.4470], headwayMin: 12 },
-      { id: '160', name: 'Secunderabad – Airport', from: [78.5016, 17.4337], to: [78.4294, 17.2403], headwayMin: 30 },
-      { id: '170', name: 'Osmania University – Banjara Hills', from: [78.5280, 17.4130], to: [78.4400, 17.4150], headwayMin: 15 },
-      { id: '200', name: 'Jeedimetla – Abids', from: [78.4500, 17.5100], to: [78.4747, 17.3916], headwayMin: 15 },
-      { id: '210', name: 'HITEC City – Financial District', from: [78.3810, 17.4474], to: [78.3420, 17.4160], headwayMin: 10 },
-      { id: '300', name: 'Charminar – Golconda Fort', from: [78.4747, 17.3616], to: [78.4011, 17.3833], headwayMin: 15 }
+      { id: '101', name: 'Syntagma – Piraeus', from: [23.7348, 37.9755], to: [23.6375, 37.9420], headwayMin: 10 },
+      { id: '102', name: 'Omonia – Kifisia', from: [23.7281, 37.9841], to: [23.8105, 38.0742], headwayMin: 12 },
+      { id: '103', name: 'Syntagma – Glyfada', from: [23.7348, 37.9755], to: [23.7536, 37.8650], headwayMin: 10 },
+      { id: '110', name: 'Peristeri – Syntagma', from: [23.6880, 38.0130], to: [23.7348, 37.9755], headwayMin: 10 },
+      { id: '120', name: 'Marousi – Omonia', from: [23.7866, 38.0363], to: [23.7281, 37.9841], headwayMin: 12 },
+      { id: '160', name: 'Syntagma – Airport', from: [23.7348, 37.9755], to: [23.9445, 37.9364], headwayMin: 20 },
+      { id: '170', name: 'Zografou – Monastiraki', from: [23.7820, 37.9780], to: [23.7255, 37.9761], headwayMin: 12 },
+      { id: '200', name: 'Piraeus – SNFCC', from: [23.6375, 37.9420], to: [23.6920, 37.9420], headwayMin: 15 },
+      { id: '210', name: 'Elliniko – Syntagma', from: [23.7300, 37.8890], to: [23.7348, 37.9755], headwayMin: 12 },
+      { id: '300', name: 'Larissis station – Panathenaic Stadium', from: [23.7208, 37.9920], to: [23.7411, 37.9683], headwayMin: 15 }
     ]
   },
 
@@ -231,26 +230,19 @@ sampleVideos: [
     hiredSharePeak: 0.7, hiredShareDay: 0.5, hiredShareNight: 0.25,   // share of taxis carrying a passenger
     bookingShare: 0.1,            // share driving to a booking
     ranks: [
-      { name: 'Abids', at: [78.4747, 17.3916], bays: 10 },
-      { name: 'Charminar', at: [78.4747, 17.3616], bays: 8 },
-      { name: 'Secunderabad station', at: [78.5016, 17.4337], bays: 14 },
-      { name: 'Begumpet', at: [78.4670, 17.4440], bays: 8 },
-      { name: 'Ameerpet', at: [78.4480, 17.4375], bays: 10 },
-      { name: 'Banjara Hills', at: [78.4400, 17.4150], bays: 8 },
-      { name: 'HITEC City', at: [78.3810, 17.4474], bays: 12 },
-      { name: 'Financial District', at: [78.3420, 17.4160], bays: 12 },
-      { name: 'Kukatpally', at: [78.4070, 17.4840], bays: 8 },
-      { name: 'LB Nagar', at: [78.5520, 17.3460], bays: 8 },
-      { name: 'Airport', at: [78.4294, 17.2403], bays: 20 }
+      { name: 'Syntagma', at: [23.7348, 37.9755], bays: 14 }, { name: 'Omonia', at: [23.7281, 37.9841], bays: 12 }, { name: 'Monastiraki', at: [23.7255, 37.9761], bays: 8 },
+      { name: 'Acropolis', at: [23.7257, 37.9690], bays: 8 }, { name: 'Larissis station', at: [23.7208, 37.9920], bays: 12 }, { name: 'Piraeus port', at: [23.6375, 37.9420], bays: 20 },
+      { name: 'Kifisia', at: [23.8105, 38.0742], bays: 8 }, { name: 'Marousi', at: [23.7866, 38.0363], bays: 8 }, { name: 'Glyfada', at: [23.7536, 37.8650], bays: 8 },
+      { name: 'Airport', at: [23.9445, 37.9364], bays: 30 }
     ]
   },
   shuttles: {
     seats: 12, speedKmh: 24,
     zones: [
-      { name: 'HITEC City', at: [78.3810, 17.4474], radiusM: 2600, vehicles: 6, waitMin: 8 },
-      { name: 'Financial District', at: [78.3420, 17.4160], radiusM: 2600, vehicles: 5, waitMin: 10 },
-      { name: 'University of Hyderabad', at: [78.3350, 17.4590], radiusM: 2800, vehicles: 4, waitMin: 9 },
-      { name: 'Jubilee Hills', at: [78.4075, 17.4300], radiusM: 1800, vehicles: 4, waitMin: 6 }
+      { name: 'Elliniko', at: [23.7300, 37.8890], radiusM: 2400, vehicles: 5, waitMin: 9 },
+      { name: 'Marousi and OAKA', at: [23.7866, 38.0363], radiusM: 2400, vehicles: 5, waitMin: 9 },
+      { name: 'Zografou campus', at: [23.7820, 37.9780], radiusM: 1800, vehicles: 4, waitMin: 8 },
+      { name: 'Kifisia', at: [23.8105, 38.0742], radiusM: 1800, vehicles: 4, waitMin: 7 }
     ]
   },
 
@@ -262,13 +254,13 @@ sampleVideos: [
   // Real live data read from files the "Live data" GitHub Actions workflow publishes on the live-data branch
   // (NASA FIRMS fire detections, N2YO satellite orbits, aisstream.io vessels). The API keys stay in GitHub as
   // repository secrets FIRMS_API_KEY, N2YO_API_KEY, AIS_API_KEY and FLIGHT_RADAR; none is needed here.
-  // Telangana has no coast: the AIS vessel feed is off (vessels: false) and the Sea layers stay empty.
+  // Greek waters have good AIS coverage: real vessels replace the synthetic ships once enough are heard.
   live: {
     enabled: true,
-    baseUrl: 'https://raw.githubusercontent.com/thirumald/UrbanIQ/live-data/',
+    baseUrl: 'https://raw.githubusercontent.com/thirumald/AthenaIQ/live-data/',
     refreshMin: 10,              // how often the browser looks for newer files
-    ais: false,                  // no coast in Telangana: no AIS card, layer or source
-    fires: true, vessels: false, satellites: true, flights: true,   // layers on at start
+    ais: true,
+    fires: true, vessels: true, satellites: true, flights: true,   // layers on at start
     replaceSyntheticShips: true, // hide the synthetic ships once enough real AIS vessels are loaded
     minVesselsToReplace: 15,     // fewer real vessels than this: keep the synthetic ships as well
     fireAlertMw: 10              // raise an alert for a heat detection in the open region at or above this power
@@ -284,11 +276,11 @@ sampleVideos: [
   // the "Earth from space" tile: NASA's live stream on YouTube by default; null hides the tile.
   cameraWall: { tilesPerPage: 12, earthStream: 'https://www.youtube.com/embed/live_stream?channel=UCLA_DiR1FfKNvjuUpBHmylQ&autoplay=1&mute=1' },
 
-  // OSINT on the 3D map: the Telangana-wide view and how far heights are scaled so that aircraft and satellites can be seen.
-  // defaultView: the view the OSINT page opens on: 'region' (city, 3D buildings), 'state' (all of Telangana) or 'world'. orbit: circle the camera when the page opens.
-  osintMap: { centre: [79.0, 17.85], zoom: 6.3, pitch: 52, bearing: -12, minZoom: 4, heightExaggeration: 6, satelliteHeightScale: 0.2, defaultView: 'region', orbit: true, orbitDegPerSec: 4 },
+  // OSINT on the 3D map: the Greece-wide view and how far heights are scaled so that aircraft and satellites can be seen.
+  // defaultView: the view the OSINT page opens on: 'region' (city, 3D buildings), 'state' (all of Greece) or 'world'. orbit: circle the camera when the page opens.
+  osintMap: { centre: [23.9, 38.3], zoom: 5.7, pitch: 52, bearing: -12, minZoom: 4, heightExaggeration: 6, satelliteHeightScale: 0.2, defaultView: 'region', orbit: true, orbitDegPerSec: 4 },
   // directWeather: when the published weather file is older than 75 minutes, ask Open-Meteo from the browser instead.
-  osint: { rainAlertMm: 20, quakeAlertMag: 4.5, quakeAlertKm: 600, heatAlertC: 42, directWeather: true },
+  osint: { rainAlertMm: 20, quakeAlertMag: 4.5, quakeAlertKm: 300, heatAlertC: 40, directWeather: true },
 
   // Critical smart-city use cases added to the existing sections (js/citycases.js). All figures are synthetic or screening estimates.
   cityCases: {
@@ -308,23 +300,26 @@ sampleVideos: [
   // Example movements. The sea lanes and flight paths are approximate lines for demonstration, not
   // charted channels or published procedures. Paths are [longitude, latitude] points.
   sea: {
-    // Telangana is landlocked: no port and no sea lanes. The Sea layers stay empty.
-    portName: '', port: null, view: null, berths: 0, everyMin: 22, wakeSec: 900, namePrefix: 'MV Example',
-    lanes: [],
+    portName: 'Piraeus', port: [23.6375, 37.9420], view: [23.6000, 37.9000], berths: 12, everyMin: 12, wakeSec: 900, namePrefix: 'MV Example',
+    lanes: [   // drawn from the port out to sea
+      { name: 'Saronic Gulf, south-west lane', path: [[23.6300, 37.9350], [23.6000, 37.9050], [23.5300, 37.8500], [23.4000, 37.7500]] },
+      { name: 'Saronic Gulf, southern lane', path: [[23.6350, 37.9330], [23.6500, 37.8900], [23.6800, 37.8000], [23.7200, 37.7000]] },
+      { name: 'Salamina strait, western lane', path: [[23.6250, 37.9400], [23.5900, 37.9450], [23.5500, 37.9600], [23.5000, 37.9700]] }
+    ],
     types: [
-      { kind: 'Container ship', knots: 14, colour: [57, 135, 229] }, { kind: 'Tanker', knots: 12, colour: [217, 89, 38] },
-      { kind: 'Cruise ship', knots: 16, colour: [255, 255, 255] }, { kind: 'Ferry', knots: 20, colour: [25, 158, 112] }, { kind: 'Cargo vessel', knots: 9, colour: [201, 133, 0] }
+      { kind: 'Ferry', knots: 18, colour: [25, 158, 112] }, { kind: 'Cruise ship', knots: 16, colour: [255, 255, 255] },
+      { kind: 'Container ship', knots: 14, colour: [57, 135, 229] }, { kind: 'Tanker', knots: 12, colour: [217, 89, 38] }, { kind: 'Cargo vessel', knots: 9, colour: [201, 133, 0] }
     ]
   },
   air: {
     synthetic: false,           // real flights come from Flightradar24 (see live); true brings the synthetic flights back
-    airport: [78.4294, 17.2403], airportName: 'Rajiv Gandhi International Airport', movementsPerHour: 18, inViewSec: 420, topAltM: 2600, trailSec: 150, delayedShare: 0.2, flightPrefix: 'FLT',
-    cities: ['Delhi', 'Mumbai', 'Bengaluru', 'Chennai', 'Kolkata', 'Dubai', 'Doha', 'Singapore', 'London', 'Jeddah', 'Kuala Lumpur', 'Pune'],
-    routes: [   // arrivals end at the airport; departures start there. Runways run roughly east–west.
-      { name: 'Approach from the west', arrival: true, path: [[78.1300, 17.2450], [78.2900, 17.2420], [78.4294, 17.2403]] },
-      { name: 'Approach from the east', arrival: true, path: [[78.7300, 17.2350], [78.5700, 17.2380], [78.4294, 17.2403]] },
-      { name: 'Departure to the east', arrival: false, path: [[78.4294, 17.2403], [78.5700, 17.2380], [78.7300, 17.2350]] },
-      { name: 'Departure to the west', arrival: false, path: [[78.4294, 17.2403], [78.2900, 17.2420], [78.1300, 17.2450]] }
+    airport: [23.9445, 37.9364], airportName: 'Athens International Airport', movementsPerHour: 30, inViewSec: 420, topAltM: 2600, trailSec: 150, delayedShare: 0.2, flightPrefix: 'FLT',
+    cities: ['London', 'Frankfurt', 'Paris', 'Rome', 'Munich', 'Amsterdam', 'Istanbul', 'Dubai', 'Larnaca', 'Thessaloniki', 'Heraklion', 'Rhodes'],
+    routes: [   // arrivals end at the airport; departures start there. Runways run north-east – south-west.
+      { name: 'Approach from the south-west', arrival: true, path: [[23.7800, 37.7200], [23.8700, 37.8400], [23.9445, 37.9364]] },
+      { name: 'Approach from the north-east', arrival: true, path: [[24.1200, 38.1700], [24.0300, 38.0500], [23.9445, 37.9364]] },
+      { name: 'Departure to the north-east', arrival: false, path: [[23.9445, 37.9364], [24.0300, 38.0500], [24.1200, 38.1700]] },
+      { name: 'Departure to the south-west', arrival: false, path: [[23.9445, 37.9364], [23.8700, 37.8400], [23.7800, 37.7200]] }
     ]
   },
 
@@ -340,10 +335,10 @@ sampleVideos: [
       { type: 'roadworks', roadIndex: 9, fromDay: 0, toDay: 1, start: '09:30', end: '15:00', lanes: 1 },
       { type: 'roadworks', roadIndex: 15, fromDay: 2, toDay: 9, start: '21:00', end: '05:00', lanes: 2 },
       { type: 'roadworks', roadIndex: 21, fromDay: 6, toDay: 13, start: '10:00', end: '14:00', lanes: 1 },
-      { type: 'event', title: 'Exhibition at HITEX (example)', at: [78.3720, 17.4710], fromDay: 0, toDay: 2, start: '10:00', end: '19:00', attendance: 18000 },
-      { type: 'event', title: 'Evening concert, Gachibowli Stadium (example)', at: [78.3480, 17.4470], fromDay: 1, toDay: 1, start: '18:00', end: '23:30', attendance: 25000 },
-      { type: 'event', title: 'Hussain Sagar fun run (example)', at: [78.4740, 17.4239], fromDay: 5, toDay: 5, start: '06:00', end: '10:00', attendance: 6000 },
-      { type: 'event', title: 'Cricket match, Uppal stadium (example)', at: [78.5500, 17.4065], fromDay: 3, toDay: 3, start: '19:00', end: '23:00', attendance: 39000 }
+      { type: 'event', title: 'Concert at OAKA, Marousi (example)', at: [23.7866, 38.0363], fromDay: 0, toDay: 0, start: '19:00', end: '23:30', attendance: 45000 },
+      { type: 'event', title: 'Exhibition at Metropolitan Expo (example)', at: [23.9300, 37.9250], fromDay: 1, toDay: 3, start: '10:00', end: '19:00', attendance: 15000 },
+      { type: 'event', title: 'Fun run, Panathenaic Stadium (example)', at: [23.7411, 37.9683], fromDay: 5, toDay: 5, start: '08:00', end: '12:00', attendance: 8000 },
+      { type: 'event', title: 'Football at Karaiskakis Stadium, Piraeus (example)', at: [23.6645, 37.9460], fromDay: 3, toDay: 3, start: '19:30', end: '22:00', attendance: 32000 }
     ]
   },
   // Evacuation planning assumptions. Assembly points are example open areas, not designated sites.
@@ -353,44 +348,47 @@ sampleVideos: [
     // Natural disaster exercises. The areas are examples chosen for demonstration, not surveyed hazard zones.
     peoplePerKm2: 3500,
     disasters: [
-      { id: 'flood', name: 'Urban flooding after heavy rain', roadEffect: 'underpasses and low roads closed',
-        areas: [{ name: 'Musi river low roads, Chaderghat', at: [78.4880, 17.3770], radiusM: 1800 }, { name: 'Tolichowki and Nadeem Colony', at: [78.4150, 17.3950], radiusM: 1600 }, { name: 'Hussain Sagar nala, Ashok Nagar', at: [78.4930, 17.4060], radiusM: 1400 }],
-        actions: ['Close flooded underpasses and sign diversions', 'Send pumps and recovery vehicles to the closed sections', 'Warn drivers on message signs and public channels', 'Give signals more green on the diversion routes', 'Check hospitals and schools inside the area for access'] },
-      { id: 'sand', name: 'Squall and dust storm', roadEffect: 'reduced speed limit, fallen trees and hoardings',
-        areas: [{ name: 'Airport and Shamshabad corridor', at: [78.4300, 17.2600], radiusM: 6000 }, { name: 'Outer Ring Road, west', at: [78.3200, 17.4300], radiusM: 5000 }],
-        actions: ['Lower the limit on the Outer Ring Road and exposed flyovers', 'Show low-visibility warnings on message signs', 'Send crews to clear fallen trees and hoardings', 'Place patrols at the usual pile-up locations', 'Tell schools and employers to stagger departures'] },
-      { id: 'quake', name: 'Earthquake', roadEffect: 'flyovers and underpasses closed until inspected',
-        areas: [{ name: 'Old city and centre', at: [78.4750, 17.3900], radiusM: 7000 }],
-        actions: ['Close flyovers and underpasses until inspected', 'Set signals to flashing where power is lost', 'Keep main corridors clear for emergency vehicles', 'Open the assembly points and route people to them', 'Survey critical sites in priority order: hospitals first'] },
-      { id: 'heat', name: 'Heatwave', roadEffect: 'no closures, more breakdowns',
-        areas: [{ name: 'Whole city', at: [78.4600, 17.4000], radiusM: 18000 }],
-        actions: ['Add recovery patrols for breakdowns on the Outer Ring Road', 'Limit roadworks to night hours', 'Open shaded waiting areas at bus stations', 'Check on outdoor workers and traffic police at junctions', 'Watch for vehicle fires on camera feeds'] }
+      { id: 'flood', name: 'Flash flood after a storm', roadEffect: 'underpasses and low roads closed',
+        areas: [{ name: 'Kifissos Avenue, Agios Ioannis Rentis', at: [23.6750, 37.9650], radiusM: 1800 }, { name: 'Poseidonos Avenue at Pikrodafni, Alimos', at: [23.7050, 37.9170], radiusM: 1400 }, { name: 'Piraeus Avenue, Tavros', at: [23.6980, 37.9640], radiusM: 1300 }],
+        actions: ['Close flooded underpasses and Kifissos Avenue service roads', 'Send pumps and recovery vehicles to the closed sections', 'Send a 112 message to phones in the area', 'Give signals more green on the diversion routes', 'Check hospitals and schools inside the area for access'] },
+      { id: 'fire', name: 'Wildfire near homes', roadEffect: 'roads closed for evacuation and fire engines',
+        areas: [{ name: 'Penteli and Dionysos foothills', at: [23.8700, 38.0700], radiusM: 3500 }, { name: 'Parnitha foothills, Acharnes', at: [23.7300, 38.1100], radiusM: 3500 }, { name: 'Varibobi and Tatoi', at: [23.8100, 38.1150], radiusM: 3000 }],
+        actions: ['Send a 112 evacuation message to phones in the area', 'Close forest roads and keep evacuation routes one-way outbound', 'Hold traffic at the edge for fire engines and water tankers', 'Open the assembly points away from the fire front', 'Warn drivers on message signs and the motorway operators'] },
+      { id: 'surge', name: 'Storm surge on the coast road', roadEffect: 'coastal lanes closed',
+        areas: [{ name: 'Poseidonos Avenue, Faliro', at: [23.6800, 37.9330], radiusM: 1500 }, { name: 'Glyfada seafront', at: [23.7450, 37.8700], radiusM: 1500 }, { name: 'Piraeus, Akti Miaouli', at: [23.6420, 37.9400], radiusM: 1200 }],
+        actions: ['Close the coastal lanes of Poseidonos Avenue', 'Divert traffic inland via Syngrou and Vouliagmenis avenues', 'Pause ferry boarding at exposed gates', 'Move parked cars off the seafront'] },
+      { id: 'sand', name: 'Saharan dust episode', roadEffect: 'reduced visibility, lower speed limits',
+        areas: [{ name: 'Attiki Odos near the airport', at: [23.9000, 37.9600], radiusM: 5000 }, { name: 'Kifissos Avenue, north', at: [23.7000, 38.0300], radiusM: 4000 }],
+        actions: ['Lower the limit on Attiki Odos and Kifissos Avenue', 'Show low-visibility warnings on message signs', 'Advise people with breathing problems to stay indoors', 'Place patrols at the usual pile-up locations'] },
+      { id: 'quake', name: 'Earthquake', roadEffect: 'bridges and underpasses closed until inspected',
+        areas: [{ name: 'Athens basin', at: [23.7300, 37.9800], radiusM: 9000 }],
+        actions: ['Close bridges and underpasses until inspected', 'Set signals to flashing where power is lost', 'Keep main avenues clear for emergency vehicles', 'Open the assembly points and route people to them', 'Survey critical sites in priority order: hospitals first'] },
+      { id: 'heat', name: 'Heatwave', roadEffect: 'no closures, more breakdowns and fires',
+        areas: [{ name: 'Whole city', at: [23.7300, 37.9800], radiusM: 18000 }],
+        actions: ['Add breakdown patrols on Attiki Odos and Kifissos Avenue', 'Limit roadworks to the early morning', 'Open cooled spaces at metro stations and town halls', 'Raise wildfire readiness on the city edge', 'Watch camera feeds for vehicle and grass fires'] }
     ],
     assemblyPoints: [
-      { name: 'Parade Ground, Secunderabad (example)', at: [78.4980, 17.4430] },
-      { name: 'NTR Gardens and Necklace Road (example)', at: [78.4700, 17.4120] },
-      { name: 'LB Stadium grounds (example)', at: [78.4740, 17.3990] },
-      { name: 'KBR Park gates (example)', at: [78.4210, 17.4230] },
-      { name: 'Gachibowli Stadium grounds (example)', at: [78.3480, 17.4470] },
-      { name: 'Uppal stadium car parks (example)', at: [78.5500, 17.4065] },
-      { name: 'Osmania University grounds (example)', at: [78.5280, 17.4130] }
+      { name: 'Pedion tou Areos park (example)', at: [23.7330, 37.9940] }, { name: 'National Garden, Syntagma (example)', at: [23.7370, 37.9730] },
+      { name: 'Panathenaic Stadium (example)', at: [23.7411, 37.9683] }, { name: 'OAKA, Marousi (example)', at: [23.7866, 38.0363] },
+      { name: 'SNFCC park, Kallithea (example)', at: [23.6920, 37.9420] }, { name: 'Peace and Friendship Stadium (example)', at: [23.6680, 37.9420] },
+      { name: 'Goudi park (example)', at: [23.7700, 37.9840] }
     ]
   },
   parking: {
     violationsPerDay: 900,
     sites: [
-      { name: 'Abids multi-level car park', at: [78.4760, 17.3925], spaces: 900, kind: 'business' },
-      { name: 'Charminar visitors', at: [78.4735, 17.3630], spaces: 500, kind: 'leisure' },
-      { name: 'Secunderabad station car park', at: [78.5025, 17.4345], spaces: 1200, kind: 'mixed' },
-      { name: 'Begumpet car park', at: [78.4680, 17.4450], spaces: 700, kind: 'business' },
-      { name: 'Ameerpet metro car park', at: [78.4490, 17.4385], spaces: 600, kind: 'business' },
-      { name: 'HITEC City car park', at: [78.3820, 17.4484], spaces: 2400, kind: 'business' },
-      { name: 'Inorbit Mall car park', at: [78.3870, 17.4350], spaces: 2000, kind: 'leisure' },
-      { name: 'Financial District car park', at: [78.3430, 17.4170], spaces: 3000, kind: 'business' },
-      { name: 'Airport long stay', at: [78.4300, 17.2380], spaces: 3500, kind: 'mixed' },
-      { name: 'Banjara Hills Road No. 1 on-street zone', at: [78.4480, 17.4180], spaces: 420, kind: 'business', street: true },
-      { name: 'Koti on-street zone', at: [78.4840, 17.3850], spaces: 380, kind: 'business', street: true },
-      { name: 'Kukatpally on-street zone', at: [78.4080, 17.4850], spaces: 650, kind: 'residential', street: true }
+      { name: 'Kotzia Square underground car park', at: [23.7275, 37.9810], spaces: 900, kind: 'business' },
+      { name: 'Syntagma area car park', at: [23.7350, 37.9770], spaces: 600, kind: 'business' },
+      { name: 'Acropolis visitors', at: [23.7230, 37.9700], spaces: 300, kind: 'leisure' },
+      { name: 'Piraeus port car park', at: [23.6390, 37.9440], spaces: 1500, kind: 'mixed' },
+      { name: 'Larissis station car park', at: [23.7210, 37.9925], spaces: 500, kind: 'mixed' },
+      { name: 'The Mall Athens car park', at: [23.7896, 38.0444], spaces: 2500, kind: 'leisure' },
+      { name: 'OAKA car park', at: [23.7870, 38.0350], spaces: 3000, kind: 'leisure' },
+      { name: 'Kifisia car park', at: [23.8110, 38.0745], spaces: 600, kind: 'business' },
+      { name: 'Airport long stay', at: [23.9400, 37.9330], spaces: 4000, kind: 'mixed' },
+      { name: 'Kolonaki on-street zone', at: [23.7420, 37.9790], spaces: 420, kind: 'business', street: true },
+      { name: 'Koukaki on-street zone', at: [23.7240, 37.9640], spaces: 380, kind: 'residential', street: true },
+      { name: 'Glyfada on-street zone', at: [23.7540, 37.8660], spaces: 520, kind: 'leisure', street: true }
     ]
   },
   // Vehicle search uses generated plate reads at the synthetic cameras. Plates here are demo values.
@@ -404,12 +402,12 @@ sampleVideos: [
   },
   freight: {
     weightLimitT: 2.5, banHours: [[6.5, 9], [15, 18]], nonComplianceShare: 0.06,
-    zone: { at: [78.4750, 17.3950], radiusM: 6000 },
-    hazmatVehicles: 5, hazmatFrom: [78.4500, 17.5100], hazmatTo: [78.5650, 17.4300],
+    zone: { at: [23.7300, 37.9800], radiusM: 3000 },
+    hazmatVehicles: 6, hazmatFrom: [23.5900, 38.0450], hazmatTo: [23.6300, 37.9500],
     weighStations: [
-      { name: 'Patancheru weigh station (example)', at: [78.2700, 17.5200], perHour: 180 },
-      { name: 'Shamshabad weigh station (example)', at: [78.4100, 17.2700], perHour: 140 },
-      { name: 'Jeedimetla checkpoint (example)', at: [78.4500, 17.5150], perHour: 110 }
+      { name: 'Elefsina toll weigh station (example)', at: [23.5600, 38.0500], perHour: 180 },
+      { name: 'Attiki Odos, Metamorfosi (example)', at: [23.7500, 38.0600], perHour: 150 },
+      { name: 'Kifissos Avenue checkpoint (example)', at: [23.6900, 38.0200], perHour: 110 }
     ]
   },
   pedestrians: { schoolLimitKmh: 30, schoolWindows: [[6.75, 8, 'Arrival time'], [13, 15, 'Dismissal time']], crossings: 16, peakPerHour: 420 },
@@ -567,47 +565,47 @@ sampleVideos: [
     // payload. `connectors` lists the usual ways that device delivers data, most common first. The payloads are invented.
     devices: [
       { id: 'anpr', name: 'ANPR / plate-reading camera', cat: 'Cameras', connectors: ['rest', 'kafka', 'onvif'], entity: 'VehicleDetection', format: 'json',
-        sample: '[{"plate":"TS09EA1234","time":"2026-11-17T06:10:22+05:30","camera_id":"CAM-0012","confidence":96.4,"class":"Car","lat":17.4539,"lon":78.3773,"speed":62,"lane":2},{"plate":"TS07UB8802","time":"2026-11-17T06:10:24+05:30","camera_id":"CAM-0012","confidence":91.2,"class":"Taxi","lat":17.4539,"lon":78.3773,"speed":58,"lane":1}]' },
+        sample: '[{"plate":"IKA1234","time":"2026-11-17T06:10:22+02:00","camera_id":"CAM-0012","confidence":96.4,"class":"Car","lat":37.9539,"lon":23.7773,"speed":62,"lane":2},{"plate":"YHN8802","time":"2026-11-17T06:10:24+02:00","camera_id":"CAM-0012","confidence":91.2,"class":"Taxi","lat":37.9539,"lon":23.7773,"speed":58,"lane":1}]' },
       { id: 'cctv', name: 'CCTV with video analytics', cat: 'Cameras', connectors: ['kafka', 'onvif', 'mqtt', 'rest'], entity: 'VideoEvent', format: 'json',
-        sample: '[{"event_id":"EV-88120","ts":"2026-11-17T06:11:02+05:30","camera":"CCTV-0231","type":"stopped_vehicle","score":0.91,"object":"car","lat":17.4667,"lon":78.3667,"snapshot":"https://vms.example/snap/88120.jpg","zone":"Lane 2"},{"event_id":"EV-88121","ts":"2026-11-17T06:11:40+05:30","camera":"CCTV-0102","type":"wrong_way","score":0.84,"object":"car","lat":17.431,"lon":78.441,"snapshot":"https://vms.example/snap/88121.jpg","zone":"Slip road"}]' },
+        sample: '[{"event_id":"EV-88120","ts":"2026-11-17T06:11:02+02:00","camera":"CCTV-0231","type":"stopped_vehicle","score":0.91,"object":"car","lat":37.9667,"lon":23.7667,"snapshot":"https://vms.example/snap/88120.jpg","zone":"Lane 2"},{"event_id":"EV-88121","ts":"2026-11-17T06:11:40+02:00","camera":"CCTV-0102","type":"wrong_way","score":0.84,"object":"car","lat":37.931,"lon":23.741,"snapshot":"https://vms.example/snap/88121.jpg","zone":"Slip road"}]' },
       { id: 'thermal', name: 'Thermal camera', cat: 'Cameras', connectors: ['onvif', 'mqtt', 'rest'], entity: 'VideoEvent', format: 'json',
-        sample: '[{"event_id":"TH-2201","ts":"2026-11-17T06:14:10+05:30","camera":"THM-T2-04","type":"fire","score":0.88,"object":"vehicle","zone":"Tunnel bore 2"},{"event_id":"TH-2202","ts":"2026-11-17T06:15:31+05:30","camera":"THM-T2-07","type":"pedestrian","score":0.79,"object":"person","zone":"Tunnel bore 2"}]' },
+        sample: '[{"event_id":"TH-2201","ts":"2026-11-17T06:14:10+02:00","camera":"THM-T2-04","type":"fire","score":0.88,"object":"vehicle","zone":"Tunnel bore 2"},{"event_id":"TH-2202","ts":"2026-11-17T06:15:31+02:00","camera":"THM-T2-07","type":"pedestrian","score":0.79,"object":"person","zone":"Tunnel bore 2"}]' },
       { id: 'enforcement', name: 'Speed and red-light enforcement camera', cat: 'Cameras', connectors: ['rest', 'sftp', 'kafka'], entity: 'SpeedMeasurement', format: 'json',
-        sample: '[{"site":"ENF-ORR-04","captured":"17/11/2026 06:12:40","speed_kmh":147,"limit_kmh":120,"lane":3,"plate":"TS09FA5521","veh_class":"Car","direction":"Southbound"},{"site":"ENF-ORR-04","captured":"17/11/2026 06:13:05","speed_kmh":133,"limit_kmh":120,"lane":2,"plate":"SHJ 4410","veh_class":"Car","direction":"Southbound"}]' },
+        sample: '[{"site":"ENF-ATT-04","captured":"17/11/2026 06:12:40","speed_kmh":147,"limit_kmh":120,"lane":3,"plate":"IPT5521","veh_class":"Car","direction":"Southbound"},{"site":"ENF-ATT-04","captured":"17/11/2026 06:13:05","speed_kmh":133,"limit_kmh":120,"lane":2,"plate":"SHJ 4410","veh_class":"Car","direction":"Southbound"}]' },
       { id: 'speed-radar', name: 'Speed radar', cat: 'Radar and LiDAR', connectors: ['rest', 'socket', 'mqtt'], entity: 'SpeedMeasurement', format: 'json',
-        sample: '[{"radar":"RAD-07","t":"2026-11-17T06:12:03+05:30","kmh":138.4,"limit":120,"lane":2,"dir":"NB","cls":"car","len_m":4.6},{"radar":"RAD-07","t":"2026-11-17T06:12:04+05:30","kmh":96.0,"limit":120,"lane":1,"dir":"NB","cls":"truck","len_m":11.8}]' },
+        sample: '[{"radar":"RAD-07","t":"2026-11-17T06:12:03+02:00","kmh":138.4,"limit":120,"lane":2,"dir":"NB","cls":"car","len_m":4.6},{"radar":"RAD-07","t":"2026-11-17T06:12:04+02:00","kmh":96.0,"limit":120,"lane":1,"dir":"NB","cls":"truck","len_m":11.8}]' },
       { id: 'traffic-radar', name: 'Traffic counting radar', cat: 'Radar and LiDAR', connectors: ['mqtt', 'socket', 'rest'], entity: 'TrafficReading', format: 'json',
         sample: '[{"unit":"TR-112","ts":1794881400,"lane":1,"volume":1320,"avg_speed":84.2,"occupancy":14.6},{"unit":"TR-112","ts":1794881400,"lane":2,"volume":1188,"avg_speed":79.5,"occupancy":16.1}]' },
       { id: 'lidar', name: 'LiDAR sensor', cat: 'Radar and LiDAR', connectors: ['socket', 'websocket', 'kafka'], entity: 'ObjectTrack', format: 'json',
         sample: '{"sensor":"LID-J12","frame_ts":1794881400123,"objects":[{"id":4411,"cls":"pedestrian","x":12.4,"y":-3.1,"speed_ms":1.4,"heading":92,"l":0.6,"w":0.6,"h":1.7,"zone":"Crossing N"},{"id":4412,"cls":"car","x":-8.2,"y":15.9,"speed_ms":9.8,"heading":181,"l":4.5,"w":1.9,"h":1.5,"zone":"Approach E"},{"id":4413,"cls":"bicycle","x":3.3,"y":7.0,"speed_ms":4.9,"heading":178,"l":1.8,"w":0.6,"h":1.6,"zone":"Approach E"}]}' },
       { id: 'tracking-radar', name: 'Tracking radar (junction or perimeter)', cat: 'Radar and LiDAR', connectors: ['socket', 'websocket', 'kafka'], entity: 'ObjectTrack', format: 'json',
-        sample: '{"radar":"RDR-P03","time":"2026-11-17T06:12:05.250+05:30","tracks":[{"track":88,"class":"Truck","lat":17.4281,"lon":78.4372,"speed_kmh":71,"heading_deg":14,"length_m":12.5},{"track":91,"class":"Car","lat":17.4283,"lon":78.4369,"speed_kmh":64,"heading_deg":193,"length_m":4.4}]}' },
+        sample: '{"radar":"RDR-P03","time":"2026-11-17T06:12:05.250+02:00","tracks":[{"track":88,"class":"Truck","lat":37.9281,"lon":23.7372,"speed_kmh":71,"heading_deg":14,"length_m":12.5},{"track":91,"class":"Car","lat":37.9283,"lon":23.7369,"speed_kmh":64,"heading_deg":193,"length_m":4.4}]}' },
       { id: 'loop', name: 'Loop or detector station', cat: 'Traffic field equipment', connectors: ['mqtt', 'snmp', 'rest'], entity: 'TrafficReading', format: 'json',
         sample: '[{"det":"DET-014","ts":1794881400,"q":1260,"v":71.5,"occ":18.2,"lane":1},{"det":"DET-014","ts":1794881400,"q":1104,"v":66.0,"occ":21.7,"lane":2}]' },
       { id: 'signal', name: 'Signal controller', cat: 'Traffic field equipment', connectors: ['snmp', 'rest', 'soap'], entity: 'SignalStatus', format: 'json',
-        sample: '[{"junction":"J-12","time":"2026-11-17T06:00:00+05:30","mode":"Normal","plan":"P3","phase":2,"cycle":90},{"junction":"J-15","time":"2026-11-17T06:00:05+05:30","mode":"Flashing","plan":"P1","phase":1,"cycle":120}]' },
+        sample: '[{"junction":"J-12","time":"2026-11-17T06:00:00+02:00","mode":"Normal","plan":"P3","phase":2,"cycle":90},{"junction":"J-15","time":"2026-11-17T06:00:05+02:00","mode":"Flashing","plan":"P1","phase":1,"cycle":120}]' },
       { id: 'vms', name: 'Variable message sign', cat: 'Traffic field equipment', connectors: ['snmp', 'rest'], entity: 'DeviceHealth', format: 'json',
-        sample: '[{"sign":"VMS-E11-03","polled":"2026-11-17T06:10:00+05:30","state":"Online","type":"Variable message sign","temp_c":41.5,"fw":"3.2.1","last_error":""},{"sign":"VMS-E11-07","polled":"2026-11-17T06:10:00+05:30","state":"Degraded","type":"Variable message sign","temp_c":58.9,"fw":"3.2.1","last_error":"Pixel faults: 14"}]' },
+        sample: '[{"sign":"VMS-E11-03","polled":"2026-11-17T06:10:00+02:00","state":"Online","type":"Variable message sign","temp_c":41.5,"fw":"3.2.1","last_error":""},{"sign":"VMS-E11-07","polled":"2026-11-17T06:10:00+02:00","state":"Degraded","type":"Variable message sign","temp_c":58.9,"fw":"3.2.1","last_error":"Pixel faults: 14"}]' },
       { id: 'air', name: 'Air quality and noise station', cat: 'IoT sensors', connectors: ['mqtt', 'lorawan', 'rest'], entity: 'EnvironmentReading', format: 'json',
-        sample: '[{"station":"AQ-03","time":"2026-11-17T06:00:00+05:30","pm2_5":38.2,"pm10":91.0,"no2":44.1,"noise_db":66.3,"temp_c":27.4,"rh":58},{"station":"AQ-07","time":"2026-11-17T06:00:00+05:30","pm2_5":52.9,"pm10":120.4,"no2":61.0,"noise_db":71.8,"temp_c":27.9,"rh":55}]' },
+        sample: '[{"station":"AQ-03","time":"2026-11-17T06:00:00+02:00","pm2_5":38.2,"pm10":91.0,"no2":44.1,"noise_db":66.3,"temp_c":27.4,"rh":58},{"station":"AQ-07","time":"2026-11-17T06:00:00+02:00","pm2_5":52.9,"pm10":120.4,"no2":61.0,"noise_db":71.8,"temp_c":27.9,"rh":55}]' },
       { id: 'weather', name: 'Road weather station', cat: 'IoT sensors', connectors: ['rest', 'mqtt'], entity: 'WeatherReading', format: 'json',
-        sample: '[{"station_id":"RWIS-07","obs_time":"2026-11-17T06:00:00+05:30","air_temp":27.1,"road_temp":29.8,"humidity":61,"wind_speed":14,"wind_dir":310,"visibility":8000,"rain_mm_h":0,"road_condition":"Dry"},{"station_id":"RWIS-09","obs_time":"2026-11-17T06:00:00+05:30","air_temp":26.4,"road_temp":28.9,"humidity":83,"wind_speed":6,"wind_dir":295,"visibility":350,"rain_mm_h":0,"road_condition":"Fog"}]' },
+        sample: '[{"station_id":"RWIS-07","obs_time":"2026-11-17T06:00:00+02:00","air_temp":27.1,"road_temp":29.8,"humidity":61,"wind_speed":14,"wind_dir":310,"visibility":8000,"rain_mm_h":0,"road_condition":"Dry"},{"station_id":"RWIS-09","obs_time":"2026-11-17T06:00:00+02:00","air_temp":26.4,"road_temp":28.9,"humidity":83,"wind_speed":6,"wind_dir":295,"visibility":350,"rain_mm_h":0,"road_condition":"Fog"}]' },
       { id: 'parking', name: 'Parking bay sensor', cat: 'IoT sensors', connectors: ['lorawan', 'mqtt', 'rest'], entity: 'ParkingOccupancy', format: 'json',
-        sample: '[{"dev_eui":"70B3D57ED0051A2C","received_at":"2026-11-17T02:09:41Z","facility":"PK-ABIDS-2","bay":"B-114","occupied":true,"battery":87},{"dev_eui":"70B3D57ED0051A2D","received_at":"2026-11-17T02:09:55Z","facility":"PK-ABIDS-2","bay":"B-115","occupied":false,"battery":91}]' },
+        sample: '[{"dev_eui":"70B3D57ED0051A2C","received_at":"2026-11-17T02:09:41Z","facility":"PK-SYNTAGMA-2","bay":"B-114","occupied":true,"battery":87},{"dev_eui":"70B3D57ED0051A2D","received_at":"2026-11-17T02:09:55Z","facility":"PK-SYNTAGMA-2","bay":"B-115","occupied":false,"battery":91}]' },
       { id: 'streetlight', name: 'Smart streetlight controller', cat: 'IoT sensors', connectors: ['lorawan', 'mqtt', 'rest'], entity: 'SensorReading', format: 'json',
-        sample: '[{"device":"SL-4471","ts":"2026-11-17T06:10:00+05:30","metric":"power_w","value":86.5,"unit":"W","quality":"Good"},{"device":"SL-4472","ts":"2026-11-17T06:10:00+05:30","metric":"power_w","value":0,"unit":"W","quality":"Suspect"}]' },
+        sample: '[{"device":"SL-4471","ts":"2026-11-17T06:10:00+02:00","metric":"power_w","value":86.5,"unit":"W","quality":"Good"},{"device":"SL-4472","ts":"2026-11-17T06:10:00+02:00","metric":"power_w","value":0,"unit":"W","quality":"Suspect"}]' },
       { id: 'flood', name: 'Water level and flood sensor', cat: 'IoT sensors', connectors: ['lorawan', 'mqtt'], entity: 'SensorReading', format: 'json',
-        sample: '[{"device":"WL-09","ts":"2026-11-17T06:10:00+05:30","metric":"water_level_cm","value":3.2,"unit":"cm","battery":78},{"device":"WL-12","ts":"2026-11-17T06:10:00+05:30","metric":"water_level_cm","value":0.4,"unit":"cm","battery":64}]' },
+        sample: '[{"device":"WL-09","ts":"2026-11-17T06:10:00+02:00","metric":"water_level_cm","value":3.2,"unit":"cm","battery":78},{"device":"WL-12","ts":"2026-11-17T06:10:00+02:00","metric":"water_level_cm","value":0.4,"unit":"cm","battery":64}]' },
       { id: 'iot', name: 'Other IoT sensor', cat: 'IoT sensors', connectors: ['mqtt', 'lorawan', 'opcua', 'modbus', 'rest'], entity: 'SensorReading', format: 'json',
-        sample: '[{"device":"TUN-FAN-01","ts":"2026-11-17T06:10:00+05:30","metric":"fan_speed_rpm","value":1180,"unit":"rpm","quality":"Good"},{"device":"TUN-CO-03","ts":"2026-11-17T06:10:00+05:30","metric":"co_ppm","value":7.5,"unit":"ppm","quality":"Good"}]' },
+        sample: '[{"device":"TUN-FAN-01","ts":"2026-11-17T06:10:00+02:00","metric":"fan_speed_rpm","value":1180,"unit":"rpm","quality":"Good"},{"device":"TUN-CO-03","ts":"2026-11-17T06:10:00+02:00","metric":"co_ppm","value":7.5,"unit":"ppm","quality":"Good"}]' },
       { id: 'avl', name: 'Bus and fleet tracker (GPS)', cat: 'Vehicles', connectors: ['kafka', 'websocket', 'rest'], entity: 'TransitPosition', format: 'json',
-        sample: '[{"vehicle":"BUS-2231","route":"054","gps_time":"2026-11-17T06:12:00+05:30","lat":17.4702,"lon":78.3711,"speed":34,"delay_s":95,"occupancy":62},{"vehicle":"BUS-2260","route":"032","gps_time":"2026-11-17T06:12:02+05:30","lat":17.4488,"lon":78.3954,"speed":0,"delay_s":-20,"occupancy":41}]' },
+        sample: '[{"vehicle":"BUS-2231","route":"054","gps_time":"2026-11-17T06:12:00+02:00","lat":37.9702,"lon":23.7711,"speed":34,"delay_s":95,"occupancy":62},{"vehicle":"BUS-2260","route":"032","gps_time":"2026-11-17T06:12:02+02:00","lat":37.9488,"lon":23.7954,"speed":0,"delay_s":-20,"occupancy":41}]' },
       { id: 'health', name: 'Device health (cameras, radars, network)', cat: 'Infrastructure health', connectors: ['snmp', 'rest', 'mqtt'], entity: 'DeviceHealth', format: 'json',
-        sample: '[{"device_id":"CAM-0012","type":"ANPR camera","polled_at":"2026-11-17T06:10:00+05:30","status":"Online","uptime_s":1843200,"temp_c":48.2,"cpu":37,"storage":61,"firmware":"7.4.2","signal":-67},{"device_id":"RAD-07","type":"Speed radar","polled_at":"2026-11-17T06:10:00+05:30","status":"Degraded","uptime_s":86400,"temp_c":63.5,"cpu":88,"storage":40,"firmware":"2.1.0","signal":-81,"last_error":"Heater fault"}]' },
+        sample: '[{"device_id":"CAM-0012","type":"ANPR camera","polled_at":"2026-11-17T06:10:00+02:00","status":"Online","uptime_s":1843200,"temp_c":48.2,"cpu":37,"storage":61,"firmware":"7.4.2","signal":-67},{"device_id":"RAD-07","type":"Speed radar","polled_at":"2026-11-17T06:10:00+02:00","status":"Degraded","uptime_s":86400,"temp_c":63.5,"cpu":88,"storage":40,"firmware":"2.1.0","signal":-81,"last_error":"Heater fault"}]' },
       { id: 'cabinet', name: 'Cabinet, power and UPS', cat: 'Infrastructure health', connectors: ['modbus', 'snmp'], entity: 'DeviceHealth', format: 'json',
-        sample: '[{"cabinet":"CAB-J12","ts":"2026-11-17T06:10:00+05:30","state":"Online","type":"Roadside cabinet","voltage":26.8,"temp_c":44.0},{"cabinet":"CAB-J15","ts":"2026-11-17T06:10:00+05:30","state":"Degraded","type":"Roadside cabinet","voltage":22.1,"temp_c":57.3,"last_error":"On battery"}]' },
+        sample: '[{"cabinet":"CAB-J12","ts":"2026-11-17T06:10:00+02:00","state":"Online","type":"Roadside cabinet","voltage":26.8,"temp_c":44.0},{"cabinet":"CAB-J15","ts":"2026-11-17T06:10:00+02:00","state":"Degraded","type":"Roadside cabinet","voltage":22.1,"temp_c":57.3,"last_error":"On battery"}]' },
       { id: 'cad', name: 'Control room or incident system', cat: 'Systems', connectors: ['sftp', 'rest', 'sql', 'soap'], entity: 'Incident', format: 'csv',
-        sample: 'Incident Ref;Reported;Category;Priority;Lat;Lon;Details;State\nINC-2026-118204;17/11/2026 05:42;Accident;Critical;17.4667;78.3667;Two vehicles, lane 2 blocked;Open\nINC-2026-118205;17/11/2026 05:51;Breakdown;Medium;17.4310;78.4410;Stalled lorry on hard shoulder;Acknowledged' }
+        sample: 'Incident Ref;Reported;Category;Priority;Lat;Lon;Details;State\nINC-2026-118204;17/11/2026 05:42;Accident;Critical;37.9667;23.7667;Two vehicles, lane 2 blocked;Open\nINC-2026-118205;17/11/2026 05:51;Breakdown;Medium;37.9310;23.7410;Stalled lorry on hard shoulder;Acknowledged' }
     ],
     // Where mapped records are kept. Every entity is time-stamped, so each lands in a time-series table.
     // No database runs in this demonstrator: the studio shows the design and generates the table definitions.
@@ -643,17 +641,17 @@ sampleVideos: [
     // Example integrations shown on first use. The vendors, endpoints and payloads are invented.
     seed: [
       { id: 'anpr-vendor', name: 'ANPR Vendor', device: 'anpr', connector: 'rest', entity: 'VehicleDetection', status: 'draft', format: 'json', ratePerSec: 240,
-        config: { url: 'https://anpr-vendor.example/api/v2/reads', method: 'GET', paging: 'Since last timestamp' }, auth: { type: 'API key', ref: 'vault://urbaniq/anpr-vendor/api-key' }, every: '10 seconds',
-        sample: '{\n  "vendor": "ANPR Vendor",\n  "count": 6,\n  "events": [\n    { "plate_no": "ts09ea1234", "capture_time": "17/11/2026 06:10:22", "device_code": "CAM-0012", "confidence_score": 96.4, "vehicle_type": "car", "location": { "lat": 17.4539, "lon": 78.3773 }, "speed": 62, "lane": 2 },\n    { "plate_no": "ts07ub8802", "capture_time": "17/11/2026 06:10:24", "device_code": "CAM-0012", "confidence_score": 91.2, "vehicle_type": "taxi", "location": { "lat": 17.4539, "lon": 78.3773 }, "speed": 58, "lane": 1 },\n    { "plate_no": "TS08UC7041", "capture_time": "17/11/2026 06:10:31", "device_code": "CAM-0047", "confidence_score": 88.75, "vehicle_type": "truck", "location": { "lat": 17.4281, "lon": 78.4372 }, "speed": 74, "lane": 3 },\n    { "plate_no": "ts11ub5120", "capture_time": "17/11/2026 06:10:40", "device_code": "CAM-0047", "confidence_score": 79.1, "vehicle_type": "bus", "location": { "lat": 17.4281, "lon": 78.4372 }, "speed": 51, "lane": 3 },\n    { "plate_no": "ts13eb3097", "capture_time": "17/11/2026 06:10:44", "device_code": "CAM-0103", "confidence_score": 93.0, "vehicle_type": "pickup", "location": { "lat": 17.4912, "lon": 78.3606 }, "speed": 66, "lane": 1 },\n    { "plate_no": "ts09ea1234", "capture_time": "17/11/2026 06:10:22", "device_code": "CAM-0012", "confidence_score": 96.4, "vehicle_type": "car", "location": { "lat": 17.4539, "lon": 78.3773 }, "speed": 62, "lane": 2 }\n  ]\n}',
+        config: { url: 'https://anpr-vendor.example/api/v2/reads', method: 'GET', paging: 'Since last timestamp' }, auth: { type: 'API key', ref: 'vault://athenaiq/anpr-vendor/api-key' }, every: '10 seconds',
+        sample: '{\n  "vendor": "ANPR Vendor",\n  "count": 6,\n  "events": [\n    { "plate_no": "ika1234", "capture_time": "17/11/2026 06:10:22", "device_code": "CAM-0012", "confidence_score": 96.4, "vehicle_type": "car", "location": { "lat": 37.9539, "lon": 23.7773 }, "speed": 62, "lane": 2 },\n    { "plate_no": "yhn8802", "capture_time": "17/11/2026 06:10:24", "device_code": "CAM-0012", "confidence_score": 91.2, "vehicle_type": "taxi", "location": { "lat": 37.9539, "lon": 23.7773 }, "speed": 58, "lane": 1 },\n    { "plate_no": "ZKE7041", "capture_time": "17/11/2026 06:10:31", "device_code": "CAM-0047", "confidence_score": 88.75, "vehicle_type": "truck", "location": { "lat": 37.9281, "lon": 23.7372 }, "speed": 74, "lane": 3 },\n    { "plate_no": "ibm5120", "capture_time": "17/11/2026 06:10:40", "device_code": "CAM-0047", "confidence_score": 79.1, "vehicle_type": "bus", "location": { "lat": 37.9281, "lon": 23.7372 }, "speed": 51, "lane": 3 },\n    { "plate_no": "xkp3097", "capture_time": "17/11/2026 06:10:44", "device_code": "CAM-0103", "confidence_score": 93.0, "vehicle_type": "pickup", "location": { "lat": 37.9912, "lon": 23.7606 }, "speed": 66, "lane": 1 },\n    { "plate_no": "ika1234", "capture_time": "17/11/2026 06:10:22", "device_code": "CAM-0012", "confidence_score": 96.4, "vehicle_type": "car", "location": { "lat": 37.9539, "lon": 23.7773 }, "speed": 62, "lane": 2 }\n  ]\n}',
         rules: [
           { sourcePath: 'plate_no', targetPath: 'plateNumber', transform: 'uppercase', required: true },
-          { sourcePath: 'capture_time', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'dd/MM/yyyy HH:mm:ss', tz: '+05:30' }, required: true },
+          { sourcePath: 'capture_time', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'dd/MM/yyyy HH:mm:ss', tz: '+02:00' }, required: true },
           { sourcePath: 'device_code', targetPath: 'cameraId', transform: 'direct', required: true },
           { sourcePath: 'confidence_score', targetPath: 'confidence', transform: 'toDecimal', args: { decimals: 1 } },
           { sourcePath: 'vehicle_type', targetPath: 'vehicleClass', transform: 'lookup', args: { table: 'car=Car\ntaxi=Taxi\nbus=Bus\nvan=Light goods\ntruck=Heavy vehicle\nmotorbike=Motorcycle', fallback: '' } }
         ] },
       { id: 'roadside-detectors', name: 'Roadside detectors', device: 'loop', connector: 'mqtt', entity: 'TrafficReading', status: 'published', format: 'json', ratePerSec: 520, platformFeed: 'Traffic detectors',
-        config: { broker: 'mqtts://roadside-broker.example:8883', topic: 'roadside/+/readings', qos: '1' }, auth: { type: 'Client certificate (mTLS)', ref: 'vault://urbaniq/roadside/client-cert' },
+        config: { broker: 'mqtts://roadside-broker.example:8883', topic: 'roadside/+/readings', qos: '1' }, auth: { type: 'Client certificate (mTLS)', ref: 'vault://athenaiq/roadside/client-cert' },
         sample: '[\n  { "det": "DET-014", "ts": 1794881400, "q": 1260, "v": 71.5, "occ": 18.2, "lane": 1 },\n  { "det": "DET-014", "ts": 1794881400, "q": 1104, "v": 66.0, "occ": 21.7, "lane": 2 },\n  { "det": "DET-022", "ts": 1794881400, "q": 1832, "v": 38.4, "occ": 44.9, "lane": 1 },\n  { "det": "DET-031", "ts": 1794881460, "q": 640, "v": 92.3, "occ": 7.5, "lane": 1 }\n]',
         rules: [
           { sourcePath: 'det', targetPath: 'detectorId', transform: 'direct', required: true },
@@ -662,11 +660,11 @@ sampleVideos: [
           { sourcePath: 'occ', targetPath: 'occupancyPct', transform: 'toDecimal', args: { decimals: 1 } }, { sourcePath: 'lane', targetPath: 'lane', transform: 'direct' }
         ] },
       { id: 'control-room-incidents', name: 'Control room incidents', device: 'cad', connector: 'sftp', entity: 'Incident', status: 'published', format: 'csv', ratePerSec: 0.6, platformFeed: 'Incident reports',
-        config: { host: 'sftp.control-room.example:22', path: '/outbound/incidents', pattern: 'incidents_*.csv' }, auth: { type: 'Basic (user and password)', ref: 'vault://urbaniq/control-room/sftp' }, every: '1 minute',
-        sample: 'Incident Ref;Reported;Category;Priority;Lat;Lon;Details;State\nINC-2026-118204;17/11/2026 05:42;RTA;P1;17.4667;78.3667;Two vehicles, lane 2 blocked;OPEN\nINC-2026-118205;17/11/2026 05:51;BRK;P3;17.4310;78.4410;Stalled lorry on hard shoulder;ACK\nINC-2026-118206;17/11/2026 06:03;OBS;P2;17.4895;78.3582;Debris in lane 1;OPEN\nINC-2026-118207;17/11/2026 06:15;RWK;P4;17.4532;78.3901;Night works overrun;CLOSED',
+        config: { host: 'sftp.control-room.example:22', path: '/outbound/incidents', pattern: 'incidents_*.csv' }, auth: { type: 'Basic (user and password)', ref: 'vault://athenaiq/control-room/sftp' }, every: '1 minute',
+        sample: 'Incident Ref;Reported;Category;Priority;Lat;Lon;Details;State\nINC-2026-118204;17/11/2026 05:42;RTA;P1;37.9667;23.7667;Two vehicles, lane 2 blocked;OPEN\nINC-2026-118205;17/11/2026 05:51;BRK;P3;37.9310;23.7410;Stalled lorry on hard shoulder;ACK\nINC-2026-118206;17/11/2026 06:03;OBS;P2;37.9895;23.7582;Debris in lane 1;OPEN\nINC-2026-118207;17/11/2026 06:15;RWK;P4;37.9532;23.7901;Night works overrun;CLOSED',
         rules: [
           { sourcePath: 'Incident Ref', targetPath: 'incidentId', transform: 'direct', required: true },
-          { sourcePath: 'Reported', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'dd/MM/yyyy HH:mm', tz: '+05:30' }, required: true },
+          { sourcePath: 'Reported', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'dd/MM/yyyy HH:mm', tz: '+02:00' }, required: true },
           { sourcePath: 'Category', targetPath: 'type', transform: 'lookup', args: { table: 'RTA=Accident\nBRK=Breakdown\nRWK=Roadworks\nOBS=Obstruction\nFLD=Flooding', fallback: 'Other' }, required: true },
           { sourcePath: 'Priority', targetPath: 'severity', transform: 'lookup', args: { table: 'P1=Critical\nP2=High\nP3=Medium\nP4=Low', fallback: '' } },
           { sourcePath: 'Lat', targetPath: 'latitude', transform: 'toDecimal', args: { decimals: 5 }, required: true }, { sourcePath: 'Lon', targetPath: 'longitude', transform: 'toDecimal', args: { decimals: 5 }, required: true },
@@ -674,10 +672,10 @@ sampleVideos: [
           { sourcePath: 'State', targetPath: 'status', transform: 'lookup', args: { table: 'OPEN=Open\nACK=Acknowledged\nCLOSED=Closed', fallback: '' } }
         ] },
       { id: 'speed-radars', name: 'Speed radar network', device: 'speed-radar', connector: 'rest', entity: 'SpeedMeasurement', status: 'published', format: 'json', ratePerSec: 95,
-        config: { url: 'https://radar-vendor.example/api/measurements', method: 'GET', paging: 'Cursor' }, auth: { type: 'OAuth 2.0 client credentials', ref: 'vault://urbaniq/radar-vendor/oauth' }, every: '10 seconds',
-        sample: '[\n  { "radar": "RAD-07", "t": "2026-11-17T06:12:03+05:30", "kmh": 138.4, "limit": 120, "lane": 2, "dir": "NB", "cls": "car", "len_m": 4.6 },\n  { "radar": "RAD-07", "t": "2026-11-17T06:12:04+05:30", "kmh": 96.0, "limit": 120, "lane": 1, "dir": "NB", "cls": "truck", "len_m": 11.8 },\n  { "radar": "RAD-11", "t": "2026-11-17T06:12:04+05:30", "kmh": 151.9, "limit": 140, "lane": 3, "dir": "SB", "cls": "car", "len_m": 4.9 },\n  { "radar": "RAD-11", "t": "2026-11-17T06:12:07+05:30", "kmh": 88.3, "limit": 140, "lane": 1, "dir": "SB", "cls": "bus", "len_m": 12.0 }\n]',
+        config: { url: 'https://radar-vendor.example/api/measurements', method: 'GET', paging: 'Cursor' }, auth: { type: 'OAuth 2.0 client credentials', ref: 'vault://athenaiq/radar-vendor/oauth' }, every: '10 seconds',
+        sample: '[\n  { "radar": "RAD-07", "t": "2026-11-17T06:12:03+02:00", "kmh": 138.4, "limit": 120, "lane": 2, "dir": "NB", "cls": "car", "len_m": 4.6 },\n  { "radar": "RAD-07", "t": "2026-11-17T06:12:04+02:00", "kmh": 96.0, "limit": 120, "lane": 1, "dir": "NB", "cls": "truck", "len_m": 11.8 },\n  { "radar": "RAD-11", "t": "2026-11-17T06:12:04+02:00", "kmh": 151.9, "limit": 140, "lane": 3, "dir": "SB", "cls": "car", "len_m": 4.9 },\n  { "radar": "RAD-11", "t": "2026-11-17T06:12:07+02:00", "kmh": 88.3, "limit": 140, "lane": 1, "dir": "SB", "cls": "bus", "len_m": 12.0 }\n]',
         rules: [
-          { sourcePath: 'radar', targetPath: 'deviceId', transform: 'direct', required: true }, { sourcePath: 't', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'auto', tz: '+05:30' }, required: true },
+          { sourcePath: 'radar', targetPath: 'deviceId', transform: 'direct', required: true }, { sourcePath: 't', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'auto', tz: '+02:00' }, required: true },
           { sourcePath: 'kmh', targetPath: 'speedKmh', transform: 'toDecimal', args: { decimals: 1 }, required: true }, { sourcePath: 'limit', targetPath: 'speedLimitKmh', transform: 'toInteger' }, { sourcePath: 'lane', targetPath: 'lane', transform: 'direct' },
           { sourcePath: 'dir', targetPath: 'direction', transform: 'lookup', args: { table: 'NB=Northbound\nSB=Southbound\nEB=Eastbound\nWB=Westbound', fallback: '' } },
           { sourcePath: 'cls', targetPath: 'vehicleClass', transform: 'lookup', args: { table: 'car=Car\ntaxi=Taxi\nbus=Bus\nvan=Light goods\ntruck=Heavy vehicle\nmotorbike=Motorcycle', fallback: 'Unknown' } },
@@ -693,30 +691,30 @@ sampleVideos: [
           { sourcePath: 'speed_ms', targetPath: 'speedKmh', transform: 'scale', args: { factor: 3.6, offset: 0, decimals: 1 } }
         ] },
       { id: 'cctv-analytics', name: 'CCTV video analytics', device: 'cctv', connector: 'kafka', entity: 'VideoEvent', status: 'published', format: 'json', ratePerSec: 180, platformFeed: 'Video analytics events',
-        config: { brokers: 'vms-broker-1:9092, vms-broker-2:9092', topic: 'vms.analytics.events', group: 'urbaniq-ingest', offset: 'Latest' }, auth: { type: 'Client certificate (mTLS)', ref: 'vault://urbaniq/vms/client-cert' },
-        sample: '[\n  { "event_id": "EV-88120", "ts": "2026-11-17T06:11:02+05:30", "camera": "CCTV-0231", "type": "stopped_vehicle", "score": 0.91, "object": "car", "lat": 17.4667, "lon": 78.3667, "snapshot": "https://vms.example/snap/88120.jpg", "zone": "Lane 2" },\n  { "event_id": "EV-88121", "ts": "2026-11-17T06:11:40+05:30", "camera": "CCTV-0102", "type": "wrong_way", "score": 0.84, "object": "car", "lat": 17.4310, "lon": 78.4410, "snapshot": "https://vms.example/snap/88121.jpg", "zone": "Slip road" },\n  { "event_id": "EV-88122", "ts": "2026-11-17T06:12:15+05:30", "camera": "CCTV-0417", "type": "pedestrian", "score": 0.77, "object": "person", "lat": 17.4895, "lon": 78.3582, "snapshot": "https://vms.example/snap/88122.jpg", "zone": "Carriageway" }\n]',
+        config: { brokers: 'vms-broker-1:9092, vms-broker-2:9092', topic: 'vms.analytics.events', group: 'athenaiq-ingest', offset: 'Latest' }, auth: { type: 'Client certificate (mTLS)', ref: 'vault://athenaiq/vms/client-cert' },
+        sample: '[\n  { "event_id": "EV-88120", "ts": "2026-11-17T06:11:02+02:00", "camera": "CCTV-0231", "type": "stopped_vehicle", "score": 0.91, "object": "car", "lat": 37.9667, "lon": 23.7667, "snapshot": "https://vms.example/snap/88120.jpg", "zone": "Lane 2" },\n  { "event_id": "EV-88121", "ts": "2026-11-17T06:11:40+02:00", "camera": "CCTV-0102", "type": "wrong_way", "score": 0.84, "object": "car", "lat": 37.9310, "lon": 23.7410, "snapshot": "https://vms.example/snap/88121.jpg", "zone": "Slip road" },\n  { "event_id": "EV-88122", "ts": "2026-11-17T06:12:15+02:00", "camera": "CCTV-0417", "type": "pedestrian", "score": 0.77, "object": "person", "lat": 37.9895, "lon": 23.7582, "snapshot": "https://vms.example/snap/88122.jpg", "zone": "Carriageway" }\n]',
         rules: [
-          { sourcePath: 'event_id', targetPath: 'eventId', transform: 'direct', required: true }, { sourcePath: 'ts', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'auto', tz: '+05:30' }, required: true },
+          { sourcePath: 'event_id', targetPath: 'eventId', transform: 'direct', required: true }, { sourcePath: 'ts', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'auto', tz: '+02:00' }, required: true },
           { sourcePath: 'camera', targetPath: 'cameraId', transform: 'direct', required: true },
           { sourcePath: 'type', targetPath: 'eventType', transform: 'lookup', args: { table: 'stopped_vehicle=Stopped vehicle\nwrong_way=Wrong way\npedestrian=Pedestrian on road\ncrowd=Crowd\nintrusion=Intrusion\nfire=Smoke or fire\ndebris=Debris\nqueue=Queue', fallback: 'Other' }, required: true },
           { sourcePath: 'score', targetPath: 'confidence', transform: 'scale', args: { factor: 100, offset: 0, decimals: 1 } }, { sourcePath: 'object', targetPath: 'objectClass', transform: 'direct' },
           { sourcePath: 'lat', targetPath: 'latitude', transform: 'direct' }, { sourcePath: 'lon', targetPath: 'longitude', transform: 'direct' }, { sourcePath: 'snapshot', targetPath: 'snapshotUrl', transform: 'direct' }, { sourcePath: 'zone', targetPath: 'zone', transform: 'direct' }
         ] },
       { id: 'field-device-health', name: 'Field device health', device: 'health', connector: 'snmp', entity: 'DeviceHealth', status: 'published', format: 'json', ratePerSec: 12,
-        config: { host: 'nms.field.example:161', version: 'v3', objects: '1.3.6.1.2.1.1.3.0\n1.3.6.1.4.1.99999.1.2' }, auth: { type: 'Basic (user and password)', ref: 'vault://urbaniq/nms/snmpv3' }, every: '1 minute',
-        sample: '[\n  { "device_id": "CAM-0012", "type": "ANPR camera", "polled_at": "2026-11-17T06:10:00+05:30", "status": "up", "uptime_s": 1843200, "temp_c": 48.2, "cpu": 37, "disk": 61, "fw": "7.4.2", "rssi": -67 },\n  { "device_id": "RAD-07", "type": "Speed radar", "polled_at": "2026-11-17T06:10:00+05:30", "status": "degraded", "uptime_s": 86400, "temp_c": 63.5, "cpu": 88, "disk": 40, "fw": "2.1.0", "rssi": -81, "last_error": "Heater fault" },\n  { "device_id": "LID-J12", "type": "LiDAR", "polled_at": "2026-11-17T06:10:00+05:30", "status": "down", "uptime_s": 0, "fw": "1.9.3", "last_error": "No response" }\n]',
+        config: { host: 'nms.field.example:161', version: 'v3', objects: '1.3.6.1.2.1.1.3.0\n1.3.6.1.4.1.99999.1.2' }, auth: { type: 'Basic (user and password)', ref: 'vault://athenaiq/nms/snmpv3' }, every: '1 minute',
+        sample: '[\n  { "device_id": "CAM-0012", "type": "ANPR camera", "polled_at": "2026-11-17T06:10:00+02:00", "status": "up", "uptime_s": 1843200, "temp_c": 48.2, "cpu": 37, "disk": 61, "fw": "7.4.2", "rssi": -67 },\n  { "device_id": "RAD-07", "type": "Speed radar", "polled_at": "2026-11-17T06:10:00+02:00", "status": "degraded", "uptime_s": 86400, "temp_c": 63.5, "cpu": 88, "disk": 40, "fw": "2.1.0", "rssi": -81, "last_error": "Heater fault" },\n  { "device_id": "LID-J12", "type": "LiDAR", "polled_at": "2026-11-17T06:10:00+02:00", "status": "down", "uptime_s": 0, "fw": "1.9.3", "last_error": "No response" }\n]',
         rules: [
-          { sourcePath: 'device_id', targetPath: 'deviceId', transform: 'direct', required: true }, { sourcePath: 'polled_at', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'auto', tz: '+05:30' }, required: true },
+          { sourcePath: 'device_id', targetPath: 'deviceId', transform: 'direct', required: true }, { sourcePath: 'polled_at', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'auto', tz: '+02:00' }, required: true },
           { sourcePath: 'status', targetPath: 'status', transform: 'lookup', args: { table: 'up=Online\ndegraded=Degraded\ndown=Offline\nmaintenance=Maintenance', fallback: '' }, required: true },
           { sourcePath: 'type', targetPath: 'deviceType', transform: 'direct' }, { sourcePath: 'uptime_s', targetPath: 'uptimeSec', transform: 'toInteger' }, { sourcePath: 'temp_c', targetPath: 'temperatureC', transform: 'toDecimal', args: { decimals: 1 } },
           { sourcePath: 'cpu', targetPath: 'cpuPct', transform: 'direct' }, { sourcePath: 'disk', targetPath: 'storagePct', transform: 'direct' }, { sourcePath: 'fw', targetPath: 'firmware', transform: 'direct' },
           { sourcePath: 'rssi', targetPath: 'signalDbm', transform: 'direct' }, { sourcePath: 'last_error', targetPath: 'lastError', transform: 'trim' }
         ] },
       { id: 'air-quality-stations', name: 'Air quality stations', device: 'air', connector: 'mqtt', entity: 'EnvironmentReading', status: 'published', format: 'json', ratePerSec: 6, platformFeed: 'Environmental sensors',
-        config: { broker: 'mqtts://iot-broker.example:8883', topic: 'city/air/+/reading', qos: '1' }, auth: { type: 'Client certificate (mTLS)', ref: 'vault://urbaniq/iot/client-cert' },
-        sample: '[\n  { "station": "AQ-03", "time": "2026-11-17T06:00:00+05:30", "pm2_5": 38.2, "pm10": 91.0, "no2": 44.1, "noise_db": 66.3, "temp_c": 27.4, "rh": 58 },\n  { "station": "AQ-07", "time": "2026-11-17T06:00:00+05:30", "pm2_5": 52.9, "pm10": 120.4, "no2": 61.0, "noise_db": 71.8, "temp_c": 27.9, "rh": 55 },\n  { "station": "AQ-11", "time": "2026-11-17T06:00:00+05:30", "pm2_5": 21.7, "pm10": 64.3, "no2": 18.6, "noise_db": 58.2, "temp_c": 26.8, "rh": 63 }\n]',
+        config: { broker: 'mqtts://iot-broker.example:8883', topic: 'city/air/+/reading', qos: '1' }, auth: { type: 'Client certificate (mTLS)', ref: 'vault://athenaiq/iot/client-cert' },
+        sample: '[\n  { "station": "AQ-03", "time": "2026-11-17T06:00:00+02:00", "pm2_5": 38.2, "pm10": 91.0, "no2": 44.1, "noise_db": 66.3, "temp_c": 27.4, "rh": 58 },\n  { "station": "AQ-07", "time": "2026-11-17T06:00:00+02:00", "pm2_5": 52.9, "pm10": 120.4, "no2": 61.0, "noise_db": 71.8, "temp_c": 27.9, "rh": 55 },\n  { "station": "AQ-11", "time": "2026-11-17T06:00:00+02:00", "pm2_5": 21.7, "pm10": 64.3, "no2": 18.6, "noise_db": 58.2, "temp_c": 26.8, "rh": 63 }\n]',
         rules: [
-          { sourcePath: 'station', targetPath: 'stationId', transform: 'direct', required: true }, { sourcePath: 'time', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'auto', tz: '+05:30' }, required: true },
+          { sourcePath: 'station', targetPath: 'stationId', transform: 'direct', required: true }, { sourcePath: 'time', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'auto', tz: '+02:00' }, required: true },
           { sourcePath: 'pm2_5', targetPath: 'pm25', transform: 'direct' }, { sourcePath: 'pm10', targetPath: 'pm10', transform: 'direct' }, { sourcePath: 'no2', targetPath: 'no2', transform: 'direct' },
           { sourcePath: 'noise_db', targetPath: 'noiseDb', transform: 'direct' }, { sourcePath: 'temp_c', targetPath: 'temperatureC', transform: 'direct' }, { sourcePath: 'rh', targetPath: 'humidityPct', transform: 'direct' }
         ] }
@@ -724,7 +722,7 @@ sampleVideos: [
     // Reusable mappings for vendors with similar payloads.
     templates: [
       { name: 'Plate read, generic ANPR', entity: 'VehicleDetection', rules: [
-        { sourcePath: 'plate', targetPath: 'plateNumber', transform: 'uppercase', required: true }, { sourcePath: 'time', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'auto', tz: '+05:30' }, required: true },
+        { sourcePath: 'plate', targetPath: 'plateNumber', transform: 'uppercase', required: true }, { sourcePath: 'time', targetPath: 'timestamp', transform: 'dateFormat', args: { format: 'auto', tz: '+02:00' }, required: true },
         { sourcePath: 'camera_id', targetPath: 'cameraId', transform: 'direct', required: true }, { sourcePath: 'confidence', targetPath: 'confidence', transform: 'toDecimal', args: { decimals: 1 } }] }
     ]
   },
@@ -741,13 +739,13 @@ sampleVideos: [
     auto: true,                 // route automatically when a critical alert is pushed
     speedFactor: 1.25,          // response vehicles travel this much faster than surrounding traffic
     bases: [
-      { name: 'Patrol unit, Abids', lon: 78.4747, lat: 17.3916 },
-      { name: 'Patrol unit, Charminar', lon: 78.4747, lat: 17.3616 },
-      { name: 'Patrol unit, Secunderabad', lon: 78.5016, lat: 17.4337 },
-      { name: 'Patrol unit, Banjara Hills', lon: 78.4400, lat: 17.4150 },
-      { name: 'Patrol unit, HITEC City', lon: 78.3810, lat: 17.4474 },
-      { name: 'Patrol unit, Kukatpally', lon: 78.4070, lat: 17.4840 },
-      { name: 'Patrol unit, LB Nagar', lon: 78.5520, lat: 17.3460 }
+      { name: 'Patrol unit, Syntagma', lon: 23.7348, lat: 37.9755 },
+      { name: 'Patrol unit, Omonia', lon: 23.7281, lat: 37.9841 },
+      { name: 'Patrol unit, Piraeus', lon: 23.6375, lat: 37.9420 },
+      { name: 'Patrol unit, Kifisia', lon: 23.8105, lat: 38.0742 },
+      { name: 'Patrol unit, Marousi', lon: 23.7866, lat: 38.0363 },
+      { name: 'Patrol unit, Glyfada', lon: 23.7536, lat: 37.8650 },
+      { name: 'Patrol unit, Peristeri', lon: 23.6880, lat: 38.0130 }
     ]
   },
 
@@ -805,82 +803,113 @@ sampleVideos: [
     roadsToWiden: 10,                 // size of the widening programme tested
     signalsToUpgrade: 25,             // junctions given adaptive control in the test
     adaptiveSignalDelayReduction: 0.12,
-    valueOfTimePerHour: 150,         // value of time, rupees per vehicle-hour (assumed)
+    valueOfTimePerHour: 12,          // value of time, euros per vehicle-hour (assumed)
     workingDaysPerYear: 250,
     co2: { baseGPerKm: 150, congestionGKmh: 2500,       // g/km = base + congestion ÷ speed (km/h)
       typeFactor: { car: 1, taxi: 1, van: 1.5, lorry: 4, bus: 4.5, moto: 0.5 } },   // emissions per km against a car
     // Example targets for the City scorecard. They are illustrations, not official targets; set your own.
-    // Example targets for Hyderabad, set against Telangana conditions (about 20 km/h at the city peak, mixed traffic).
+    // Example targets for Athens, set against Greek conditions (about 20–25 km/h in the city at the peak).
     // Counts (accidents, fines, delay, CO2 …) are scaled for the other cities by their assumed trips against
     // targetsBaseTrips, so a town is not judged against a metro. They are illustrations, not official targets.
-    targetsBaseTrips: 420000,
+    targetsBaseTrips: 450000,
     targetsScaled: ['dailyDelayVehH', 'criticalRoads', 'accidentsPerDay', 'seriousAccidentsPerDay', 'accidentsWorstHour', 'finesPerDay', 'finesWorstHour',
       'sitesMonitored', 'co2TonnesPerDay', 'futureCriticalRoads', 'cycleKm', 'delayCostMillion'],
     targets: {
       venuesHighPct: 20, schoolZonesOkPct: 60, adaptiveCorridorsPct: 30, assetHealth: 85, planConflicts: 0, busLateMin: 8,
-      peakSpeedKmh: 20, extraTravelPct: 120, dailyDelayVehH: 600000, criticalRoads: 90, junctionsEFPct: 45, busOnTimePct: 70,
+      peakSpeedKmh: 22, extraTravelPct: 90, dailyDelayVehH: 600000, criticalRoads: 90, junctionsEFPct: 45, busOnTimePct: 70,
       accidentsPerDay: 70, seriousAccidentsPerDay: 6, accidentsWorstHour: 9, criticalAlertsOpen: 2,
       finesPerDay: 12000, finesWorstHour: 1000, topViolationSharePct: 50, topSitesSharePct: 25,
       sitesMonitored: 1500, sitesOnAlertPct: 5, camerasOnlinePct: 97,
       co2TonnesPerDay: 12000, aqi: 100, noiseDb: 70,
-      flightsOnTimePct: 80, flightDelayMin: 15, berthUsePct: 85, railKm: 150,
-      futureSpeedKmh: 18, futureCriticalRoads: 120, cycleKm: 60, delayCostMillion: 30000
+      flightsOnTimePct: 80, flightDelayMin: 15, berthUsePct: 85, railKm: 250,
+      futureSpeedKmh: 20, futureCriticalRoads: 120, cycleKm: 60, delayCostMillion: 2500
     },
-    // Population: Census of India 2011 (the latest census), with districts as re-drawn in 2016. growthPerYear is the
-    // 2001–2011 average for the state; projections assume it held, so treat them as rough context only.
-    population: { area: 'Telangana', total: 35003674, year: 2011, source: 'Census of India 2011', growthPerYear: 0.0128, growthFrom: '2001–2011',
-      partsLabel: 'Hyderabad metro districts', parts: [['Hyderabad', 3943323], ['Ranga Reddy', 2446265], ['Medchal–Malkajgiri', 2440073]] }
+    // Population: ELSTAT 2021 census (the latest). growthPerYear is the 2011–2021 average; projections assume it held,
+    // so treat them as rough context only.
+    population: { area: 'Greece', total: 10482487, year: 2021, source: 'ELSTAT 2021 census', growthPerYear: -0.0031, growthFrom: '2011–2021',
+      partsLabel: 'Largest regions', parts: [['Attica', 3814064], ['Central Macedonia', 1795669], ['Crete', 624408]] }
   },
 
-  /* ---- Telangana use cases (js/telangana.js) ------------------------------------------------- */
-  // Example lists for Hyderabad with approximate positions; replace them with the official lists (GHMC waterlogging
-  // points, TGPCB/CPCB stations, the Traffic Police festival plans) before client use. Other cities use their site list.
-  telangana: {
+  /* ---- Greek use cases (js/localcases.js) ------------------------------------------------------ */
+  // Example lists for Athens with approximate positions; replace them with official lists (municipal flood points,
+  // the Attica air-quality network, the Traffic Police event plans) before client use. Other cities use their site list.
+  local: {
+    country: 'Greece', citiesTitle: 'Greek cities', emergencyNumber: '112', ambulance: 'EKAB 166 ambulance', weatherService: 'the Hellenic National Meteorological Service (EMY)',
+    plate: { letters: 'ABEZHIKMNOPTYX', digits: 4, format: 'LLL-NNNN' },
     waterlogging: {
+      title: 'Flash-flood watch', authority: 'the municipalities’ and the Region of Attica’s flood-prone points',
       watchMm6h: 15, alertMm6h: 35,          // rain forecast in the next 6 hours
       points: [
-        { name: 'Khairatabad junction', at: [78.4600, 17.4130] }, { name: 'Lakdikapul', at: [78.4630, 17.4040], under: true }, { name: 'Masab Tank', at: [78.4540, 17.4020] },
-        { name: 'Mehdipatnam', at: [78.4390, 17.3950] }, { name: 'Tolichowki', at: [78.4150, 17.3950], low: 1.3 }, { name: 'Punjagutta', at: [78.4500, 17.4280] },
-        { name: 'Ameerpet', at: [78.4480, 17.4375] }, { name: 'Begumpet', at: [78.4670, 17.4440], under: true }, { name: 'Paradise junction', at: [78.4870, 17.4430] },
-        { name: 'Malakpet railway underbridge', at: [78.4980, 17.3750], under: true }, { name: 'Chaderghat causeway', at: [78.4880, 17.3770], low: 1.4 },
-        { name: 'Moosarambagh causeway', at: [78.5150, 17.3750], low: 1.4 }, { name: 'Raidurg', at: [78.3830, 17.4230] }, { name: 'Kukatpally Y junction', at: [78.4100, 17.4880] }
+        { name: 'Kifissos Avenue, Agios Ioannis Rentis', at: [23.6750, 37.9650], under: true, low: 1.3 }, { name: 'Kifissos Avenue, Peristeri', at: [23.6950, 38.0050], under: true },
+        { name: 'Poseidonos Avenue, Pikrodafni', at: [23.7050, 37.9170], low: 1.4 }, { name: 'Faliro, Ilissos outlet', at: [23.6850, 37.9360], low: 1.3 },
+        { name: 'Piraeus Avenue, Tavros', at: [23.6980, 37.9640] }, { name: 'Syngrou Avenue, Neos Kosmos', at: [23.7230, 37.9570] },
+        { name: 'Petrou Ralli underpass', at: [23.6900, 37.9720], under: true }, { name: 'Mesogeion Avenue, Cholargos', at: [23.7950, 38.0000] },
+        { name: 'Kifisias Avenue, Marousi', at: [23.8000, 38.0420] }, { name: 'Vouliagmenis Avenue, Elliniko', at: [23.7400, 37.8950] },
+        { name: 'Attiki Odos, Metamorfosi', at: [23.7500, 38.0600], under: true }, { name: 'Acharnon Street, Patisia', at: [23.7330, 38.0120] }
       ]
     },
     lakes: [
-      { name: 'Hussain Sagar', at: [78.4740, 17.4239] }, { name: 'Osman Sagar (Gandipet)', at: [78.3000, 17.3800] }, { name: 'Himayat Sagar', at: [78.4000, 17.3200] },
-      { name: 'Durgam Cheruvu', at: [78.3880, 17.4290] }, { name: 'Musi river, Chaderghat gauge', at: [78.4880, 17.3770], river: true }
+      { name: 'Kifissos river, Neo Faliro', at: [23.6750, 37.9480], river: true }, { name: 'Ilissos stream, Kallithea', at: [23.6950, 37.9450], river: true },
+      { name: 'Pikrodafni stream, Alimos', at: [23.7050, 37.9170], river: true }, { name: 'Podoniftis stream, Nea Ionia', at: [23.7600, 38.0400], river: true },
+      { name: 'Lake Marathon reservoir', at: [23.9000, 38.1700] }
     ],
     festivals: [
-      { id: 'ganesh', name: 'Ganesh immersion', season: 'August–September', crowd: 300000, at: [78.4740, 17.4239], radiusM: 2200,
-        areas: [{ name: 'Tank Bund and NTR Marg', at: [78.4740, 17.4239] }, { name: 'MJ Market', at: [78.4780, 17.3860] }, { name: 'Charminar', at: [78.4747, 17.3616] }],
-        actions: ['Close Tank Bund, NTR Marg and Necklace Road to general traffic', 'Run the procession route Balapur – Charminar – MJ Market – Tank Bund with timed slots', 'Divert heavy vehicles to the Outer Ring Road from the evening before', 'Stage cranes, medical posts and lost-and-found at the immersion points', 'Extend Metro and bus services late into the night'] },
-      { id: 'bonalu', name: 'Bonalu', season: 'July–August', crowd: 100000, at: [78.4980, 17.4370], radiusM: 1500,
-        areas: [{ name: 'Ujjaini Mahankali temple, Secunderabad', at: [78.4980, 17.4370] }, { name: 'Lal Darwaza, old city', at: [78.4800, 17.3550] }],
-        actions: ['Close the temple approach roads to vehicles during the main day', 'Signed diversions around Secunderabad and the old city', 'Parking at Parade Ground with shuttle buses', 'Queue lines and medical posts at the temples'] },
-      { id: 'bathukamma', name: 'Bathukamma', season: 'September–October', crowd: 60000, at: [78.4740, 17.4100], radiusM: 1600,
-        areas: [{ name: 'Tank Bund', at: [78.4740, 17.4239] }, { name: 'LB Stadium', at: [78.4740, 17.3990] }],
-        actions: ['Evening closure of Tank Bund', 'Parking and drop-off away from the stadium', 'Extra buses from the suburbs in the evening'] },
-      { id: 'sankranti', name: 'Sankranti exodus (NH65 towards Vijayawada)', season: 'January', crowd: 0, outbound: 0.6, at: [78.5800, 17.3400], radiusM: 3500,
-        areas: [{ name: 'LB Nagar', at: [78.5520, 17.3460] }, { name: 'Hayathnagar', at: [78.6000, 17.3300] }],
-        actions: ['Open extra toll lanes and suspend roadworks on NH65', 'Hold heavy vehicles off NH65 in the morning peak', 'Advise travel windows on message signs and social media', 'Add TGSRTC special buses from LB Nagar and MGBS'] }
+      { id: 'marathon', name: 'Athens Authentic Marathon', season: 'November', crowd: 60000, at: [23.7411, 37.9683], radiusM: 2500,
+        areas: [{ name: 'Panathenaic Stadium finish', at: [23.7411, 37.9683] }, { name: 'Vasilissis Sofias Avenue', at: [23.7500, 37.9770] }, { name: 'Mesogeion Avenue', at: [23.7900, 37.9980] }],
+        actions: ['Close Marathonos and Mesogeion avenues to traffic on race morning', 'Run extra metro trains from the early morning', 'Divert buses around Syntagma and Vasilissis Sofias', 'Medical posts every 2.5 km and at the finish'] },
+      { id: 'easter', name: 'Easter holiday exodus', season: 'March–May (Orthodox Easter)', crowd: 0, outbound: 0.7, at: [23.7000, 38.0600], radiusM: 4000,
+        areas: [{ name: 'Athens–Lamia motorway (A1), Metamorfosi', at: [23.7500, 38.0600] }, { name: 'Elefsina toll, Olympia Odos (A8)', at: [23.5600, 38.0500] }],
+        actions: ['Open every toll lane and suspend roadworks on A1 and A8', 'Ban heavy vehicles on the motorways on the peak days', 'Advise departure windows on message signs and the radio', 'Extra ferry sailings from Piraeus, Rafina and Lavrio'] },
+      { id: 'august', name: '15 August exodus', season: 'August', crowd: 0, outbound: 0.6, at: [23.6400, 37.9420], radiusM: 2500,
+        areas: [{ name: 'Piraeus port gates', at: [23.6375, 37.9420] }, { name: 'Elefsina toll, Olympia Odos (A8)', at: [23.5600, 38.0500] }],
+        actions: ['Stagger ferry boarding times by gate', 'Open overflow car parks at the port', 'Traffic police at the port gates and on Akti Miaouli', 'Message signs on Kifissos Avenue towards the port'] },
+      { id: 'parade', name: 'Independence Day parade (25 March)', season: 'March', crowd: 40000, at: [23.7400, 37.9760], radiusM: 1500,
+        areas: [{ name: 'Syntagma and Amalias Avenue', at: [23.7360, 37.9740] }, { name: 'Vasilissis Sofias Avenue', at: [23.7500, 37.9770] }],
+        actions: ['Close the parade route from early morning', 'Close Syntagma metro exits to the square if crowded', 'Divert buses and trolleys around the centre', 'Security perimeter and medical posts'] },
+      { id: 'cruise', name: 'Peak cruise day at Piraeus', season: 'April–October', crowd: 25000, at: [23.6300, 37.9370], radiusM: 1500,
+        areas: [{ name: 'Cruise terminals, Akti Miaouli', at: [23.6300, 37.9370] }, { name: 'Acropolis coach drop-off', at: [23.7230, 37.9700] }],
+        actions: ['Timed coach slots at the Acropolis drop-off', 'Coach lanes from the port to the centre', 'Extra line 1 trains Piraeus–Monastiraki', 'Taxi marshals at the terminals'] }
     ],
-    metro: { source: 'L&T Metro Rail (Hyderabad) as published; check before client use', totalKm: 69, stations: 57, lines: [
-      { name: 'Red Line', from: 'Miyapur', to: 'LB Nagar', km: 29, colour: '#d32f2f' },
-      { name: 'Blue Line', from: 'Nagole', to: 'Raidurg', km: 27, colour: '#1e63c8' },
-      { name: 'Green Line', from: 'JBS Parade Ground', to: 'MGBS', km: 11, colour: '#2e9e47' }] },
-    // Approximate positions of continuous air-quality stations in Hyderabad (CPCB CAAQMS); not connected yet.
+    festivalsByRegion: {
+      thessaloniki: [
+        { id: 'tif', name: 'Thessaloniki International Fair', season: 'September', crowd: 30000, at: [22.9550, 40.6260], radiusM: 1500,
+          areas: [{ name: 'Helexpo', at: [22.9550, 40.6260] }, { name: 'Egnatia Street', at: [22.9450, 40.6350] }],
+          actions: ['Close streets around Helexpo during the opening', 'Park-and-ride from the western suburbs', 'Extra metro and bus services in the evening'] },
+        { id: 'okhi', name: '28 October parade', season: 'October', crowd: 50000, at: [22.9500, 40.6200], radiusM: 1500,
+          areas: [{ name: 'Megalou Alexandrou Avenue', at: [22.9500, 40.6200] }],
+          actions: ['Close the seafront avenue from early morning', 'Divert buses inland', 'Security perimeter and medical posts'] }
+      ],
+      patras: [
+        { id: 'carnival', name: 'Patras Carnival', season: 'February–March', crowd: 150000, at: [21.7346, 38.2466], radiusM: 1500,
+          areas: [{ name: 'Georgiou Square', at: [21.7346, 38.2466] }, { name: 'Port seafront', at: [21.7300, 38.2440] }],
+          actions: ['Close the parade route in the centre', 'Park-and-ride and extra suburban trains', 'Medical posts and lost-and-found on the route'] }
+      ]
+    },
+    metro: { source: 'STASY (Athens Metro) as published; check before client use', totalKm: 91.7, stations: 66, lines: [
+      { name: 'Line 1 (green)', from: 'Piraeus', to: 'Kifisia', km: 25.7, colour: '#2e9e47' },
+      { name: 'Line 2 (red)', from: 'Anthoupoli', to: 'Elliniko', km: 18.7, colour: '#d32f2f' },
+      { name: 'Line 3 (blue)', from: 'Dimotiko Theatro', to: 'Airport', km: 47.3, colour: '#1e63c8' }] },
+    metroByRegion: {
+      thessaloniki: { source: 'Thessaloniki Metro as published; check before client use', totalKm: 14.4, stations: 18, lines: [
+        { name: 'Line 1', from: 'New Railway Station', to: 'Nea Elvetia', km: 9.6, colour: '#d32f2f' },
+        { name: 'Kalamaria extension', from: 'Nomarchia', to: 'Mikra', km: 4.8, colour: '#1e63c8' }] }
+    },
+    // Approximate positions of air-quality stations of the Attica network; not connected yet.
     aqStations: [
-      { name: 'Sanathnagar', at: [78.4430, 17.4560] }, { name: 'Zoo Park', at: [78.4510, 17.3500] }, { name: 'Somajiguda', at: [78.4570, 17.4170] },
-      { name: 'Central University', at: [78.3350, 17.4590] }, { name: 'ICRISAT Patancheru', at: [78.2720, 17.5110] }, { name: 'IDA Pashamylaram', at: [78.1900, 17.5300] },
-      { name: 'Bollaram', at: [78.3580, 17.5420] }, { name: 'Kokapet', at: [78.3400, 17.3930] }, { name: 'Ramachandrapuram', at: [78.3050, 17.5280] }, { name: 'Nacharam', at: [78.5600, 17.4300] }
+      { name: 'Athinas', at: [23.7270, 37.9780] }, { name: 'Patision', at: [23.7320, 37.9990] }, { name: 'Marousi', at: [23.7870, 38.0310] },
+      { name: 'Lykovrysi', at: [23.7760, 38.0700] }, { name: 'Thrakomakedones', at: [23.7580, 38.1430] }, { name: 'Agia Paraskevi', at: [23.8190, 37.9950] },
+      { name: 'Ano Liosia', at: [23.6960, 38.0770] }, { name: 'Peristeri', at: [23.6880, 38.0210] }, { name: 'Piraeus', at: [23.6500, 37.9470] }, { name: 'Elefsina', at: [23.5380, 38.0510] }
     ],
-    // Mixed traffic: shares of moving vehicles (ASSUMED, from the dominance of two-wheelers in Telangana registrations)
-    // and passenger-car units from IRC 106-1990. The simulation counts car units; this splits them into vehicles.
-    mix: [['Two-wheelers', 0.62, 0.5], ['Cars and taxis', 0.20, 1.0], ['Auto-rickshaws', 0.08, 1.2], ['Buses', 0.02, 2.2], ['Goods vehicles', 0.08, 2.2]],
-    // E-challan violation shares (ASSUMED) applied to the synthetic fines; fine values are placeholders.
-    challan: [['No helmet, rider', 0.36, 100], ['No helmet, pillion', 0.14, 100], ['Triple riding', 0.06, 1200], ['Wrong-side driving', 0.09, 1000],
-      ['Signal jumping', 0.10, 1000], ['No seat belt', 0.08, 1000], ['Phone while driving', 0.04, 1000], ['Stop-line violation', 0.13, 100]],
-    heat: { heatC: 40, severeC: 45 },
+    aqNetwork: 'Attica air-quality network (Ministry of Environment)', aqConnect: 'the ministry’s open data or the European Environment Agency service',
+    // Traffic mix: shares of moving vehicles (ASSUMED; Athens has many motorcycles and scooters) and passenger-car units.
+    mix: [['Cars and taxis', 0.70, 1.0], ['Motorcycles and scooters', 0.17, 0.4], ['Buses', 0.03, 2.0], ['Vans and lorries', 0.10, 1.8]],
+    mixNote: 'The simulation counts car units; they are split into vehicle types with assumed shares and passenger-car units.',
+    // Traffic offences: shares (ASSUMED) applied to the synthetic tickets; fine values are placeholders.
+    challan: [['Speeding', 0.30, 150], ['Red light', 0.10, 700], ['Phone while driving', 0.10, 350], ['No seat belt', 0.07, 350], ['No helmet', 0.08, 350],
+      ['Illegal or double parking', 0.25, 80], ['Bus-lane misuse', 0.10, 200]],
+    challanTitle: 'Traffic offences by type', challanSub: 'Speeding, red light, phone, parking and more', twoWheelerTypes: ['No helmet'],
+    ring: { title: 'Attiki Odos', match: '^(Αττική Οδός|Attiki Odos)', centre: [23.73, 37.98] },
+    heat: { heatC: 40, severeC: 44, fireWindKmh: 40 },
     signalDelaySec: 25                       // average wait a green corridor saves at each signal (assumed)
   },
 
@@ -914,5 +943,5 @@ sampleVideos: [
   },
 
   /* ---- Language ------------------------------------------------------------------------------ */
-  language: { default: 'en', available: ['en', 'te'] }   // English and Telugu
+  language: { default: 'en', available: ['en', 'el'] }   // English and Greek
 };

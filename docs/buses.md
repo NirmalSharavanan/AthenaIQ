@@ -4,7 +4,7 @@ The **Transit** section covers buses (`js/buses.js`) and taxis and on-demand shu
 
 ## Why it is synthetic
 
-The app uses an example network: no public GTFS timetable is set up for TGSRTC city buses in Hyderabad. **The route numbers, stops, timetables and delays are invented. They are not TGSRTC's real bus services**, and the section says so on screen.
+The app uses an example network: no public GTFS timetable is set up for OASA city buses in Athens. **The route numbers, stops, timetables and delays are invented. They are not OASA's real bus services**, and the section says so on screen.
 
 ## How it is built
 

@@ -1,7 +1,7 @@
 /* IntelliTwin illustrative events.
  *
  * Accidents and traffic fines shown in the app are NOT real records. No accident or enforcement
- * data is public for Hyderabad. They are generated here, deterministically, from the synthetic
+ * data is public for Athens. They are generated here, deterministically, from the synthetic
  * day's traffic so that the dashboard has something to show: accidents are placed in proportion
  * to vehicle-kilometres (more where traffic is slow), and violations are drawn at fixed
  * "enforcement sites" in proportion to the flow passing them. See docs/methodology.md.

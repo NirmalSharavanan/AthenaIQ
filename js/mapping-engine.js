@@ -160,7 +160,7 @@
     return new Date(t);
   }
   // Read a date in the given format ("auto", "epoch-s", "epoch-ms" or a pattern such as dd/MM/yyyy HH:mm:ss).
-  // Text without a time zone is taken to be in `tz` (for example +05:30).
+  // Text without a time zone is taken to be in `tz` (for example +02:00).
   function parseDate(v, format, tz) {
     var s = String(v).trim(), m;
     format = format || 'auto';
@@ -268,7 +268,7 @@
       fn: function (v) { var s = String(v).trim().toLowerCase(); if (['true', 'yes', 'y', '1', 'on'].indexOf(s) >= 0) { return true; } if (['false', 'no', 'n', '0', 'off'].indexOf(s) >= 0) { return false; } throw new Error('"' + v + '" is not yes or no'); } },
     { id: 'dateFormat', label: 'Date format', help: 'Read a date and write it as ISO 8601 in UTC.',
       args: [{ key: 'format', label: 'Source format', type: 'text', def: 'auto', hint: 'auto, epoch-s, epoch-ms, or a pattern such as dd/MM/yyyy HH:mm:ss' }, { key: 'tz', label: 'Source time zone', type: 'text', def: '+04:00', hint: 'Used when the value has no time zone' }],
-      fn: function (v, a) { return parseDate(v, a.format || 'auto', a.tz === undefined ? '+05:30' : a.tz).toISOString(); } },
+      fn: function (v, a) { return parseDate(v, a.format || 'auto', a.tz === undefined ? '+02:00' : a.tz).toISOString(); } },
     { id: 'lookup', label: 'Lookup', help: 'Replace a code with a value from a table. One "source=target" pair per line.',
       args: [{ key: 'table', label: 'Lookup table', type: 'area', def: '' }, { key: 'fallback', label: 'If not in the table', type: 'text', def: '', hint: 'Leave empty to report an error' }],
       fn: function (v, a) { var t = lookupTable(a.table), k = String(v).trim().toLowerCase(); if (Object.prototype.hasOwnProperty.call(t, k)) { return t[k]; } if (!empty(a.fallback)) { return a.fallback; } throw new Error('"' + v + '" is not in the lookup table'); } },

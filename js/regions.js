@@ -1,7 +1,7 @@
-/* UrbanIQ regions (Telangana).
+/* AthenaIQ regions (Greece).
  *
- * Runs before the application. It reads the region from the address (?region=warangal), defaults to
- * config.defaultRegion (Hyderabad), and for any region other than the default it replaces the Hyderabad
+ * Runs before the application. It reads the region from the address (?region=thessaloniki), defaults to
+ * config.defaultRegion (Athens), and for any region other than the default it replaces the Athens
  * example data in the configuration with data derived from that region's site list: patrol bases, bus
  * routes, taxi ranks, shuttle zones, car parks, freight zone, assembly points, disaster exercise areas,
  * events, sea lanes and flight paths. All of it is SYNTHETIC example data placed at approximate sites.
@@ -9,10 +9,10 @@
 (function () {
   'use strict';
   var CFG = window.INTELLITWIN_CONFIG; if (!CFG || !CFG.regions) { return; }
-  var want = (new URLSearchParams(location.search).get('region') || CFG.defaultRegion || 'hyderabad').toLowerCase();
+  var want = (new URLSearchParams(location.search).get('region') || CFG.defaultRegion || 'athens').toLowerCase();
   var R = CFG.regions.filter(function (r) { return r.id === want; })[0] || CFG.regions[0];
   CFG.region = R;
-  R.isDefault = R.id === (CFG.defaultRegion || 'hyderabad');
+  R.isDefault = R.id === (CFG.defaultRegion || 'athens');
   R.dataDir = 'data/' + (R.dir ? R.dir + '/' : '');
   if (R.isDefault) { return; }
 
@@ -58,7 +58,8 @@
     surge: coastal.slice(0, 3).map(function (s) { return { name: s.name + ' seafront', at: s.at, radiusM: 1800 }; }),
     sand: (air.length ? air : S.slice(-2)).slice(0, 2).map(function (s) { return { name: s.name + ' area', at: s.at, radiusM: 5000 }; }),
     quake: [{ name: R.name + ' centre', at: R.centre, radiusM: 7000 }],
-    heat: [{ name: 'Whole city', at: R.centre, radiusM: 15000 }]
+    heat: [{ name: 'Whole city', at: R.centre, radiusM: 15000 }],
+    fire: of(['open', 'leisure', 'residential']).slice(-2).map(function (s) { return { name: s.name + ' edge of town', at: s.at, radiusM: 2500 }; })
   };
   CFG.emergency.disasters = (CFG.emergency.disasters || []).map(function (d) { return Object.assign({}, d, { areas: areas[d.id] || [] }); }).filter(function (d) { return d.areas.length; });
 
@@ -85,7 +86,7 @@
       { name: 'Departure to the ' + card(rb + 180), arrival: false, path: [a.at, move(a.at, rb + 180, 14), move(a.at, rb + 180, 32)] }] });
   } else { CFG.air = Object.assign({}, CFG.air, { routes: [], airport: null }); }
 
-  // Figures that are specific to Hyderabad are switched off for other regions (the population is state-wide and stays).
+  // Figures that are specific to Athens are switched off for other regions (the population is national and stays).
   if (CFG.devices) { CFG.devices.cameras = []; }
   if (CFG.zones) { CFG.zones.custom = []; }
   if (CFG.environment) { CFG.environment.sensors = []; }

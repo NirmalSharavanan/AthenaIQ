@@ -14,7 +14,7 @@ All settings are in `config.js` at the repository root. Every value has a workin
 | `defaultRegion`, `regions` | `id`, `name`, `dir`, `centre`, `sites`, `port`, `airport` | `'abudhabi'`, eight regions | Region selector and each region's site list; see [regions.md](regions.md) |
 | `tomtom` | `key`, `flowStyle`, `flowOnStart`, `incidentRefreshSec`, `searchRadiusM`, `maxSites` | set, … | TomTom live data. The key here is public; see [tomtom.md](tomtom.md) |
 | `map.google` | `key`, `type`, `tiles3d`, `heightOffsetM` | set, `'roadmap'`, `false`, 27 | Google Maps as the base map. The key here is public; see [google-maps.md](google-maps.md) |
-| `start` | `mode`, `rate` | `'live'`, 30 | Opening mode and speed. `'live'` starts at India Standard Time and plays at `rate` (30× by default, so it runs ahead of the clock; choose 1× to stay locked to it). `'replay'` opens today's synthetic day as Historical |
+| `start` | `mode`, `rate` | `'live'`, 30 | Opening mode and speed. `'live'` starts at Greece Standard Time and plays at `rate` (30× by default, so it runs ahead of the clock; choose 1× to stay locked to it). `'replay'` opens today's synthetic day as Historical |
 | | `orbit`, `selectionZoomBoost`, `selectionMaxZoom` | `true`, 2, 17.5 | Orbit is on at start and stays on until the Orbit button is unclicked (it pauses only while the map is dragged or zoomed by hand). Selecting a site, road or item zooms in by the boost, up to the maximum. Overview moves (zoom under 13.5) are not boosted |
 | | `view` | `'3d'` | Map view at start: `'2d'`, `'3d'` or `'city'` (Google photorealistic 3D, experimental). The 2D / 3D / City view switch on the time bar changes it and is remembered per browser |
 | | `autoZoomForPanel` | `true` | A selection is centred in the part of the map not covered by the panel, and the zoom is reduced a little when the panel narrows the view, so it stays whole while the camera orbits |
@@ -24,7 +24,7 @@ All settings are in `config.js` at the repository root. Every value has a workin
 | | `rasterTiles`, `rasterAttribution` | OpenStreetMap standard tiles | Raster fallback if the vector style cannot load |
 | | `styleUrlLight`, `lightTint`, `theme` | OpenFreeMap positron, `#cfe0d2`, `'dark'` | Light-theme style, its pale green background tint, and the theme at start |
 | | `buildings3d` | `true` | Extrude buildings from the vector tiles |
-| `time` | `timeZone` | `Asia/Kolkata` | Clock used for Live mode and dates |
+| `time` | `timeZone` | `Europe/Athens` | Clock used for Live mode and dates |
 | | `weekendDays`, `shortDay` | `[6, 0]`, `5` | Weekend days and the shorter working day, used by the synthetic day |
 | `feeds` | `traffic` | `'synthetic'` | Traffic source. Only `'synthetic'` is implemented; see “Integration points” |
 | | `accidentsUrl` | `null` | Reserved for a real accident feed; not implemented yet |
