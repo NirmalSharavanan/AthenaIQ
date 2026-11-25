@@ -15,11 +15,16 @@
   var KIND = {
     clear: { label: 'Clear', vis: [9000, 10000], wind: [8, 22], limit: null, sign: '', advice: 'No weather restriction.' },
     fog: { label: 'Fog', vis: [80, 400], wind: [2, 8], limit: 80, sign: 'FOG · SLOW DOWN · 80', advice: 'Lower the limit on motorways, switch message signs to the fog warning, keep lorries in the right lane.' },
-    sand: { label: 'Sandstorm', vis: [300, 1500], wind: [40, 70], limit: 100, sign: 'DUST · LOW VISIBILITY · 100', advice: 'Lower the limit on exposed motorways and warn drivers on message signs.' },
+    sand: { label: 'Saharan dust', vis: [1500, 5000], wind: [20, 45], limit: 100, sign: 'DUST · LOW VISIBILITY · 100', advice: 'Warn people with breathing problems, lower the limit on exposed motorways and expect dirty windscreens and slower traffic.' },
+    snow: { label: 'Snow and ice', vis: [200, 1500], wind: [10, 40], limit: 60, sign: 'SNOW · CHAINS REQUIRED · 60', advice: 'Send gritters to mountain roads (Parnitha, A1 at Malakasa), require chains, hold lorries at the toll plazas.' },
+    smoke: { label: 'Wildfire smoke', vis: [500, 3000], wind: [25, 60], limit: 80, sign: 'SMOKE · DRIVE SLOWLY · 80', advice: 'Close roads toward the fire, keep evacuation routes one-way outbound, warn drivers on message signs.' },
     rain: { label: 'Rain', vis: [1500, 5000], wind: [15, 35], limit: 100, sign: 'RAIN · WET ROAD · KEEP DISTANCE', advice: 'Warn of standing water in underpasses; expect more minor accidents.' }
   };
+  function liveKind(n) { var c = n.code || 0, fires = ((T.live && T.live.fires()) || {}).list || []; if (c >= 71 && c <= 86 || (n.temp != null && n.temp < 1 && c >= 51)) { return 'snow'; } if (c === 45 || c === 48) { return 'fog'; } if ((n.dust || 0) >= 100 || (n.aod || 0) >= 0.6) { return 'sand'; } if (fires.length > 15 && (n.vis || 10000) < 5000) { return 'smoke'; } if (c >= 51) { return 'rain'; } return 'clear'; }
   function weatherAt(t) {
-    var s = seed(), h = t / 3600, r = rnd(s, 901), kind = demo !== 'auto' ? demo : r < 0.10 && h >= 4 && h < 9 ? 'fog' : r >= 0.10 && r < 0.18 && h >= 11 && h < 18 ? 'sand' : r >= 0.18 && r < 0.22 ? 'rain' : 'clear';
+    var s = seed(), h = t / 3600, r = rnd(s, 901), live = demo === 'auto' && T.osint && T.osint.weather ? T.osint.weather() : null, n = live && live.now ? live.now : null;
+    var kind = demo !== 'auto' ? demo : n ? liveKind(n) : r < 0.08 && h >= 4 && h < 9 ? 'fog' : r >= 0.08 && r < 0.14 ? 'sand' : r >= 0.14 && r < 0.20 ? 'rain' : 'clear';
+    if (n) { return { kind: kind, k: KIND[kind] || KIND.clear, vis: n.vis != null ? Math.round(n.vis / 10) * 10 : 10000, wind: Math.round(n.wind || 0), temp: n.temp, live: true }; }
     var k = KIND[kind] || KIND.clear, f = rnd(s, 902 + Math.floor(t / 1800)), temp = null;
     if (T.environment && T.environment.sensors().length) { var rd = T.environment.readingAt(T.environment.sensors()[0], t); temp = rd && rd.temp; }
     return { kind: kind, k: k, vis: Math.round((k.vis[0] + (k.vis[1] - k.vis[0]) * f) / 10) * 10, wind: Math.round(k.wind[0] + (k.wind[1] - k.wind[0]) * f), temp: temp };
@@ -29,7 +34,7 @@
     var w = weatherAt(state.t);
     $('wxNow').textContent = w.k.label; $('wxVis').innerHTML = w.vis >= 1000 ? (w.vis / 1000).toFixed(1) + '<small>km</small>' : w.vis + '<small>m</small>';
     $('wxWind').innerHTML = w.wind + '<small>km/h</small>'; $('wxLimit').innerHTML = w.k.limit ? w.k.limit + '<small>km/h</small>' : 'Normal';
-    $('wxFacts').innerHTML = C.fact('Advice', 'example rule set', esc(w.k.advice)) + (w.k.sign ? C.fact('Message sign text', 'suggested', esc(w.k.sign)) : '') + (w.temp !== null && w.temp !== undefined ? C.fact('Temperature', 'synthetic sensor', Math.round(w.temp) + ' °C') : '');
+    $('wxFacts').innerHTML = C.fact('Advice', 'example rule set', esc(w.k.advice)) + (w.k.sign ? C.fact('Message sign text', 'suggested', esc(w.k.sign)) : '') + (w.temp !== null && w.temp !== undefined ? C.fact('Temperature', w.live ? 'Open-Meteo' : 'synthetic sensor', Math.round(w.temp) + ' °C') : '');
     $('wxCard').classList.toggle('wx-alert', w.kind !== 'clear');
   }
 

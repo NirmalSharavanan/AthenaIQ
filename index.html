@@ -8,8 +8,8 @@
 <meta name="theme-color" content="#0b1220">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1220'/%3E%3Cpath d='M6 22 L13 12 L19 18 L26 8' fill='none' stroke='%232dd4a7' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="vendor/maplibre-gl.css">
-<link rel="stylesheet" href="css/styles.css?v=20261125a">
-<link rel="stylesheet" href="css/theme.css?v=20261125a">
+<link rel="stylesheet" href="css/styles.css?v=20261125b">
+<link rel="stylesheet" href="css/theme.css?v=20261125b">
 </head>
 <body>
 <header class="topbar">
@@ -125,7 +125,7 @@
         <button type="button">Forecast</button>
         <button type="button">Show accidents</button>
         <button type="button">How many fines?</button>
-        <button type="button">Go to Yas Island</button>
+        <button type="button">Go to Syntagma Square</button>
         <button type="button">Compare the demand cases</button>
       </div>
       <form id="chatForm" autocomplete="off"><input id="chatInput" type="text" placeholder="Ask about traffic, roads, alerts, accidents, fines…" aria-label="Question"><button class="btn" type="submit">Send</button></form>
@@ -749,8 +749,8 @@
 
     <!-- Environment -->
     <section class="card" data-tab="env" id="wxCard" hidden>
-      <p class="notice"><strong>Synthetic weather.</strong> Conditions are generated for the day; the advice follows an example rule set. Use the selector to demonstrate fog, a sandstorm or rain. The traffic simulation does not change.</p>
-      <div class="card-head"><h2>Weather and visibility</h2><label class="inline-field">Show <select id="wxDemo"><option value="auto">Today (generated)</option><option value="clear">Clear</option><option value="fog">Fog</option><option value="sand">Sandstorm</option><option value="rain">Rain</option></select></label></div>
+      <p class="notice"><strong>Live weather, example advice.</strong> Conditions are read from Open-Meteo, or generated for the day; the advice follows an example rule set. Today uses the live Open-Meteo weather when it is available; the selector demonstrates Saharan dust, snow and ice, wildfire smoke, fog or rain. The traffic simulation does not change.</p>
+      <div class="card-head"><h2>Weather and visibility</h2><label class="inline-field">Show <select id="wxDemo"><option value="auto">Today (live)</option><option value="clear">Clear</option><option value="sand">Saharan dust</option><option value="snow">Snow and ice</option><option value="smoke">Wildfire smoke</option><option value="fog">Fog</option><option value="rain">Rain</option></select></label></div>
       <div class="kpis">
         <div class="kpi"><span class="k-label">Conditions</span><span class="k-value" id="wxNow">–</span></div>
         <div class="kpi"><span class="k-label">Visibility</span><span class="k-value" id="wxVis">–</span></div>
@@ -996,49 +996,50 @@
 <!-- Printed summary -->
 <div id="report" class="report" aria-hidden="true"></div>
 
-<script src="config.js?v=20261125a"></script>
-<script src="js/regions.js?v=20261125a"></script>
+<script src="config.js?v=20261125b"></script>
+<script src="js/regions.js?v=20261125b"></script>
 <script src="vendor/maplibre-gl.js"></script>
 <script src="vendor/deck.gl.min.js"></script>
 <script src="vendor/satellite.min.js"></script>
-<script src="js/daymodel.js?v=20261125a"></script>
-<script src="js/events.js?v=20261125a"></script>
-<script src="js/vehicles3d.js?v=20261125a"></script>
-<script src="js/app.js?v=20261125a"></script>
-<script src="js/ops.js?v=20261125a"></script>
-<script src="js/devices.js?v=20261125a"></script>
-<script src="js/i18n.js?v=20261125a"></script>
-<script src="js/response.js?v=20261125a"></script>
-<script src="js/zones.js?v=20261125a"></script>
-<script src="js/environment.js?v=20261125a"></script>
-<script src="js/buses.js?v=20261125a"></script>
-<script src="js/transit.js?v=20261125a"></script>
-<script src="js/operations.js?v=20261125a"></script>
-<script src="js/mobility.js?v=20261125a"></script>
-<script src="js/support.js?v=20261125a"></script>
-<script src="js/seaair.js?v=20261125a"></script>
-<script src="js/energy.js?v=20261125a"></script>
-<script src="js/tomtom.js?v=20261125a"></script>
-<script src="js/citycases.js?v=20261125a"></script>
-<script src="js/osint.js?v=20261125a"></script>
-<script src="js/livefeeds.js?v=20261125a"></script>
-<script src="js/osintmap.js?v=20261125a"></script>
-<script src="js/layertree.js?v=20261125a"></script>
-<script src="js/camwall.js?v=20261125a"></script>
-<script src="js/map3d.js?v=20261125a"></script>
-<script src="js/osintpage.js?v=20261125a"></script>
-<script src="js/diagnostics.js?v=20261125a"></script>
-<script src="js/platform.js?v=20261125a"></script>
-<script src="js/mapping-engine.js?v=20261125a"></script>
-<script src="js/integrations.js?v=20261125a"></script>
-<script src="js/vlm.js?v=20261125a"></script>
-<script src="js/analytics.js?v=20261125a"></script>
-<script src="js/analytics-ops.js?v=20261125a"></script>
-<script src="js/analytics-nav.js?v=20261125a"></script>
-<script src="js/localcases.js?v=20261125a"></script>
-<script src="js/greece.js?v=20261125a"></script>
-<script src="js/ux.js?v=20261125a"></script>
-<script src="js/assistant.js?v=20261125a"></script>
-<script src="js/shell.js?v=20261125a"></script>
+<script src="js/daymodel.js?v=20261125b"></script>
+<script src="js/events.js?v=20261125b"></script>
+<script src="js/vehicles3d.js?v=20261125b"></script>
+<script src="js/app.js?v=20261125b"></script>
+<script src="js/ops.js?v=20261125b"></script>
+<script src="js/devices.js?v=20261125b"></script>
+<script src="js/i18n.js?v=20261125b"></script>
+<script src="js/response.js?v=20261125b"></script>
+<script src="js/zones.js?v=20261125b"></script>
+<script src="js/environment.js?v=20261125b"></script>
+<script src="js/buses.js?v=20261125b"></script>
+<script src="js/transit.js?v=20261125b"></script>
+<script src="js/operations.js?v=20261125b"></script>
+<script src="js/mobility.js?v=20261125b"></script>
+<script src="js/support.js?v=20261125b"></script>
+<script src="js/seaair.js?v=20261125b"></script>
+<script src="js/energy.js?v=20261125b"></script>
+<script src="js/tomtom.js?v=20261125b"></script>
+<script src="js/citycases.js?v=20261125b"></script>
+<script src="js/osint.js?v=20261125b"></script>
+<script src="js/livefeeds.js?v=20261125b"></script>
+<script src="js/osintmap.js?v=20261125b"></script>
+<script src="js/layertree.js?v=20261125b"></script>
+<script src="js/camwall.js?v=20261125b"></script>
+<script src="js/map3d.js?v=20261125b"></script>
+<script src="js/osintpage.js?v=20261125b"></script>
+<script src="js/diagnostics.js?v=20261125b"></script>
+<script src="js/platform.js?v=20261125b"></script>
+<script src="js/mapping-engine.js?v=20261125b"></script>
+<script src="js/integrations.js?v=20261125b"></script>
+<script src="js/vlm.js?v=20261125b"></script>
+<script src="js/analytics.js?v=20261125b"></script>
+<script src="js/analytics-ops.js?v=20261125b"></script>
+<script src="js/analytics-nav.js?v=20261125b"></script>
+<script src="js/localcases.js?v=20261125b"></script>
+<script src="js/greece.js?v=20261125b"></script>
+<script src="js/greece2.js?v=20261125b"></script>
+<script src="js/ux.js?v=20261125b"></script>
+<script src="js/assistant.js?v=20261125b"></script>
+<script src="js/shell.js?v=20261125b"></script>
 </body>
 </html>

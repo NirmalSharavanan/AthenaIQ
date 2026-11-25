@@ -22,8 +22,8 @@
       if (n.length >= 3 && q.indexOf(n) >= 0 && n.length > bestLen) { best = name; bestLen = n.length; }
     });
     if (best) { return best; }
-    // Otherwise match on the most distinctive word of a name (for example "yas", "corniche", "mussafah").
-    var skip = { street: 1, road: 1, island: 1, city: 1, the: 1, bin: 1, sheikh: 1, zayed: 1, international: 1, mohamed: 1, grand: 1 };
+    // Otherwise match on the most distinctive word of a name (for example "syntagma", "kifisias", "piraeus").
+    var skip = { street: 1, road: 1, island: 1, city: 1, the: 1, bin: 1, avenue: 1, square: 1, international: 1, leoforos: 1, odos: 1, agios: 1, agia: 1 };
     list.forEach(function (name) {
       norm(name).split(' ').forEach(function (w) {
         if (w.length >= 4 && !skip[w] && new RegExp('\\b' + w + '\\b').test(q) && w.length > bestLen) { best = name; bestLen = w.length; }
@@ -49,9 +49,9 @@
     '• "Which roads are slowest?"\n' +
     '• "Any alerts?" or "Forecast"\n' +
     '• "Show accidents" or "How many fines?"\n' +
-    '• "Close Al Khaleej Al Arabi Street" or "Reopen roads"\n' +
+    '• "Close Syngrou Avenue" or "Reopen roads"\n' +
     '• "Open a camera"\n' +
-    '• "Go to Yas Island" or "Show Al Khaleej Al Arabi Street"\n' +
+    '• "Go to Syntagma Square" or "Show Kifisias Avenue"\n' +
     '• "Switch to demand +20%" or "Compare the demand cases"\n' +
     '• "Orbit", "3D", "Pause", "Live"';
 
@@ -80,7 +80,7 @@
     if (/\breopen|\bclear (the )?closure|\bremove (the )?closure|\bopen (the )?road/.test(q)) { a.closeRoad(''); return 'Closure cleared.'; }
     if (/\bclose\b|\bclosure\b|\bshut\b|\bblock\b/.test(q)) {
       var cr = findByName(a.roads(), q);
-      if (!cr) { return 'Tell me which road to close, for example "Close Al Khaleej Al Arabi Street".'; }
+      if (!cr) { return 'Tell me which road to close, for example "Close Syngrou Avenue".'; }
       var res = a.closeRoad(cr);
       if (!res || res.error) { return (res && res.error) || 'The what-if tool is not available.'; }
       a.setTab('cong');
@@ -136,7 +136,7 @@
     }
     if (/\b(ship|ships|vessel|vessels|port|berth|berths|sea|marine)\b/.test(q) && window.IntelliTwin.sea) {
       a.setTab('bus'); var se = window.IntelliTwin.sea.stats();
-      return se.moving + ' vessels are moving near Mina Zayed (' + se.inbound + ' inbound, ' + se.outbound + ' outbound); ' + se.berthsUsed + ' of ' + se.berths + ' berths are in use, with ' + se.callsToday + ' vessel movements so far today. These ship movements are synthetic.';
+      return se.moving + ' vessels are moving near the port of Piraeus (' + se.inbound + ' inbound, ' + se.outbound + ' outbound); ' + se.berthsUsed + ' of ' + se.berths + ' berths are in use, with ' + se.callsToday + ' vessel movements so far today. These ship movements are synthetic.';
     }
     if (/\b(flight|flights|aircraft|plane|planes|airport|airline|airlines|air)\b/.test(q) && window.IntelliTwin.air) {
       a.setTab('bus'); var ai = window.IntelliTwin.air.stats();

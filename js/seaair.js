@@ -1,6 +1,6 @@
 /* IntelliTwin sea and air movements (synthetic).
  *
- * Ships on example shipping lanes off Mina Zayed and aircraft on example approach and departure paths
+ * Ships on example shipping lanes off Piraeus and aircraft on example approach and departure paths
  * at the two airports, drawn as moving icons with a wake or a trail. There is no public feed of vessel
  * or aircraft positions in this app: vessel names, flight numbers, times and positions are SYNTHETIC,
  * and the lanes and flight paths are approximate examples, not charted routes. See docs/buses.md.

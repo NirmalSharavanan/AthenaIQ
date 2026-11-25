@@ -34,6 +34,7 @@
   function list(id, items) { var ol = $(id); if (!ol) { return; } ol.innerHTML = ''; items.forEach(function (li) { ol.appendChild(li); }); if (!items.length) { ol.innerHTML = '<li class="muted">Nothing to show.</li>'; } }
   function row(dot, title, sub, right, at, z) { return C.listButton(dot, title, sub, right, function () { if (at) { C.flyTo(at[0], at[1], z || 15); } }); }
   function bars(id, rows) { var mx = Math.max.apply(null, rows.map(function (r) { return r[1]; }).concat([1])); set(id, rows.map(function (r) { return C.barRow(esc(r[0]), r[2] || '', r[3] != null ? r[3] : num(r[1]), r[1] / mx); }).join('')); }
+  function hideCard(id) { var s = document.getElementById(id); if (s) { s.setAttribute('data-tab', 'retired'); s.hidden = true; } }
   function hour() { return state.t / 3600; }
   function pick(seed, k, arr) { return arr[Math.floor(rnd(seed, k) * arr.length) % arr.length]; }
   function inBox(at, pad) { pad = pad || 0; return at[0] >= bb[0] - pad && at[0] <= bb[2] + pad && at[1] >= bb[1] - pad && at[1] <= bb[3] + pad; }
@@ -87,8 +88,10 @@
   var route = null;
   function planRoute() {
     var full = bins().filter(function (b) { return fill(b) >= 75; }), depot = ATH && inBox([23.6460, 38.0480]) ? [23.6460, 38.0480] : centre(), path = [depot], left = full.slice(), cur = depot, km = 0;
-    while (left.length && path.length < 40) { var bi = 0, bd = 1e12; left.forEach(function (b, i) { var d = m(cur, b.at); if (d < bd) { bd = d; bi = i; } }); km += bd / 1000; cur = left[bi].at; path.push(cur); left.splice(bi, 1); }
-    route = { path: path, stops: path.length - 1, km: km * 1.35 };
+    while (left.length && path.length < 25) { var bi = 0, bd = 1e12; left.forEach(function (b, i) { var d = m(cur, b.at); if (d < bd) { bd = d; bi = i; } }); km += bd / 1000; cur = left[bi].at; path.push(cur); left.splice(bi, 1); }
+    var road = [], rkm = 0, ok = !!T.response;
+    for (var k = 1; ok && k < path.length; k++) { var leg = T.response.pathBetween(path[k - 1], path[k]); if (!leg) { ok = false; break; } road = road.concat(leg.path); leg.links.forEach(function (i) { rkm += (C.edges()[i].m || 0) / 1000; }); }
+    route = ok && road.length ? { path: road, stops: path.length - 1, km: rkm, roads: true } : { path: path, stops: path.length - 1, km: km * 1.35, roads: false };
     return route;
   }
   function renderWaste() {
@@ -96,7 +99,7 @@
     var fixed = b.length * 2.1 * 1.35 / 4, smart = full.length * 2.1 * 1.35 / 4 + 6;
     set('grWsBins', num(b.length)); set('grWsFull', num(full.length)); set('grWsTr', String(trucks)); set('grWsSave', Math.max(0, Math.round(100 - 100 * smart / Math.max(fixed, 1))) + '%');
     list('grWsList', full.sort(function (x, y) { return fill(y) - fill(x); }).slice(0, 8).map(function (x) { var f = fill(x); return row(f >= 95 ? 'severe' : 'heavy', x.id + ' · ' + x.kind, x.street + ' · emptied 05:00', Math.round(f) + '%', x.at, 17); }));
-    set('grWsRoute', route ? route.stops + ' bins, about ' + route.km.toFixed(1) + ' km in nearest-first order (straight lines, not road routing).' : '');
+    set('grWsRoute', route ? route.stops + ' bins, about ' + route.km.toFixed(1) + ' km in nearest-first order' + (route.roads ? ', following the road network.' : ' (straight lines; no road route found).') : '');
   }
 
   /* ============================== 2. Street lighting and building energy ============================== */
@@ -172,7 +175,7 @@
     return g.map(function (x, k) { var at = [x[1], x[2]], a = area(at, 500), h = hour(), wave = Math.max(0, Math.sin((h - 6) / 18 * Math.PI)) + (h > 6.5 && h < 8 ? 0.8 : 0) + (h > 16 && h < 18 ? 0.6 : 0); return { name: x[0], at: at, queue: Math.round((wave * 60 + rnd(SEED, k + Math.floor(state.t / 600)) * 25) * (weekend() ? 1.3 : 1)), a: a }; });
   }
   function renderPort() {
-    var p = portSite(); if (!p) { set('grPtSub', 'No passenger port in this city'); return; }
+    var p = portSite(); if (!p) { hideCard('grPt'); return; }
     var g = gates(), s = T.sea && T.sea.stats ? T.sea.stats() : null, h = hour(), dep = Math.round((h > 6 && h < 23 ? 9 : 1) * (weekend() ? 1.4 : 1)), a = area(p.at, 1500);
     set('grPtDep', String(dep)); set('grPtQ', num(g.reduce(function (s0, x) { return s0 + x.queue; }, 0))); set('grPtSpd', a.kmh != null ? a.kmh + ' km/h' : '–'); set('grPtShip', s ? num(s.moving) : '–');
     list('grPtList', g.map(function (x) { return row(x.queue > 70 ? 'severe' : x.queue > 40 ? 'heavy' : 'free', x.name, 'Approach roads ' + (x.a.kmh != null ? x.a.kmh + ' km/h' : 'not modelled'), x.queue + ' vehicles', x.at, 16); }));
@@ -181,7 +184,7 @@
   /* ============================== 7. Airport landside ============================== */
   function airport() { var a = sites(['airport'])[0]; if (a) { return a; } return ATH ? { name: 'Athens International Airport', at: (CFG.air || {}).at || [23.9445, 37.9364] } : null; }
   function renderAir() {
-    var a = airport(); if (!a) { set('grAirSub', 'No airport in this city'); return; }
+    var a = airport(); if (!a) { hideCard('grAir'); return; }
     var h = hour(), wave = 0.35 + 0.65 * Math.max(Math.exp(-Math.pow(h - 7, 2) / 4), Math.exp(-Math.pow(h - 18, 2) / 6)), pax = Math.round((ATH ? 3800 : 900) * wave), st = T.air && T.air.stats ? T.air.stats() : null;
     var kerb = Math.min(100, Math.round(45 + wave * 55)), taxiQ = Math.max(0, Math.round(pax / 90 - 8)), park = Math.min(98, Math.round(58 + wave * 30 + (weekend() ? 8 : 0))), acc = area(a.at, 5000);
     set('grAirPax', num(pax)); set('grAirKerb', kerb + '%'); set('grAirTaxi', taxiQ > 0 ? taxiQ + ' min wait' : 'No wait'); set('grAirPark', park + '%');
@@ -206,7 +209,7 @@
     var cs = crossings(), dk = darkShips(), hits = cs.reduce(function (s, c) { return s + c.hits; }, 0);
     set('grSmTr', num(cs.reduce(function (s, c) { return s + c.trucks; }, 0))); set('grSmHit', num(hits)); set('grSmDark', T.live && T.live.vessels() ? num(dk.length) : 'no AIS'); set('grSmScan', num(Math.round(hits * 3.2 + 40)));
     var REASONS = ['Plate on watchlist', 'Seal number mismatch', 'Route deviation before border', 'Declared cargo vs. X-ray density', 'Repeated short crossings', 'Tobacco risk profile', 'Fuel laundering risk profile'];
-    var items = cs.filter(function (c) { return c.hits > 0; }).sort(function (a, b) { return b.hits - a.hits; }).slice(0, 6).map(function (c, k) { return row(c.hits > 3 ? 'severe' : 'heavy', c.name, pick(SEED + k, Math.floor(state.t / 900), REASONS) + ' · ' + plate(SEED + 9 + k, Math.floor(state.t / 900)), c.hits + ' alerts', c.at, 13); });
+    var c0 = centre(), items = cs.filter(function (c) { return c.hits > 0; }).sort(function (a, b) { return Math.hypot(a.at[0] - c0[0], a.at[1] - c0[1]) - Math.hypot(b.at[0] - c0[0], b.at[1] - c0[1]); }).slice(0, 6).map(function (c, k) { return row(c.hits > 3 ? 'severe' : 'heavy', c.name, pick(SEED + k, Math.floor(state.t / 900), REASONS) + ' · ' + plate(SEED + 9 + k, Math.floor(state.t / 900)), c.hits + ' alerts', c.at, 13); });
     dk.slice(0, 4).forEach(function (s) { items.push(row('moderate', (s.name || 'MMSI ' + s.mmsi) + ' · AIS silent', 'Tanker or cargo, last heard ' + Math.round((Date.now() - Date.parse(s.t)) / 3600e3) + ' h ago', 'Vessel', [s.lon, s.lat], 10)); });
     list('grSmList', items);
   }
@@ -215,8 +218,12 @@
   var CI_ATH = [['Substation KYT Pallini (IPTO)', 23.8950, 38.0050, 'Power'], ['Substation KYT Koumoundourou (IPTO)', 23.6170, 38.0480, 'Power'], ['Substation KYT Rouf (IPTO)', 23.6990, 37.9740, 'Power'], ['Water treatment plant Galatsi (EYDAP)', 23.7620, 38.0270, 'Water'],
     ['Water treatment plant Acharnes (EYDAP)', 23.7450, 38.0950, 'Water'], ['Water treatment plant Aspropyrgos (EYDAP)', 23.5850, 38.0600, 'Water'], ['Wastewater plant Psyttaleia (EYDAP)', 23.5880, 37.9450, 'Water'], ['Aspropyrgos refinery', 23.5800, 38.0350, 'Fuel'],
     ['Revithoussa LNG terminal', 23.4050, 37.9620, 'Fuel'], ['Hymettus telecom masts', 23.8000, 37.9600, 'Telecom'], ['Athens traffic management centre', 23.7300, 37.9900, 'Transport'], ['Kifissos river channel', 23.6900, 37.9700, 'Flood']];
+  var CI_CITY = { athens: CI_ATH,
+    thessaloniki: [['Port of Thessaloniki (ThPA)', 22.9250, 40.6320, 'Transport'], ['Thessaloniki airport Makedonia', 22.9709, 40.5197, 'Transport'], ['EYATH wastewater plant, Sindos', 22.8200, 40.6600, 'Water'], ['EYATH water treatment plant', 22.8700, 40.7000, 'Water'], ['Thessaloniki substation (IPTO)', 22.9500, 40.6600, 'Power'], ['Kalochori fuel depots', 22.8600, 40.6400, 'Fuel'], ['Dendropotamos stream', 22.8800, 40.6600, 'Flood']],
+    heraklion: [['Linoperamata power station', 25.0600, 35.3300, 'Power'], ['Heraklion airport Nikos Kazantzakis', 25.1803, 35.3397, 'Transport'], ['Port of Heraklion', 25.1400, 35.3450, 'Transport'], ['DEYAH water treatment plant', 25.1200, 35.3200, 'Water'], ['Giofyros stream', 25.1100, 35.3300, 'Flood']],
+    patras: [['Port of Patras', 21.7250, 38.2250, 'Transport'], ['Rio–Antirrio bridge', 21.7740, 38.3200, 'Transport'], ['DEYAP water treatment plant', 21.7600, 38.2500, 'Water'], ['Patras substation (IPTO)', 21.7500, 38.2200, 'Power'], ['Glafkos river', 21.7400, 38.2200, 'Flood']] };
   function assets() {
-    var out = ATH ? CI_ATH.map(function (a) { return { name: a[0], at: [a[1], a[2]], kind: a[3] }; }) : [];
+    var out = (CI_CITY[C.region.id] || []).map(function (a) { return { name: a[0], at: [a[1], a[2]], kind: a[3] }; });
     sites(['hospital']).slice(0, 40).forEach(function (s) { out.push({ name: s.name, at: s.at, kind: 'Health' }); });
     sites(['police', 'fire', 'government']).slice(0, 8).forEach(function (s) { out.push({ name: s.name, at: s.at, kind: 'Emergency services' }); });
     var w = now(), fires = ((T.live && T.live.fires()) || {}).list || [], wind = w.wind || 0, hot = (w.temp || 0) >= ((CFG.local || {}).heat || {}).heatC;
@@ -266,7 +273,9 @@
   /* ============================== 12. Counter-UAV and threat detection ============================== */
   var NOFLY_ATH = [['Hellenic Parliament and Maximos Mansion', 23.7370, 37.9755, 1000], ['Athens International Airport', 23.9445, 37.9364, 5000], ['Port of Piraeus', 23.6375, 37.9420, 1500], ['Acropolis', 23.7257, 37.9715, 600], ['Elefsina air base', 23.5560, 38.0670, 3000], ['Tatoi air base', 23.7830, 38.1080, 2500], ['Korydallos prison', 23.6450, 37.9840, 500]];
   function zonesU() {
-    var z = ATH ? NOFLY_ATH.map(function (x) { return { name: x[0], at: [x[1], x[2]], r: x[3] }; }) : [];
+    var NF = { athens: NOFLY_ATH, thessaloniki: [['Thessaloniki airport', 22.9709, 40.5197, 5000], ['White Tower and waterfront', 22.9484, 40.6264, 500], ['Port of Thessaloniki', 22.9250, 40.6320, 1500], ['Diavata prison', 22.8600, 40.6900, 500]],
+      heraklion: [['Heraklion airport', 25.1803, 35.3397, 5000], ['Port of Heraklion', 25.1400, 35.3450, 1500], ['Knossos', 25.1630, 35.2980, 600]], patras: [['Port of Patras', 21.7250, 38.2250, 1500], ['Rio–Antirrio bridge', 21.7740, 38.3200, 1000]] };
+    var z = (NF[C.region.id] || []).map(function (x) { return { name: x[0], at: [x[1], x[2]], r: x[3] }; });
     sites(['airport']).forEach(function (s) { if (!z.some(function (q) { return m(q.at, s.at) < 3000; })) { z.push({ name: s.name, at: s.at, r: 5000 }); } });
     sites(['defence', 'government']).slice(0, 5).forEach(function (s) { z.push({ name: s.name, at: s.at, r: 800 }); });
     return z;
@@ -321,7 +330,7 @@
       kpis([['Passengers arriving, per hour', 'grAirPax'], ['Kerb in use', 'grAirKerb'], ['Taxi rank', 'grAirTaxi'], ['Parking full', 'grAirPark']]) + '<h3 class="sub-h">How passengers reach the airport</h3><div class="bars" id="grAirBars"></div><p class="muted small" id="grAirNote"></p>');
     card('bus', 'grTf', ATH ? 'Transport for Athens' : 'Public transport for ' + esc(CITY), 'All modes', EST + 'Trips by mode are estimated from typical ridership; service messages are examples. Connect ' + (ATH ? 'OASA' : C.region.id === 'thessaloniki' ? 'OASTH' : 'the local operator') + ' GTFS and real-time feeds to replace them.',
       kpis([['Trips this hour', 'grTfTrip'], ['On time', 'grTfOn'], ['Buses in the model', 'grTfBus'], ['CO₂ avoided', 'grTfCo2']]) + '<div class="bars" id="grTfBars"></div><h3 class="sub-h">Service status</h3><ol class="corridors" id="grTfList"></ol>');
-    card('anpr', 'grSm', 'Smuggling: border and customs', 'Greece', EXA + 'Crossing points are real; truck counts and alerts are synthetic. Vessels come from live AIS: tankers and cargo ships silent for over 2 hours are flagged.',
+    card('anpr', 'grSm', 'Smuggling: border and customs', 'Greece-wide · nearest first', EXA + 'Crossing points are real; truck counts and alerts are synthetic. Vessels come from live AIS: tankers and cargo ships silent for over 2 hours are flagged.',
       kpis([['Trucks crossing today', 'grSmTr'], ['Risk alerts', 'grSmHit'], ['Vessels gone silent', 'grSmDark'], ['Sent to X-ray', 'grSmScan']]) + '<ol class="corridors" id="grSmList"></ol>');
     card('zones', 'grCp', 'Civil protection and critical infrastructure', 'Exposure to current hazards', EXA + 'Hazards are real (Open-Meteo wind and heat, NASA FIRMS fires, rain). Asset positions are approximate; hospitals and emergency services come from OpenStreetMap.',
       kpis([['Assets', 'grCpN'], ['Exposed now', 'grCpEx'], ['Public alert', 'grCp112'], ['Sectors', 'grCpKinds']]) + '<ol class="corridors" id="grCpList"></ol>');
