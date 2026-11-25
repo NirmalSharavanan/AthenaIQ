@@ -13,12 +13,14 @@
   // [group, [[tick box id, label for a linked copy (only for boxes that live in another section)], …]]
   var TREE = [
     ['Road', [['showCars'], ['showSig'], ['lyTtFlow'], ['lyTtInc'], ['showAcc'], ['showVms'], ['showDet'], ['showRail'], ['showCycle'], ['lyTtEv'], ['lyTtFuel']]],
+    ['Municipality', [['showBins', 'Smart bins <span class="muted">(synthetic)</span>'], ['showFleet', 'Municipal vehicles and routes <span class="muted">(synthetic)</span>'], ['showLamps', 'Street lights <span class="muted">(synthetic)</span>'], ['showDma', 'Water metered areas <span class="muted">(synthetic)</span>'],
+      ['showEnv', 'Environment sensors <span class="muted">(synthetic)</span>'], ['lyOsWx'], ['showMuniAll', 'Keep municipal layers on in every menu']]],
     ['Public transport', [['showSynBuses', 'Buses <span class="muted">(synthetic)</span>'], ['showTaxis', 'Taxis <span class="muted">(synthetic)</span>'], ['showShuttles', 'Shuttles <span class="muted">(synthetic)</span>']]],
     ['Sea', [['lyLvShip'], ['showSea', 'Ships and sea lanes <span class="muted">(synthetic)</span>']]],
     ['Air and space', [['lyLvAir'], ['showAir', 'Aircraft and flight paths <span class="muted">(synthetic)</span>'], ['lyLvSat']]],
     ['Cameras', [['showCams'], ['showSites'], ['lyCamWallRow']]],
     ['People and safety', [['showPeople'], ['showBases'], ['showZones', 'Critical sites'], ['lyLvFire']]],
-    ['City and environment', [['showBld'], ['showEnv', 'Environment sensors <span class="muted">(synthetic)</span>'], ['lyOsWx'], ['lyOsQk']]]
+    ['City and environment', [['showBld'], ['lyOsQk']]]
   ];
   // A region without a port and with AIS off has no Sea group.
   var CF = C.CFG || {}; if ((CF.live || {}).ais === false && !(CF.sea || {}).port) { TREE = TREE.filter(function (g) { return g[0] !== 'Sea'; }); }
@@ -56,7 +58,9 @@
   function intent(holder, box) { var want = box.checked; if (want && holder.last === true) { want = false; } holder.last = want; return want; }
   function setMany(boxes, on) { busy = true; boxes.forEach(function (b) { setBox(b, on); }); busy = false; refresh(); C.redraw(); }
 
-  C.onReady(function () {
+  // Built after every module has added its cards, so tick boxes made by later modules (Municipality) can join the tree.
+  C.onReady(function () { setTimeout(build, 0); });
+  function build() {
     var first = $('showCars'), card = first && first.closest('section'); if (!card) { return; }
     var tree = document.createElement('div'); tree.className = 'ly-tree'; tree.setAttribute('role', 'tree'); tree.setAttribute('aria-label', 'Map layers');
     var head = document.createElement('div'); head.className = 'ly-all';
@@ -94,7 +98,7 @@
     floatCard(card);
     refresh();
     setInterval(refresh, 2000);          // rows appear or become available as data and keys load
-  });
+  }
   // The card leaves the Dashboard panel and opens from a small settings button at the bottom left of the map,
   // just above the zoom buttons.
   function floatCard(card) {

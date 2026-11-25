@@ -84,6 +84,9 @@
     BINS = every([2, 3, 4], 900, SEED).slice(0, 400).map(function (e, k) { return { id: 'B' + (1000 + k), at: e.at, street: e.name || 'Street', kind: rnd(SEED, k * 7) < 0.7 ? 'Mixed' : rnd(SEED, k * 7 + 1) < 0.6 ? 'Recycling (blue)' : 'Organic (brown)', rate: 2.5 + rnd(SEED, k * 3) * 5.5, start: rnd(SEED, k * 5) * 35 }; });
     return BINS;
   }
+  function sensorOk(b, k) { return rnd(SEED + 41, (k || 0) + Math.floor(state.t / 21600)) > 0.03; }
+  function muni(id) { var box = $(id), all = $('showMuniAll'); return (!box || box.checked) && (K.tabOpen('muni') || (all && all.checked)); }
+  function chk(id, label) { return '<label class="check"><input id="' + id + '" type="checkbox" checked><span>' + label + '</span></label>'; }
   function fill(b) { var h = hour(), f = b.start + b.rate * ((h + 24 - 5) % 24); return Math.min(100, f % 125); }   // emptied on the 05:00 round
   var route = null;
   function planRoute() {
@@ -94,12 +97,48 @@
     route = ok && road.length ? { path: road, stops: path.length - 1, km: rkm, roads: true } : { path: path, stops: path.length - 1, km: km * 1.35, roads: false };
     return route;
   }
+  /* Municipal fleet: refuse trucks, sweepers and crews, each driving a loop on the road network. */
+  var FLEET = null;
+  var FTYPES = [['Refuse truck', 'RT', 10, [40, 120, 200]], ['Recycling truck', 'RC', 4, [40, 160, 100]], ['Street sweeper', 'SW', 4, [150, 110, 200]], ['Street-lighting crew', 'LC', 2, [230, 190, 40]], ['Water-leak crew', 'WC', 2, [30, 160, 210]]];
+  function fleet() {
+    if (FLEET) { return FLEET; }
+    FLEET = [];
+    if (!T.response) { return FLEET; }
+    var b = bins(), depot = ATH && inBox([23.6460, 38.0480]) ? [23.6460, 38.0480] : centre(), n = 0;
+    FTYPES.forEach(function (ft) { for (var k = 0; k < ft[2]; k++, n++) {
+      var a = b[Math.floor(rnd(SEED + 7, n * 3) * b.length) % b.length], c = b[Math.floor(rnd(SEED + 7, n * 3 + 1) * b.length) % b.length];
+      var l1 = a && T.response.pathBetween(depot, a.at), l2 = l1 && c && T.response.pathBetween(a.at, c.at), l3 = l2 && T.response.pathBetween(c.at, depot);
+      if (!l3) { continue; }
+      var path = l1.path.concat(l2.path, l3.path), cum = [0];
+      for (var i = 1; i < path.length; i++) { cum.push(cum[i - 1] + m(path[i - 1], path[i])); }
+      FLEET.push({ id: ft[1] + '-' + (101 + k), type: ft[0], col: ft[3], path: path, cum: cum, len: cum[cum.length - 1], off: rnd(SEED + 9, n), shift: ft[1] === 'LC' ? [18, 2] : ft[1] === 'WC' ? (k ? [7, 15] : [0, 24]) : ft[1] === 'SW' ? (k % 2 ? [14, 22] : [5, 13]) : ft[1] === 'RT' ? (k % 2 ? [19, 3] : [6, 14]) : [6, 14] });
+    } });
+    return FLEET;
+  }
+  function onShift(v) { var h = hour(), a = v.shift[0], z = v.shift[1]; return z - a >= 24 || (a < z ? h >= a && h < z : h >= a || h < z); }
+  function posOf(v) {
+    var kmh = v.type.indexOf('sweeper') >= 0 ? 8 : 18, d = ((state.t / 3600 * kmh * 1000) + v.off * v.len) % v.len, i = 1;
+    while (i < v.cum.length - 1 && v.cum[i] < d) { i++; }
+    var f = (d - v.cum[i - 1]) / Math.max(1, v.cum[i] - v.cum[i - 1]), a = v.path[i - 1], z = v.path[i];
+    return { at: [a[0] + (z[0] - a[0]) * f, a[1] + (z[1] - a[1]) * f], done: d / v.len };
+  }
+  function fleetNow() { return fleet().filter(onShift).map(function (v) { var p = posOf(v); return { v: v, at: p.at, done: p.done }; }); }
+  function vehPopup(x) { return [x.v.id + ' · ' + x.v.type, [['Shift', x.v.shift[1] - x.v.shift[0] >= 24 ? '24 h standby' : clock(x.v.shift[0] * 3600) + '–' + clock((x.v.shift[1] % 24) * 3600)], ['Round done', Math.round(x.done * 100) + '%'], ['Round length', (x.v.len / 1000).toFixed(1) + ' km']], 'Synthetic vehicle on the real road network']; }
+  function renderFleet() {
+    var F = fleetNow(), by = {};
+    F.forEach(function (x) { by[x.v.type] = (by[x.v.type] || 0) + 1; });
+    set('grFlN', num(F.length)); set('grFlRt', num((by['Refuse truck'] || 0) + (by['Recycling truck'] || 0))); set('grFlSw', num(by['Street sweeper'] || 0)); set('grFlCr', num((by['Street-lighting crew'] || 0) + (by['Water-leak crew'] || 0)));
+    list('grFlList', F.map(function (x) { return C.listButton('free', x.v.id + ' · ' + x.v.type, Math.round(x.done * 100) + '% of the round done', '', function () { var p = vehPopup(x); C.flyTo(x.at[0], x.at[1], 16); C.showPopup(x.at, p[0], p[1], p[2]); }); }));
+    var full = bins().filter(function (b) { return fill(b) >= 75; }).length, fixed = bins().length * 2.1 * 1.35 / 4, smart = full * 2.1 * 1.35 / 4 + 6;
+    set('grFlSave', Math.max(0, Math.round(100 - 100 * smart / Math.max(fixed, 1))) + '%');
+    set('grWsRoute', route ? route.stops + ' full bins, about ' + route.km.toFixed(1) + ' km in nearest-first order' + (route.roads ? ', following the road network.' : ' (straight lines; no road route found).') : '');
+  }
   function renderWaste() {
-    var b = bins(), full = b.filter(function (x) { return fill(x) >= 75; }), h = hour(), trucks = h >= 5 && h < 13 ? 18 : h >= 20 || h < 1 ? 12 : 4;
-    var fixed = b.length * 2.1 * 1.35 / 4, smart = full.length * 2.1 * 1.35 / 4 + 6;
-    set('grWsBins', num(b.length)); set('grWsFull', num(full.length)); set('grWsTr', String(trucks)); set('grWsSave', Math.max(0, Math.round(100 - 100 * smart / Math.max(fixed, 1))) + '%');
+    var b = bins(), full = b.filter(function (x) { return fill(x) >= 75; }), offline = b.filter(function (x, k) { return !sensorOk(x, k); }).length, avg = b.reduce(function (t, x) { return t + fill(x); }, 0) / Math.max(1, b.length), kinds = {};
+    b.forEach(function (x) { kinds[x.kind] = (kinds[x.kind] || 0) + 1; });
+    set('grWsBins', num(b.length)); set('grWsFull', num(full.length)); set('grWsTr', Math.round(avg) + '%'); set('grWsSave', num(offline));
+    bars('grWsBars', Object.keys(kinds).map(function (k) { var f = b.filter(function (x) { return x.kind === k; }), a = f.reduce(function (t, x) { return t + fill(x); }, 0) / f.length; return [k, a, num(f.length) + ' bins', Math.round(a) + '% full on average']; }));
     list('grWsList', full.sort(function (x, y) { return fill(y) - fill(x); }).slice(0, 8).map(function (x) { var f = fill(x); return row(f >= 95 ? 'severe' : 'heavy', x.id + ' · ' + x.kind, x.street + ' · emptied 05:00', Math.round(f) + '%', x.at, 17); }));
-    set('grWsRoute', route ? route.stops + ' bins, about ' + route.km.toFixed(1) + ' km in nearest-first order' + (route.roads ? ', following the road network.' : ' (straight lines; no road route found).') : '');
   }
 
   /* ============================== 2. Street lighting and building energy ============================== */
@@ -313,13 +352,17 @@
 
   /* ============================== cards ============================== */
   function build() {
-    card('frt', 'grWs', 'Waste collection, fleet and routing', 'Bins and trucks', SYN + 'Bin fill levels and truck counts are synthetic; bins sit on real streets. Connect bin sensors and truck GPS to replace them.',
-      kpis([['Bins monitored', 'grWsBins'], ['Over 75% full', 'grWsFull'], ['Trucks out', 'grWsTr'], ['Distance saved', 'grWsSave']]) +
-      '<div class="btn-col row"><button type="button" class="btn small" id="grWsPlan">Plan a route for full bins</button><button type="button" class="btn small" id="grWsClr" hidden>Clear</button></div><p class="muted small" id="grWsRoute"></p><h3 class="sub-h">Fullest bins</h3><ol class="corridors" id="grWsList"></ol>');
-    card('env', 'grLt', 'Street lighting and building energy', '', EST + 'Light times from the sun position; street-light count and building use estimated from road length and the building footprints. Lamp faults are synthetic.',
-      kpis([['Lights on', 'grLtOn'], ['Dimmed (quiet roads)', 'grLtDim'], ['Faults', 'grLtFault'], ['Saved tonight (LED, dimming)', 'grLtKwh']]) + '<p class="muted small" id="grLtSun"></p><h3 class="sub-h">Building energy today</h3><div class="bars" id="grLtBars"></div><h3 class="sub-h">Lamps not responding</h3><ol class="corridors" id="grLtList"></ol>');
-    card('env', 'grLk', 'Water leakage', 'District metered areas', SYN + 'Areas are a grid over the city and flows are synthetic. Connect ' + (ATH ? 'EYDAP' : 'DEYA') + ' meter data to find real leaks from the minimum night flow.',
-      kpis([['Areas', 'grLkDma'], ['Likely leaks', 'grLkBad'], ['Night flow', 'grLkMnf'], ['Water lost (est.)', 'grLkNrw']]) + '<ol class="corridors" id="grLkList"></ol>');
+    card('muni', 'grWs', 'Waste management: smart bins (IoT)', 'Fill-level sensors', SYN + 'Bins sit on real streets; fill levels and sensor states are synthetic. Connect the bin-sensor platform (LoRaWAN or NB-IoT) to replace them.',
+      kpis([['Bins with sensors', 'grWsBins'], ['Over 75% full', 'grWsFull'], ['Average fill', 'grWsTr'], ['Sensors offline', 'grWsSave']]) + chk('showBins', 'Show bins on the map') +
+      '<div class="bars" id="grWsBars"></div><h3 class="sub-h">Fullest bins</h3><ol class="corridors" id="grWsList"></ol>');
+    card('muni', 'grFl', 'Fleet and routing', 'Municipal vehicles', SYN + 'Vehicles are generated and drive real roads; connect vehicle GPS (AVL) to replace them. Routes use the model road network.',
+      kpis([['Vehicles out', 'grFlN'], ['Refuse and recycling trucks', 'grFlRt'], ['Sweepers', 'grFlSw'], ['Repair crews', 'grFlCr']]) + chk('showFleet', 'Show vehicles and routes on the map') +
+      '<div class="btn-col row"><button type="button" class="btn small" id="grWsPlan">Plan a route for full bins</button><button type="button" class="btn small" id="grWsClr" hidden>Clear</button></div><p class="muted small" id="grWsRoute"></p>' +
+      '<div class="kpis">' + tile('Distance saved vs fixed rounds', 'grFlSave') + '</div><h3 class="sub-h">Vehicles out now</h3><ol class="corridors" id="grFlList"></ol>');
+    card('muni', 'grLt', 'Street lighting and building energy', '', EST + 'Light times from the sun position; street-light count and building use estimated from road length and the building footprints. Lamp faults are synthetic.',
+      kpis([['Lights on', 'grLtOn'], ['Dimmed (quiet roads)', 'grLtDim'], ['Faults', 'grLtFault'], ['Saved tonight (LED, dimming)', 'grLtKwh']]) + chk('showLamps', 'Show street lights on the map') + '<p class="muted small" id="grLtSun"></p><h3 class="sub-h">Building energy today</h3><div class="bars" id="grLtBars"></div><h3 class="sub-h">Lamps not responding</h3><ol class="corridors" id="grLtList"></ol>');
+    card('muni', 'grLk', 'Water leakage', 'District metered areas', SYN + 'Areas are a grid over the city and flows are synthetic. Connect ' + (ATH ? 'EYDAP' : 'DEYA') + ' meter data to find real leaks from the minimum night flow.',
+      kpis([['Areas', 'grLkDma'], ['Likely leaks', 'grLkBad'], ['Night flow', 'grLkMnf'], ['Water lost (est.)', 'grLkNrw']]) + chk('showDma', 'Show metered areas on the map') + '<ol class="corridors" id="grLkList"></ol>');
     card('fines', 'grCt', 'Traffic and parking tickets: city streets', 'Municipal police and cameras', SYN + 'Tickets are generated in proportion to simulated traffic on real streets; fine values are indicative.',
       kpis([['Tickets today', 'grCtTot'], ['Parking', 'grCtPark'], ['Bus lane', 'grCtBus'], ['Value', 'grCtVal']]) + '<div class="bars" id="grCtBars"></div><h3 class="sub-h">Streets with most tickets</h3><ol class="corridors" id="grCtList"></ol>');
     card('fines', 'grHt', 'Traffic tickets: prefecture roads and national highways', 'Traffic police and section cameras', SYN + 'Tickets are generated from simulated speeds on motorways and trunk roads; fine values are indicative.',
@@ -340,13 +383,13 @@
       kpis([['Sites', 'grShN'], ['Higher risk now', 'grShHi'], ['Schools in session', 'grShSch'], ['Average nearby speed', 'grShSpd']]) + '<ol class="corridors" id="grShList"></ol>');
     card('dev', 'grCm', 'Prefecture and highway cameras: monitoring', 'Health and detections', SYN + 'Cameras are placed every 2.5 km on motorways and trunk roads; their state is synthetic. Queue detections come from simulated speeds.',
       kpis([['Cameras', 'grCmN'], ['Online', 'grCmUp'], ['Offline', 'grCmOff'], ['Queues seen', 'grCmInc']]) + '<ol class="corridors" id="grCmList"></ol>');
-    var pl = $('grWsPlan'); if (pl) { pl.addEventListener('click', function () { planRoute(); $('grWsClr').hidden = false; renderWaste(); C.redraw(); }); $('grWsClr').addEventListener('click', function () { route = null; this.hidden = true; renderWaste(); C.redraw(); }); }
+    var pl = $('grWsPlan'); if (pl) { pl.addEventListener('click', function () { planRoute(); $('grWsClr').hidden = false; renderFleet(); C.redraw(); }); $('grWsClr').addEventListener('click', function () { route = null; this.hidden = true; renderFleet(); C.redraw(); }); }
+    ['showBins', 'showFleet', 'showLamps', 'showDma'].forEach(function (id) { var b = $(id); if (b) { b.addEventListener('change', function () { C.redraw(); }); } });
   }
 
   function render() {
     var o = K.tabOpen;
-    if (o('frt')) { renderWaste(); }
-    if (o('env')) { renderLight(); renderLeak(); }
+    if (o('muni')) { renderWaste(); renderFleet(); renderLight(); renderLeak(); }
     if (o('fines')) { renderCityTickets(); renderHwyTickets(); }
     if (o('bus')) { renderPort(); renderAir(); renderTfA(); }
     if (o('anpr')) { renderSmug(); }
@@ -358,13 +401,18 @@
   /* ============================== map layers ============================== */
   C.addLayers(function () {
     var out = [], o = K.tabOpen;
-    if (o('frt')) {
+    if (muni('showBins')) {
       out.push(dots('gr-bins', bins(), function (b) { var f = fill(b); return rgb(f >= 95 ? 'severe' : f >= 75 ? 'heavy' : f >= 50 ? 'moderate' : 'free'); }, 4, function (b) { return [b.id + ' · ' + b.kind, [['Fill', Math.round(fill(b)) + '%'], ['Street', b.street], ['Emptied', '05:00']], 'Synthetic bin level']; }));
-      if (route) { out.push(new deck.PathLayer({ id: 'gr-route', data: [route.path], getPath: function (p) { return p; }, widthUnits: 'pixels', getWidth: 3, getColor: [40, 120, 200, 220], jointRounded: true })); }
     }
-    if (o('env')) {
+    if (muni('showFleet')) {
+      out.push(dots('gr-fleet', fleetNow(), function (x) { return x.v.col; }, 7, vehPopup));
+      if (route) { out.push(new deck.PathLayer({ id: 'gr-route', pickable: true, onClick: function (i) { C.showPopup(i.coordinate, 'Planned collection route', [['Full bins', route.stops], ['Length', route.km.toFixed(1) + ' km']], route.roads ? 'Follows the model road network' : 'Straight lines'); }, data: [route.path], getPath: function (p) { return p; }, widthUnits: 'pixels', getWidth: 3, getColor: [40, 120, 200, 220], jointRounded: true })); }
+    }
+    if (muni('showDma')) {
       out.push(new deck.PolygonLayer({ id: 'gr-dma', data: dmas(), pickable: true, getPolygon: function (d) { return d.poly; }, getFillColor: function (d) { return rgb(d.leak >= 2.5 ? 'severe' : d.leak >= 1.5 ? 'heavy' : 'free').concat([d.leak >= 1.5 ? 60 : 18]); }, getLineColor: [40, 120, 200, 120], lineWidthUnits: 'pixels', getLineWidth: 1, stroked: true,
         onClick: function (i) { if (i.object) { C.showPopup(i.object.at, i.object.id, [['Night flow', '×' + i.object.leak.toFixed(1) + ' of expected'], ['Properties', num(i.object.props)]], 'Synthetic meter data'); } } }));
+    }
+    if (muni('showLamps')) {
       out.push(dots('gr-lamps', lamps(), function (l) { var s = lampState(l); return s === 'fault' ? rgb('severe') : s === 'dim' ? [200, 170, 60] : s === 'on' ? [255, 220, 90] : rgb('off'); }, 3, function (l) { return [l.id, [['State', lampState(l)], ['Type', l.led ? 'LED, dimmable' : 'Sodium'], ['Road', l.road]], 'Synthetic lamp state']; }));
     }
     if (o('fines')) {

@@ -494,3 +494,8 @@ body.map-light .sim-clock { color: #16302a; }
 body.map-light #map { background: #e3f1e4; }
 
 .pt.synbus { background: #4696eb; outline: 2px solid #08142c; }
+
+/* Municipality summary: figures are buttons that jump to their card */
+.mu-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+button.kpi.mu-go { border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
+button.kpi.mu-go:hover, button.kpi.mu-go:focus-visible { outline: 2px solid var(--accent, #2f7d5b); outline-offset: -2px; }

@@ -70,8 +70,7 @@ Added as cards inside the existing menus, each with a map layer and a label sayi
 
 | Menu | Use case |
 |---|---|
-| Freight | Waste collection, fleet and routing |
-| Environment | Street lighting and building energy · Water leakage (district metered areas) |
+| Municipality (next to Dashboard) | Waste management: smart bins (IoT) · Fleet and routing · Street lighting and building energy · Weather · Water leakage · Drought and water supply · Environment (air, noise, sensors, emissions, streams) · Citizen reports |
 | Fines | Traffic and parking tickets: city streets · Traffic tickets: prefecture roads and national highways |
 | Transit | Port and city interface (Piraeus gates) · Airport landside · Transport for Athens |
 | ANPR | Smuggling: border crossings, customs and silent vessels (live AIS) |

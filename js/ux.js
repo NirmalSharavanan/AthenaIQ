@@ -171,6 +171,10 @@
     "School and hospital crossings": "Διαβάσεις σχολείων και νοσοκομείων",
     "Prefecture and highway cameras": "Κάμερες επαρχιακών δρόμων και αυτοκινητοδρόμων",
     "Counter-UAV and threat detection": "Αντι-drone και ανίχνευση απειλών",
+    "Municipality": "Δήμος",
+    "Municipality now": "Ο δήμος τώρα",
+    "Waste management: smart bins (IoT)": "Διαχείριση απορριμμάτων: έξυπνοι κάδοι (IoT)",
+    "Fleet and routing": "Στόλος και δρομολόγηση",
     "Daktylios: central Athens traffic ring": "Δακτύλιος: κέντρο Αθήνας",
     "Wildfire evacuation": "Εκκένωση λόγω πυρκαγιάς",
     "Winter roads: snow and ice": "Χειμερινοί δρόμοι: χιόνι και πάγος",
@@ -199,7 +203,8 @@
     var te = lang === 'el';
     document.querySelectorAll('.panel h2, .card-head h2, #panelTitle, .op-head h1, .op-head h2, #osintPage h1, #analytics h1, .rate-label, .tour-btn, #moreBtn').forEach(function (el) {
       if (el.children.length) { return; }
-      if (!orig.has(el)) { orig.set(el, el.textContent); }
+      var cur = el.textContent;   // text set by the app since the last switch (a new tab title, a tracked vehicle) becomes the new original
+      if (!orig.has(el) || (cur !== orig.get(el) && cur !== TE[orig.get(el)])) { orig.set(el, cur); }
       var en = orig.get(el); el.textContent = te && TE[en] ? TE[en] : en;
     });
     document.querySelectorAll('#tabs [title], .rail-item[title]').forEach(function (el) {

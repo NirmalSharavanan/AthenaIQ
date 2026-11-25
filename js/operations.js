@@ -13,7 +13,7 @@
   function rnd(seed, k) { var h = (Math.imul(seed ^ (k * 2654435761), 2246822519)) >>> 0; h ^= h >>> 13; h = Math.imul(h, 3266489917) >>> 0; h ^= h >>> 16; return (h >>> 0) / 4294967296; }
   function dist(a, b) { return Math.hypot((a[0] - b[0]) * kx, (a[1] - b[1]) * ky); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function tabOpen(id) { var b = document.querySelector('#tabs [data-tab=' + id + ']'); return !!b && b.classList.contains('on'); }
+  function tabOpen(id) { if (id === 'env') { id = 'muni'; } var b = document.querySelector('#tabs [data-tab=' + id + ']'); return !!b && b.classList.contains('on'); }
   function csv(name, rows) {
     var text = rows.map(function (r) { return r.map(function (v) { v = String(v === null || v === undefined ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\n');
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' })); a.download = name; document.body.appendChild(a); a.click(); a.remove();
