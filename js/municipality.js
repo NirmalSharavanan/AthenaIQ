@@ -24,6 +24,7 @@
   ];
   var TITLE_ID = { 'Air and noise now': 'envAir', 'Sensors, worst air first': 'envSens' };
 
+  var muEntered = false;
   function txt(id) { var el = $(id); return el ? el.textContent.trim() || '–' : '–'; }
   function scrollTo(el) { var box = el && el.parentElement; while (box && box.scrollHeight <= box.clientHeight + 2) { box = box.parentElement; } if (el && box) { box.scrollTop += el.getBoundingClientRect().top - box.getBoundingClientRect().top - 8; } }
   function section(id, cls, html) { var s = document.createElement('section'); s.className = cls; s.id = id; s.setAttribute('data-tab', 'muni'); s.hidden = true; s.innerHTML = html; return s; }
@@ -66,9 +67,27 @@
     // any other municipal card goes under Environmental intelligence
     Array.prototype.forEach.call(document.querySelectorAll('.panel section[data-tab="muni"]'), function (s) { if (s !== now && !s.classList.contains('mu-mod') && placed.indexOf(s) < 0) { s.setAttribute('data-mu', 'env'); var envH = $('mu-env'), next = envH; while (next.nextElementSibling && next.nextElementSibling.getAttribute('data-mu') === 'env') { next = next.nextElementSibling; } host.insertBefore(s, next.nextSibling); } });
     Array.prototype.forEach.call(now.querySelectorAll('.mu-tile'), function (b) {
-      b.addEventListener('click', function () { var h = $(b.getAttribute('data-go')), btn = h && h.querySelector('.mu-mod-h'); if (btn && btn.getAttribute('aria-expanded') !== 'true') { btn.click(); } setTimeout(function () { scrollTo(h); }, 30); });
+      b.addEventListener('click', function () { var h = $(b.getAttribute('data-go')), btn = h && h.querySelector('.mu-mod-h'); if (btn && btn.getAttribute('aria-expanded') !== 'true') { btn.click(); } setTimeout(function () { scrollTo(h); var bk = $('muBack'); if (bk) { bk.hidden = false; } }, 30); });
     });
     $('showMuniAll').addEventListener('change', function () { C.redraw(); });
+    // A way back to the overview from anywhere in the menu
+    var back = document.createElement('button'); back.type = 'button'; back.id = 'muBack'; back.className = 'mu-back'; back.hidden = true; back.innerHTML = '&#8593; Municipality overview';
+    back.addEventListener('click', home);
+    host.appendChild(back);
+    function scroller() { var b0 = now.parentElement; while (b0 && b0.scrollHeight <= b0.clientHeight + 2) { b0 = b0.parentElement; } return b0; }
+    function syncBack() { if (!T.kit.tabOpen('muni')) { back.hidden = true; return; } var s0 = scroller(); back.hidden = !s0 || now.getBoundingClientRect().bottom > s0.getBoundingClientRect().top + 40; }
+    document.addEventListener('scroll', function () { syncBack(); }, { passive: true, capture: true });
+    MODULES.forEach(function (md) { var h = $('mu-' + md[0]); if (!h) { return; } var u = document.createElement('button'); u.type = 'button'; u.className = 'mu-up'; u.textContent = 'Overview'; u.title = 'Back to Municipality overview'; u.addEventListener('click', function (e) { e.stopPropagation(); home(); }); h.querySelector('.mu-mod-h').appendChild(u); });
+    function home() {
+      var s0 = scroller(); if (s0) { s0.scrollTop = 0; } back.hidden = true;
+      var mp = T.getMap(); if (mp && mp.getZoom() > 14.6) { mp.easeTo({ zoom: window.innerWidth < 720 ? 13.6 : 14.2, pitch: Math.min(mp.getPitch(), 45), duration: 900 }); }
+    }
+    // Tapping the Municipality icon while the menu is open goes back to the overview
+    var railBtn = document.querySelector('#tabs [data-tab="muni"]');
+    if (railBtn) { railBtn.addEventListener('click', function () { if (T.kit.tabOpen('muni') && railBtn.getAttribute('data-was') === '1') { home(); } setTimeout(function () { railBtn.setAttribute('data-was', '1'); }, 0); }, true); }
+    Array.prototype.forEach.call(document.querySelectorAll('#tabs [data-tab]'), function (b) { if (b !== railBtn) { b.addEventListener('click', function () { if (railBtn) { railBtn.setAttribute('data-was', '0'); } back.hidden = true; }); } });
+    // Opening Municipality shows a wider part of the city
+    C.onTab(function () { if (T.kit.tabOpen('muni')) { var mp = T.getMap(); if (mp && mp.getZoom() > 14.8 && !muEntered) { mp.easeTo({ zoom: window.innerWidth < 720 ? 13.8 : 14.4, duration: 800 }); } muEntered = true; } else { muEntered = false; back.hidden = true; } });
     C.onTab(function () { setTimeout(refresh, 60); });
     C.onMinute(refresh);
   });

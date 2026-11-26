@@ -21,7 +21,7 @@
   function box(id) { var b = $(id); return !b || b.checked; }
   function zoom() { var mp = T.getMap(); return mp ? mp.getZoom() : 12; }
   function muniOpen() { return K.tabOpen('muni') || box('showMuniAll') && $('showMuniAll') && $('showMuniAll').checked; }
-  function on() { return box('showMuni3d') && muniOpen() && zoom() >= 15; }
+  function on() { return box('showMuni3d') && muniOpen() && zoom() >= 15.2; }
 
   /* ============================== meshes (metres; front along +X) ============================== */
   function hexa(out, x0, x1, y0, y1, z0, z1) {
@@ -271,7 +271,7 @@
   function sel(id, label, opts, def) { return '<label class="inline-field mp-f"><span>' + label + '</span><select id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(o[0]) === String(def) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }
   function chk(id, label, on0) { return '<label class="check"><input id="' + id + '" type="checkbox"' + (on0 ? ' checked' : '') + '><span>' + label + '</span></label>'; }
   function viewBtn(id) { return '<button type="button" class="btn small mu-3d" id="' + id + '">View in 3D</button>'; }
-  function fly(at, z, pitch) { z = Math.min(z || 16, window.innerWidth < 720 ? 15.4 : 16.2); var mp = T.getMap(); if (!mp || !at) { return; } var tick = $('showMuni3d'); if (tick && !tick.checked) { tick.checked = true; tick.dispatchEvent(new Event('change', { bubbles: true })); } mp.easeTo({ center: at, zoom: z || 17.2, pitch: pitch || 62, bearing: mp.getBearing() || -25, duration: 1600 }); }
+  function fly(at, z, pitch) { z = Math.min(z || 15.3, window.innerWidth < 720 ? 14.9 : 15.3); var mp = T.getMap(); if (!mp || !at) { return; } var tick = $('showMuni3d'); if (tick && !tick.checked) { tick.checked = true; tick.dispatchEvent(new Event('change', { bubbles: true })); } mp.easeTo({ center: at, zoom: z || 17.2, pitch: pitch || 62, bearing: mp.getBearing() || -25, duration: 1600 }); }
   var ILL = {
     bin: '<svg viewBox="0 0 120 70"><path d="M30 58l28 10 28-10V26L58 16 30 26z" fill="#2e7846"/><path d="M58 36v32l28-10V26z" fill="#245e37"/><path d="M27 24l31-11 31 11-31 11z" fill="#3f9a5d"/><rect x="88" y="30" width="7" height="28" rx="2" fill="#1d2a22"/><rect x="88" y="40" width="7" height="18" rx="2" fill="#ee8a2c"/><circle cx="58" cy="10" r="4" fill="#ff4632"/></svg>',
     truck: '<svg viewBox="0 0 120 70"><path d="M14 46l44 16 30-11V24L44 8 14 19z" fill="#2878c8"/><path d="M58 30v32l30-11V24z" fill="#1f5f9f"/><path d="M14 19l30-11 44 16-30 11z" fill="#4a96e0"/><path d="M88 32l18 6v16l-18 6z" fill="#e8edf3"/><circle cx="34" cy="58" r="5" fill="#1c1f24"/><circle cx="72" cy="62" r="5" fill="#1c1f24"/><circle cx="98" cy="60" r="4" fill="#1c1f24"/><rect x="40" y="2" width="8" height="5" rx="2" fill="#ffaa1e"/></svg>',

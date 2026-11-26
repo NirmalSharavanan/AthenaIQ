@@ -472,7 +472,8 @@
   function flyToPoint(lon, lat, zoom) {
     if (!map) { return; }
     // Lists ask for street zoom; cap it so the object and its surroundings fit on screen (closer on large screens).
-    var cap = window.innerWidth < 720 ? 15 : 15.8;
+    var muni = window.IntelliTwin && window.IntelliTwin.kit && window.IntelliTwin.kit.tabOpen('muni');
+    var cap = muni ? (window.innerWidth < 720 ? 14.3 : 14.8) : (window.innerWidth < 720 ? 15 : 15.8);   // Municipality shows a little more of the area around an object
     map.flyTo({ center: [lon, lat], zoom: Math.min(zoom || 14, cap), duration: 1000 });
   }
   function locate(g) {

@@ -50,7 +50,7 @@
     set('woN', num(WO.length)); set('woOpen', num(WO.filter(function (o) { return woState(o) !== 'Done'; }).length)); set('woDone', num(WO.filter(function (o) { return woState(o) === 'Done'; }).length));
     ol.innerHTML = '';
     if (!WO.length) { ol.innerHTML = '<li class="muted">No work orders yet. Click an object on the map and choose <strong>Create work order</strong>.</li>'; return; }
-    WO.slice(0, 12).forEach(function (o) { var s = woState(o); ol.appendChild(C.listButton(s === 'New' ? 'heavy' : s === 'Done' ? 'free' : 'moderate', o.id + ' · ' + o.title, o.crew + ' · raised ' + clock(o.t0), s, function () { C.flyTo(o.at[0], o.at[1], 16); setTimeout(function () { woPopup(o); }, 1050); })); });
+    WO.slice(0, 12).forEach(function (o) { var s = woState(o); ol.appendChild(C.listButton(s === 'New' ? 'heavy' : s === 'Done' ? 'free' : 'moderate', o.id + ' · ' + o.title, o.crew + ' · raised ' + clock(o.t0), s, function () { C.flyTo(o.at[0], o.at[1], 14.8); setTimeout(function () { woPopup(o); }, 1050); })); });
   }
   function set(id, html) { var el = $(id); if (el) { el.innerHTML = html; } }
   function woPopup(o) { C.showPopup(o.at, o.id + ' · work order', [['Job', esc(o.title)], ['Crew', o.crew], ['Status', woState(o)], ['Raised', clock(o.t0)]], 'Created from the map'); }
@@ -64,7 +64,7 @@
     var bar = document.createElement('div'); bar.className = 'mu-acts';
     if (CREW[lid]) { bar.appendChild(btn('Create work order', function () { var o = addWO(lid, title, at); this.textContent = o.id + ' created'; this.disabled = true; })); }
     if (CARD[lid] && $(CARD[lid])) { bar.appendChild(btn('Open card', function () { openCard(CARD[lid]); })); }
-    bar.appendChild(btn('Zoom here', function () { var mp = T.getMap(); if (mp) { mp.easeTo({ center: at, zoom: Math.max(mp.getZoom(), 16), duration: 700 }); } }));
+    bar.appendChild(btn('Zoom here', function () { var mp = T.getMap(); if (mp) { mp.easeTo({ center: at, zoom: Math.max(mp.getZoom(), 15.3), duration: 700 }); } }));
     pop.appendChild(bar);
   }
   function btn(label, fn) { var b = document.createElement('button'); b.type = 'button'; b.className = 'btn small'; b.textContent = label; b.addEventListener('click', fn); return b; }
