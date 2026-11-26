@@ -6,7 +6,7 @@ AthenaIQ is a static site, so AWS hosts it as a private S3 bucket behind CloudFr
 
 1. **Bootstrap** (AWS Console → CloudFormation → Create stack, region `ap-south-1`): upload `deploy/aws/bootstrap.cfn.yml`.
    - If the account already has a GitHub OIDC provider (this account does: UrbanIQ created it), keep the default ARN in `ExistingOidcProviderArn`; an account can hold only one.
-   - Creates the state bucket and the roles `athenaiq-github-infra` and `athenaiq-github-deploy`, trusted only for this repo on `main`. `GitHubRepo` must match the OIDC `sub` claim exactly: `thirumald@34179924/AthenaIQ@1472057579` (owner and repo IDs included; check with `gh api repos/thirumald/AthenaIQ/actions/oidc/customization/sub`).
+   - Creates the state bucket and the roles `athenaiq-github-infra` and `athenaiq-github-deploy`, trusted only for this repo on `main`. `GitHubRepo` must match the OIDC `sub` claim exactly: `NirmalSharavanan@29374886/AthenaIQ@1472475212` (owner and repo IDs included; check with `gh api repos/NirmalSharavanan/AthenaIQ/actions/oidc/customization/sub`).
 2. **Edit** `deploy/aws/env/prod.tfvars` (account number, alert email, optional domain) and commit to `main`.
 3. **GitHub → Actions → AthenaIQ Infra** → run with `plan`, read the summary, then run with `apply`. It prints the site address.
 4. Confirm the budget alert email from AWS.

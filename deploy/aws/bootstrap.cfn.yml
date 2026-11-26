@@ -6,7 +6,7 @@ Description: >-
 Parameters:
   GitHubRepo:
     Type: String
-    Default: thirumald@34179924/AthenaIQ@1472057579
+    Default: NirmalSharavanan@29374886/AthenaIQ@1472475212
     AllowedPattern: "^[A-Za-z0-9_.-]+(@[0-9]+)?/[A-Za-z0-9_.-]+(@[0-9]+)?$"
     Description: >-
       Repository allowed to work in this account, exactly as GitHub names it in its OIDC sub claim
