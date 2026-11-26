@@ -53,7 +53,7 @@ jobs:
           git init -q -b live-data
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          printf '%s\n' '# UrbanIQ live data' '' 'Written by the "Live data" workflow. One commit, replaced on every run.' > README.md
+          printf '%s\n' '# AthenaIQ live data' '' 'Written by the "Live data" workflow. One commit, replaced on every run.' > README.md
           git add -A
           git commit -q -m "Live data $(date -u +%Y-%m-%dT%H:%MZ)"
           git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" live-data

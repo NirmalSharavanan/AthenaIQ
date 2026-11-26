@@ -1,19 +1,19 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >-
-  UrbanIQ one-time setup. Lets GitHub Actions work in this AWS account through short-lived OIDC
+  AthenaIQ one-time setup. Lets GitHub Actions work in this AWS account through short-lived OIDC
   credentials (no keys stored in GitHub) and creates the bucket that holds the OpenTofu state.
 
 Parameters:
   GitHubRepo:
     Type: String
-    Default: thirumald@34179924/UrbanIQ@1469771682
+    Default: thirumald@34179924/AthenaIQ@1472057579
     AllowedPattern: "^[A-Za-z0-9_.-]+(@[0-9]+)?/[A-Za-z0-9_.-]+(@[0-9]+)?$"
     Description: >-
       Repository allowed to work in this account, exactly as GitHub names it in its OIDC sub claim
       (this account uses immutable claims: owner@ownerId/repo@repoId). The infra login step prints the real value.
   ExistingOidcProviderArn:
     Type: String
-    Default: ""
+    Default: arn:aws:iam::855985701754:oidc-provider/token.actions.githubusercontent.com
     Description: >-
       An account can have only one GitHub OIDC provider. If VisionX (or anything else) already created
       it here, paste its ARN (arn:aws:iam::<account>:oidc-provider/token.actions.githubusercontent.com). Otherwise leave empty.
@@ -34,7 +34,7 @@ Resources:
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      BucketName: !Sub "urbaniq-tfstate-${AWS::AccountId}"
+      BucketName: !Sub "athenaiq-tfstate-${AWS::AccountId}"
       VersioningConfiguration: {Status: Enabled}
       BucketEncryption:
         ServerSideEncryptionConfiguration:
@@ -45,11 +45,11 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
 
-  # Creates and changes the AWS resources (S3 site bucket, CloudFront). Used by the UrbanIQ Infra workflow.
+  # Creates and changes the AWS resources (S3 site bucket, CloudFront). Used by the AthenaIQ Infra workflow.
   InfraRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: urbaniq-github-infra
+      RoleName: athenaiq-github-infra
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -62,7 +62,7 @@ Resources:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
                 token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubRepo}:ref:refs/heads/main"
       Policies:
-        - PolicyName: urbaniq-infra
+        - PolicyName: athenaiq-infra
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -75,7 +75,7 @@ Resources:
   DeployRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: urbaniq-github-deploy
+      RoleName: athenaiq-github-deploy
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -88,16 +88,16 @@ Resources:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
                 token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubRepo}:ref:refs/heads/main"
       Policies:
-        - PolicyName: urbaniq-deploy
+        - PolicyName: athenaiq-deploy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action: s3:ListBucket
-                Resource: !Sub "arn:${AWS::Partition}:s3:::urbaniq-*-site-${AWS::AccountId}"
+                Resource: !Sub "arn:${AWS::Partition}:s3:::athenaiq-*-site-${AWS::AccountId}"
               - Effect: Allow
                 Action: [s3:GetObject, s3:PutObject, s3:DeleteObject]
-                Resource: !Sub "arn:${AWS::Partition}:s3:::urbaniq-*-site-${AWS::AccountId}/*"
+                Resource: !Sub "arn:${AWS::Partition}:s3:::athenaiq-*-site-${AWS::AccountId}/*"
               - Effect: Allow
                 Action: [cloudfront:CreateInvalidation, cloudfront:GetInvalidation, cloudfront:ListDistributions]
                 Resource: "*"

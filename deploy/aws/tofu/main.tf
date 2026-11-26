@@ -6,7 +6,7 @@ terraform {
       version = "~> 5.80"
     }
   }
-  # Bucket, key and region are passed by the UrbanIQ Infra workflow.
+  # Bucket, key and region are passed by the AthenaIQ Infra workflow.
   backend "s3" {}
 }
 
@@ -15,7 +15,7 @@ provider "aws" {
   allowed_account_ids = [var.aws_account_id]
   default_tags {
     tags = {
-      Project     = "urbaniq"
+      Project     = "athenaiq"
       Environment = var.environment
     }
   }
@@ -28,7 +28,7 @@ provider "aws" {
   allowed_account_ids = [var.aws_account_id]
   default_tags {
     tags = {
-      Project     = "urbaniq"
+      Project     = "athenaiq"
       Environment = var.environment
     }
   }
@@ -36,7 +36,7 @@ provider "aws" {
 
 locals {
   custom_domain = var.domain != ""
-  site_bucket = "urbaniq-${var.environment}-site-${var.aws_account_id}"
+  site_bucket = "athenaiq-${var.environment}-site-${var.aws_account_id}"
 }
 
 # --- Custom domain (only when var.domain is set): certificate, DNS validation, alias record ---
@@ -118,7 +118,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
 }
 
 resource "aws_cloudfront_origin_access_control" "site" {
-  name                              = "urbaniq-${var.environment}"
+  name                              = "athenaiq-${var.environment}"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -131,9 +131,9 @@ data "aws_cloudfront_cache_policy" "optimized" {
 
 resource "aws_cloudfront_distribution" "site" {
   enabled             = true
-  comment             = "UrbanIQ ${var.environment}"
+  comment             = "AthenaIQ ${var.environment}"
   default_root_object = "index.html"
-  price_class         = "PriceClass_200" # includes India
+  price_class         = "PriceClass_200" # includes Europe, the Middle East and India
   http_version        = "http2and3"
   aliases             = local.custom_domain ? [var.domain] : []
 
@@ -187,7 +187,7 @@ resource "aws_s3_bucket_policy" "site" {
 }
 
 resource "aws_sns_topic" "alerts" {
-  name = "urbaniq-${var.environment}-alerts"
+  name = "athenaiq-${var.environment}-alerts"
 }
 
 resource "aws_sns_topic_subscription" "email" {
@@ -197,14 +197,14 @@ resource "aws_sns_topic_subscription" "email" {
 }
 
 resource "aws_budgets_budget" "monthly" {
-  name         = "urbaniq-${var.environment}"
+  name         = "athenaiq-${var.environment}"
   budget_type  = "COST"
   limit_amount = tostring(var.budget_usd)
   limit_unit   = "USD"
   time_unit    = "MONTHLY"
   cost_filter {
     name   = "TagKeyValue"
-    values = ["user:Project$urbaniq"]
+    values = ["user:Project$athenaiq"]
   }
   notification {
     comparison_operator       = "GREATER_THAN"
@@ -217,6 +217,6 @@ resource "aws_budgets_budget" "monthly" {
 
 output "site_bucket" { value = aws_s3_bucket.site.id }
 output "distribution_id" { value = aws_cloudfront_distribution.site.id }
-output "urbaniq_url" {
+output "athenaiq_url" {
   value = local.custom_domain ? "https://${var.domain}" : "https://${aws_cloudfront_distribution.site.domain_name}"
 }

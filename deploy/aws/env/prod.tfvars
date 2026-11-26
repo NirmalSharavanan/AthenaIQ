@@ -1,4 +1,4 @@
-# UrbanIQ AWS settings. The only file you need to edit; then run the "UrbanIQ Infra" workflow with action "apply".
+# AthenaIQ AWS settings. The only file you need to edit; then run the "AthenaIQ Infra" workflow with action "apply".
 
 # 12-digit AWS account number (the one you ran deploy/aws/bootstrap.cfn.yml in).
 aws_account_id = "855985701754"
@@ -13,4 +13,4 @@ budget_usd  = 20
 # Custom domain. Register zone_name in Route 53 first (it creates the hosted zone), then apply.
 # Leave domain empty to use the *.cloudfront.net address.
 zone_name = "presight.click"
-domain    = "urbaniq.presight.click"
+domain    = "athenaiq.presight.click"

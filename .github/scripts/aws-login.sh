@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sign in to AWS with GitHub's OIDC token (no stored keys). usage: bash .github/scripts/aws-login.sh infra|deploy
-# Needs: permissions: id-token: write. Publishes AWS_* credentials and the UrbanIQ settings to $GITHUB_ENV.
+# Needs: permissions: id-token: write. Publishes AWS_* credentials and the AthenaIQ settings to $GITHUB_ENV.
 set -euo pipefail
 KIND=${1:?infra or deploy}
 case "$KIND" in infra|deploy) ;; *) echo "::error::role must be infra or deploy"; exit 1 ;; esac
@@ -12,9 +12,9 @@ ACCOUNT=$(get aws_account_id); REGION=$(get aws_region); ENVIRONMENT=$(get envir
 [[ "$ACCOUNT" =~ ^[0-9]{12}$ ]] || { echo "::error file=$FILE::Set aws_account_id to your 12-digit AWS account number."; exit 1; }
 {
   echo "AWS_ACCOUNT_ID=$ACCOUNT"; echo "AWS_REGION=$REGION"; echo "AWS_DEFAULT_REGION=$REGION"
-  echo "URBANIQ_ENV=$ENVIRONMENT"
-  echo "STATE_BUCKET=urbaniq-tfstate-$ACCOUNT"
-  echo "SITE_BUCKET=urbaniq-$ENVIRONMENT-site-$ACCOUNT"
+  echo "ATHENAIQ_ENV=$ENVIRONMENT"
+  echo "STATE_BUCKET=athenaiq-tfstate-$ACCOUNT"
+  echo "SITE_BUCKET=athenaiq-$ENVIRONMENT-site-$ACCOUNT"
 } >>"$GITHUB_ENV"
 
 token=$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
@@ -25,7 +25,7 @@ payload=$(cut -d. -f2 <<<"$token" | tr '_-' '/+')
 while [ $((${#payload} % 4)) -ne 0 ]; do payload="$payload="; done
 base64 -d <<<"$payload" 2>/dev/null | jq -c '{sub, aud, repository, ref}' || true
 creds=$(aws sts assume-role-with-web-identity \
-  --role-arn "arn:aws:iam::$ACCOUNT:role/urbaniq-github-$KIND" \
+  --role-arn "arn:aws:iam::$ACCOUNT:role/athenaiq-github-$KIND" \
   --role-session-name "github-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
   --web-identity-token "$token" --duration-seconds 3600 --region "$REGION" \
   --query Credentials --output json)
@@ -35,4 +35,4 @@ for f in AccessKeyId SecretAccessKey SessionToken; do echo "::add-mask::$(jq -r 
   echo "AWS_SECRET_ACCESS_KEY=$(jq -r .SecretAccessKey <<<"$creds")"
   echo "AWS_SESSION_TOKEN=$(jq -r .SessionToken <<<"$creds")"
 } >>"$GITHUB_ENV"
-echo "Signed in to $ACCOUNT as urbaniq-github-$KIND"
+echo "Signed in to $ACCOUNT as athenaiq-github-$KIND"

@@ -1,10 +1,14 @@
-name: UrbanIQ Deploy
+name: AthenaIQ Deploy
 
 # Publishes the static site to S3 and clears the CloudFront cache.
 # Runs on every push to main, after the data-build workflows commit new data, and on demand.
-# In AthenaIQ this runs only by hand: it was copied from UrbanIQ and its AWS role, bucket and domain
-# (urbaniq.presight.click) belong to UrbanIQ. Point it at an AthenaIQ AWS setup before running it.
 on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["Build twin data", "Build region data", "Add buildings to regions", "Fetch sample media"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -12,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: urbaniq-deploy
+  group: athenaiq-deploy
   cancel-in-progress: false
 
 jobs:
@@ -25,7 +29,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main   # the branch tip, so data committed by a build is included
-      - name: Sign in to AWS (OIDC, role urbaniq-github-deploy)
+      - name: Sign in to AWS (OIDC, role athenaiq-github-deploy)
         run: bash .github/scripts/aws-login.sh deploy
       - name: Build the site folder
         run: |
@@ -45,8 +49,8 @@ jobs:
             --cache-control 'no-cache'
       - name: Clear the CloudFront cache
         run: |
-          id=$(aws cloudfront list-distributions --query "DistributionList.Items[?Comment=='UrbanIQ $URBANIQ_ENV'].Id | [0]" --output text)
-          [ -n "$id" ] && [ "$id" != "None" ] || { echo "::error::No CloudFront distribution found. Run UrbanIQ Infra (apply) first."; exit 1; }
+          id=$(aws cloudfront list-distributions --query "DistributionList.Items[?Comment=='AthenaIQ $ATHENAIQ_ENV'].Id | [0]" --output text)
+          [ -n "$id" ] && [ "$id" != "None" ] || { echo "::error::No CloudFront distribution found. Run AthenaIQ Infra (apply) first."; exit 1; }
           inv=$(aws cloudfront create-invalidation --distribution-id "$id" --paths '/*' --query Invalidation.Id --output text)
           aws cloudfront wait invalidation-completed --distribution-id "$id" --id "$inv"
           dom=$(aws cloudfront list-distributions --query "DistributionList.Items[?Id=='$id'].DomainName | [0]" --output text)

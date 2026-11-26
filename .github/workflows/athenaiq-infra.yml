@@ -1,4 +1,4 @@
-name: UrbanIQ Infra
+name: AthenaIQ Infra
 
 # Creates or changes the AWS resources (S3 bucket, CloudFront). Run "plan" first, then "apply".
 on:
@@ -9,7 +9,7 @@ on:
         default: plan
         options: [plan, apply, destroy]
       confirm:
-        description: Only for destroy. Type DELETE-URBANIQ
+        description: Only for destroy. Type DELETE-ATHENAIQ
         type: string
         default: ""
 
@@ -17,7 +17,7 @@ permissions:
   id-token: write
   contents: read
 
-concurrency: urbaniq-infra
+concurrency: athenaiq-infra
 
 jobs:
   infra:
@@ -28,7 +28,7 @@ jobs:
       - name: Only main may change AWS
         if: github.ref != 'refs/heads/main'
         run: echo "::error::Run this workflow from main." && exit 1
-      - name: Sign in to AWS (OIDC, role urbaniq-github-infra)
+      - name: Sign in to AWS (OIDC, role athenaiq-github-infra)
         run: bash .github/scripts/aws-login.sh infra
       - name: Install OpenTofu
         run: |
@@ -41,7 +41,7 @@ jobs:
         working-directory: deploy/aws/tofu
         run: |
           tofu init -input=false \
-            -backend-config="bucket=$STATE_BUCKET" -backend-config="key=$URBANIQ_ENV/tofu.tfstate" \
+            -backend-config="bucket=$STATE_BUCKET" -backend-config="key=$ATHENAIQ_ENV/tofu.tfstate" \
             -backend-config="region=$AWS_REGION" -backend-config="encrypt=true" -backend-config="use_lockfile=true"
       - name: Plan
         if: inputs.action != 'destroy'
@@ -54,14 +54,14 @@ jobs:
         working-directory: deploy/aws/tofu
         run: |
           tofu apply -input=false tfplan
-          echo "### UrbanIQ address: $(tofu output -raw urbaniq_url)" >>"$GITHUB_STEP_SUMMARY"
-          echo "Confirm the AWS budget/alert email, then run the UrbanIQ Deploy workflow." >>"$GITHUB_STEP_SUMMARY"
+          echo "### AthenaIQ address: $(tofu output -raw athenaiq_url)" >>"$GITHUB_STEP_SUMMARY"
+          echo "Confirm the AWS budget/alert email, then run the AthenaIQ Deploy workflow." >>"$GITHUB_STEP_SUMMARY"
       - name: Destroy
         if: inputs.action == 'destroy'
         env:
           CONFIRM: ${{ inputs.confirm }}
         working-directory: deploy/aws/tofu
         run: |
-          [ "$CONFIRM" = "DELETE-URBANIQ" ] || { echo "::error::Type DELETE-URBANIQ in confirm."; exit 1; }
+          [ "$CONFIRM" = "DELETE-ATHENAIQ" ] || { echo "::error::Type DELETE-ATHENAIQ in confirm."; exit 1; }
           aws s3 rm --recursive --only-show-errors "s3://$SITE_BUCKET" || true
           tofu destroy -input=false -auto-approve -var-file=../env/prod.tfvars
