@@ -245,5 +245,5 @@
     C.onTab(function () { render(); C.redraw(); });
     C.onMinute(render);
   });
-  T.muniops = { render: render, warnings: warnings };
+  T.muniops = { render: render, warnings: warnings, sites: sitesC, dumping: dumping };
 })();
