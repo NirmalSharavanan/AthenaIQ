@@ -559,6 +559,11 @@ section.mu-flash { box-shadow: 0 0 0 3px var(--accent, #2f7d5b); transition: box
 @media (max-width: 720px) { .mu-legend { left: 8px; bottom: auto; top: 64px; max-width: 200px; max-height: 35vh; } }
 
 /* Municipality: back to overview */
-.mu-back { position: sticky; bottom: 8px; margin: 8px auto 4px; display: block; z-index: 3; border: 0; border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; background: var(--accent, #2f7d5b); color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
-.mu-back[hidden] { display: none; }
+.panel-head .mu-back { margin-left: auto; margin-right: 6px; }
+.panel-head .mu-back[hidden] { display: none; }
 .mu-up { margin-left: auto; margin-right: 8px; border: 0; background: rgba(0,0,0,.06); border-radius: 999px; padding: 2px 9px; font: inherit; font-size: 11px; cursor: pointer; color: inherit; }
+
+/* planner buttons wrap; tidy early-warning table */
+.mp-planner .btn-col.row, .mu-3drow, .btn-col.row { flex-wrap: wrap; }
+#ewTable th { font-weight: 600; }
+#ewTable th .small { font-weight: 400; display: block; }

@@ -221,7 +221,7 @@
 
   C.addLayers(function () {
     var out = [];
-    if (vis('mwShow')) { out.push(dots('mo-dump', dumping().filter(function (d) { return d.st !== 'Cleared'; }), function (d) { return rgb(d.st === 'New' ? 'heavy' : 'moderate'); }, 6, dumpPop)); }
+    if (vis('mwShow')) { out.push(dots('mo-dump', C.memo('moD', Math.floor(state.t / 60), function () { return dumping().filter(function (d) { return d.st !== 'Cleared'; }); }), function (d) { return rgb(d.st === 'New' ? 'heavy' : 'moderate'); }, 6, dumpPop)); }
     if (vis('upShow')) {
       out.push(new deck.ColumnLayer({ id: 'mo-sites', data: sitesC(), diskResolution: 4, radius: 18, extruded: true, pickable: true, getPosition: function (s) { return s.at; }, getElevation: function (s) { return s.storeys * 3.2 * Math.max(0.15, s.prog); },
         getFillColor: function (s) { return !s.permit ? [208, 59, 59, 220] : [240, 170, 40, 220]; }, onClick: function (i) { if (i.object) { var p = sitePop(i.object); C.showPopup(i.object.at, p[0], p[1], p[2]); } } }));
@@ -235,7 +235,7 @@
       out.push(dots('mo-perm', permits(), function (p) { return rgb(p.st === 'Approved' ? 'free' : p.st === 'Returned for changes' ? 'heavy' : 'info'); }, 5, permPop));
       out.push(dots('mo-unauth', unauth(), function () { return rgb('severe'); }, 8, function (u) { return [u.id + ' · possible unauthorised construction', [['What', u.what], ['Found by', u.src], ['Confidence', Math.round(u.conf * 100) + '%']], 'Synthetic detection']; }));
     }
-    if (vis('evShow')) { out.push(dots('mo-wq', wq(), function (w) { return w.ok ? [30, 150, 220] : rgb('heavy'); }, 7, function (w) { return [w.name, [['Within limits', w.ok ? 'Yes' : 'No'], ['Turbidity', w.turb.toFixed(2) + ' NTU'], ['pH', w.ph.toFixed(1)]], 'Synthetic sensor']; })); }
+    if (vis('evShow')) { out.push(dots('mo-wq', C.memo('moW', Math.floor(state.t / 3600), wq), function (w) { return w.ok ? [30, 150, 220] : rgb('heavy'); }, 7, function (w) { return [w.name, [['Within limits', w.ok ? 'Yes' : 'No'], ['Turbidity', w.turb.toFixed(2) + ' NTU'], ['pH', w.ph.toFixed(1)]], 'Synthetic sensor']; })); }
     return out;
   });
 

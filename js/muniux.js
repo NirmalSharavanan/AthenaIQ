@@ -64,7 +64,7 @@
     var bar = document.createElement('div'); bar.className = 'mu-acts';
     if (CREW[lid]) { bar.appendChild(btn('Create work order', function () { var o = addWO(lid, title, at); this.textContent = o.id + ' created'; this.disabled = true; })); }
     if (CARD[lid] && $(CARD[lid])) { bar.appendChild(btn('Open card', function () { openCard(CARD[lid]); })); }
-    bar.appendChild(btn('Zoom here', function () { var mp = T.getMap(); if (mp) { mp.easeTo({ center: at, zoom: Math.max(mp.getZoom(), 15.3), duration: 700 }); } }));
+    bar.appendChild(btn('Zoom here', function () { var mp = T.getMap(); if (mp) { mp.easeTo({ center: at, zoom: Math.max(mp.getZoom(), 15), duration: 700 }); } }));
     pop.appendChild(bar);
   }
   function btn(label, fn) { var b = document.createElement('button'); b.type = 'button'; b.className = 'btn small'; b.textContent = label; b.addEventListener('click', fn); return b; }
@@ -127,7 +127,7 @@
     var out = [], open = muniOpen() || ($('showMuniAll') && $('showMuniAll').checked);
     if (!open) { return out; }
     // work-order cones (any zoom; flat markers when zoomed out)
-    var W = WO.filter(function (o) { return woState(o) !== 'Done'; });
+    var W = C.memo('muW', WO.length + ':' + Math.floor(state.t / 60), function () { return WO.filter(function (o) { return woState(o) !== 'Done'; }); });
     if (W.length) {
       if (on3d()) { out.push(meshLayer('mu-wo', W, WCONE, [250, 120, 20], sc() * 1.3, function (o) { return [o.id + ' · work order', [['Job', esc(o.title)], ['Crew', o.crew], ['Status', woState(o)]], 'Created from the map']; })); }
       else { out.push(new deck.ScatterplotLayer({ id: 'mu-wo', data: W, pickable: true, radiusUnits: 'pixels', getRadius: 8, getPosition: function (o) { return o.at; }, getFillColor: [250, 120, 20], stroked: true, getLineColor: [255, 255, 255], lineWidthUnits: 'pixels', getLineWidth: 2, onClick: function (i) { if (i.object) { woPopup(i.object); } } })); }
@@ -136,26 +136,26 @@
     var s = sc(), blink = Math.floor(performance.now() / 350) % 2;
     var MP = T.muniplus, G = T.greece, MO = T.muniops;
     if (MP && box('poShow')) {
-      var U = MP.units().map(function (u) { var d = ((state.t / 3600 * 14000) + u.off * u.len) % u.len, i = 1; while (i < u.cum.length - 1 && u.cum[i] < d) { i++; } var a = u.path[i - 1], z = u.path[i], f = (d - u.cum[i - 1]) / Math.max(1, u.cum[i] - u.cum[i - 1]); return { u: u, at: [a[0] + (z[0] - a[0]) * f, a[1] + (z[1] - a[1]) * f], yaw: Math.atan2((z[1] - a[1]) * ky, (z[0] - a[0]) * kx) * 180 / Math.PI, id: u.id }; }).filter(function (x) { return inView(x.at); });
+      var U = C.memo('muU', Math.floor(state.t) + C.viewKey(), function () { return MP.units().map(function (u) { var d = ((state.t / 3600 * 14000) + u.off * u.len) % u.len, i = 1; while (i < u.cum.length - 1 && u.cum[i] < d) { i++; } var a = u.path[i - 1], z = u.path[i], f = (d - u.cum[i - 1]) / Math.max(1, u.cum[i] - u.cum[i - 1]); return { u: u, at: [a[0] + (z[0] - a[0]) * f, a[1] + (z[1] - a[1]) * f], yaw: Math.atan2((z[1] - a[1]) * ky, (z[0] - a[0]) * kx) * 180 / Math.PI, id: u.id }; }).filter(function (x) { return inView(x.at); }); });
       var pop = function (x) { return [x.u.id + ' · ' + x.u.kind, [['Status', 'On patrol'], ['Speed', 'about 14 km/h']], 'Synthetic unit on the real road network']; };
       out.push(meshLayer('mu-police', U, POLICE, [245, 247, 250], s, pop, { updateTriggers: { getPosition: state.t, getOrientation: state.t } }));
       out.push(meshLayer('mu-police-d', U, POLICE_BAR, blink ? [30, 90, 255] : [230, 40, 40], s, pop, { updateTriggers: { getPosition: state.t, getOrientation: state.t, getColor: blink } }));
     }
     if (MO && box('upShow') && MO.sites) {
-      out.push(meshLayer('mu-crane', MO.sites().filter(function (x) { return inView(x.at); }).map(function (x, k) { return { at: x.at, yaw: k * 47, s: x }; }), CRANE, function (d) { return d.s.permit ? [240, 175, 30] : [220, 60, 50]; }, Math.min(1.3, s / 2.4), function (d) { var x = d.s; return [x.name, [['Progress', Math.round(x.prog * 100) + '%'], ['Height', x.storeys + ' storeys'], ['Permit', x.permit ? 'Valid' : 'Not found: inspect'], ['Noise', Math.round(x.noise) + ' dB']], 'Synthetic construction monitoring']; }));
+      out.push(meshLayer('mu-crane', C.memo('muC', C.viewKey(), function () { return MO.sites().filter(function (x) { return inView(x.at); }).map(function (x, k) { return { at: x.at, yaw: k * 47, s: x }; }); }), CRANE, function (d) { return d.s.permit ? [240, 175, 30] : [220, 60, 50]; }, Math.min(1.3, s / 2.4), function (d) { var x = d.s; return [x.name, [['Progress', Math.round(x.prog * 100) + '%'], ['Height', x.storeys + ' storeys'], ['Permit', x.permit ? 'Valid' : 'Not found: inspect'], ['Noise', Math.round(x.noise) + ' dB']], 'Synthetic construction monitoring']; }));
     }
     if (MO && box('mwShow') && MO.dumping) {
-      out.push(meshLayer('mu-dump3d', MO.dumping().filter(function (d) { return d.st !== 'Cleared' && inView(d.at); }), PILE, [125, 92, 60], s, function (d) { return [d.id + ' · illegal dumping', [['What', d.what], ['Seen by', d.src], ['Status', d.st]], 'Synthetic detection']; }));
+      out.push(meshLayer('mu-dump3d', C.memo('muD', C.viewKey() + Math.floor(state.t / 60), function () { return MO.dumping().filter(function (d) { return d.st !== 'Cleared' && inView(d.at); }); }), PILE, [125, 92, 60], s, function (d) { return [d.id + ' · illegal dumping', [['What', d.what], ['Seen by', d.src], ['Status', d.st]], 'Synthetic detection']; }));
     }
     if (MP && box('psShow') && MP.markets) {
-      var E = C.edges(), stalls = [];
-      MP.markets().forEach(function (mk) { mk.edges.forEach(function (i) { var p = E[i].path; for (var j = 0; j + 1 < p.length; j++) { var a = p[j], z = p[j + 1], len = Math.hypot((z[0] - a[0]) * kx, (z[1] - a[1]) * ky), yaw = Math.atan2((z[1] - a[1]) * ky, (z[0] - a[0]) * kx) * 180 / Math.PI; for (var d = 0; d < len && stalls.length < 400; d += 4) { var f = d / len; stalls.push({ at: [a[0] + (z[0] - a[0]) * f, a[1] + (z[1] - a[1]) * f], yaw: yaw, mk: mk, c: stalls.length % 3 }); } } }); });
+      var E = C.edges(), stalls = C.memo('muSt', Math.floor(state.t / 3600), function () { var stalls = [];
+      MP.markets().forEach(function (mk) { mk.edges.forEach(function (i) { var p = E[i].path; for (var j = 0; j + 1 < p.length; j++) { var a = p[j], z = p[j + 1], len = Math.hypot((z[0] - a[0]) * kx, (z[1] - a[1]) * ky), yaw = Math.atan2((z[1] - a[1]) * ky, (z[0] - a[0]) * kx) * 180 / Math.PI; for (var d = 0; d < len && stalls.length < 400; d += 4) { var f = d / len; stalls.push({ at: [a[0] + (z[0] - a[0]) * f, a[1] + (z[1] - a[1]) * f], yaw: yaw, mk: mk, c: stalls.length % 3 }); } } }); }); return stalls; });
       var ph = MP.phase ? MP.phase() : 'Open';
-      if (ph === 'Open' || ph === 'Setting up') { out.push(meshLayer('mu-stalls', stalls.filter(function (x) { return inView(x.at); }), STALL, function (x) { return [[200, 60, 60], [40, 120, 200], [240, 240, 240]][x.c]; }, Math.min(1.4, s / 2.4), function (x) { return [x.mk.name, [['Stalls', x.mk.stalls], ['Now', ph]], 'Example market on a real street']; })); }
+      if (ph === 'Open' || ph === 'Setting up') { out.push(meshLayer('mu-stalls', C.memo('muSv', C.viewKey() + Math.floor(state.t / 3600), function () { return stalls.filter(function (x) { return inView(x.at); }); }), STALL, function (x) { return [[200, 60, 60], [40, 120, 200], [240, 240, 240]][x.c]; }, Math.min(1.4, s / 2.4), function (x) { return [x.mk.name, [['Stalls', x.mk.stalls], ['Now', ph]], 'Example market on a real street']; })); }
     }
     if (MP && box('coShow') && MP.beaches) {
-      var um = []; MP.beaches().forEach(function (b) { var n = b.season ? 30 : 6; for (var k = 0; k < n; k++) { um.push({ at: [b.at[0] + ((k % 6) - 2.5) * 9 / kx, b.at[1] + (Math.floor(k / 6) - 2) * 9 / ky], b: b, c: k % 2 }); } });
-      out.push(meshLayer('mu-umbrella', um.filter(function (x) { return inView(x.at); }), UMBRELLA, function (x) { return x.c ? [240, 120, 40] : [40, 140, 220]; }, Math.min(1.4, s / 2.4), function (x) { var b = x.b; return [b.name + ' beach', [['People now', num(b.crowd)], ['Lifeguards', b.guards || 'Off season'], ['Bathing water', b.water]], 'Synthetic counts']; }));
+      var um = C.memo('muUm', Math.floor(state.t / 300), function () { var um = []; MP.beaches().forEach(function (b) { var n = b.season ? 30 : 6; for (var k = 0; k < n; k++) { um.push({ at: [b.at[0] + ((k % 6) - 2.5) * 9 / kx, b.at[1] + (Math.floor(k / 6) - 2) * 9 / ky], b: b, c: k % 2 }); } }); return um; });
+      out.push(meshLayer('mu-umbrella', C.memo('muUv', C.viewKey() + Math.floor(state.t / 300), function () { return um.filter(function (x) { return inView(x.at); }); }), UMBRELLA, function (x) { return x.c ? [240, 120, 40] : [40, 140, 220]; }, Math.min(1.4, s / 2.4), function (x) { var b = x.b; return [b.name + ' beach', [['People now', num(b.crowd)], ['Lifeguards', b.guards || 'Off season'], ['Bathing water', b.water]], 'Synthetic counts']; }));
     }
     return out;
   });
@@ -186,7 +186,7 @@
   function badges() {
     Array.prototype.forEach.call(document.querySelectorAll('.panel section[data-tab="muni"] > p.notice'), function (n) {
       var sec = n.parentElement, head = sec.querySelector('.card-head'); if (!head || head.querySelector('.mu-badge')) { return; }
-      var t = n.textContent.trim(), kind = /^Synthetic/i.test(t) ? 'Synthetic' : /^Estimate/i.test(t) ? 'Estimated' : /real|live|published/i.test(t) && /synthetic/i.test(t) ? 'Live + synthetic' : /real|live|published/i.test(t) ? 'Live data' : 'About the data';
+      var t = n.textContent.trim(), kind = /^Synthetic/i.test(t) ? 'Synthetic' : /^Estimate/i.test(t) || /estimated since|estimated from/i.test(t) && !/synthetic/i.test(t) ? 'Estimated' : /real|live|published/i.test(t) && /synthetic/i.test(t) ? 'Live + synthetic' : /real|live|published/i.test(t) ? 'Live data' : 'About the data';
       var b = document.createElement('button'); b.type = 'button'; b.className = 'mu-badge mu-b-' + kind.toLowerCase().replace(/[^a-z]+/g, '-'); b.textContent = kind + ' ⓘ'; b.title = t;
       b.addEventListener('click', function () { n.hidden = !n.hidden; });
       n.hidden = true; n.classList.add('mu-note'); head.appendChild(b);

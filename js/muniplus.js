@@ -74,7 +74,8 @@
     var E = C.edges(), out = [], acc = 0;
     for (var i = 0; i < E.length && out.length < 900; i++) { var e = E[i]; if (e.c < 2 || e.c > 4 || e.k) { continue; } acc += e.m || 0; if (acc < 140) { continue; } acc = 0;
       var a = e.path[0], z = e.path[e.path.length - 1], dx = (z[1] - a[1]) * ky, dy = -(z[0] - a[0]) * kx, L = Math.hypot(dx, dy) || 1, mid = e.path[e.path.length >> 1], k = out.length;
-      out.push({ id: 'T-' + (10000 + k), at: [mid[0] + dx / L * 6 / kx, mid[1] + dy / L * 6 / ky], sp: SPECIES[k % SPECIES.length], h: 5 + rnd(SEED, k) * 11, age: 5 + Math.floor(rnd(SEED, k + 1) * 60), health: rnd(SEED, k + 2), street: names()[e.n] || 'Street' }); }
+      var rs = rnd(SEED + 21, k), WSP = [0.3, 0.2, 0.12, 0.1, 0.08, 0.07, 0.06, 0.04, 0.03], si = 0, acc2 = 0; for (; si < WSP.length - 1; si++) { acc2 += WSP[si]; if (rs <= acc2) { break; } }
+      out.push({ id: 'T-' + (10000 + k), at: [mid[0] + dx / L * 6 / kx, mid[1] + dy / L * 6 / ky], sp: SPECIES[si], h: 5 + rnd(SEED, k) * 11, age: 5 + Math.floor(rnd(SEED, k + 1) * 60), health: rnd(SEED, k + 2), street: names()[e.n] || 'Street' }); }
     TREES = out; return out;
   }
   function treeState(t) { return t.health < 0.05 ? 'severe' : t.health < 0.15 ? 'heavy' : t.health < 0.3 ? 'moderate' : 'free'; }
@@ -254,32 +255,32 @@
     if (vis('gnShow')) {
       out.push(dots('mx-parks', parks(), function (p) { return p.skip ? rgb('info') : p.need ? rgb('heavy') : [40, 150, 80]; }, 9, parkPop));
       if (z >= 15 && !(T.muni3d && $('showMuni3d') && !$('showMuni3d').checked)) {
-        var mp = T.getMap(), b = mp.getBounds(), Tv = trees().filter(function (t) { return t.at[0] > b.getWest() && t.at[0] < b.getEast() && t.at[1] > b.getSouth() && t.at[1] < b.getNorth(); });
+        var mp = T.getMap(), b = mp.getBounds(), Tv = C.memo('mxT', C.viewKey(), function () { return trees().filter(function (t) { return t.at[0] > b.getWest() && t.at[0] < b.getEast() && t.at[1] > b.getSouth() && t.at[1] < b.getNorth(); }); });
         out.push(new deck.SimpleMeshLayer({ id: 'mx-trees3d', data: Tv, mesh: TREE, pickable: true, getPosition: function (t) { return t.at; }, getScale: function (t) { var s = t.h / 6; return [s, s, s]; }, sizeScale: z >= 17 ? 1 : z >= 16 ? 1.3 : 1.7,
           getColor: function (t) { var s = treeState(t); return s === 'severe' ? [150, 110, 60] : s === 'heavy' ? [160, 160, 60] : s === 'moderate' ? [90, 150, 70] : [46, 128, 60]; }, getOrientation: function (t) { return [0, (t.h * 37) % 90, 0]; },
           onClick: function (i) { if (i.object) { var p = treePop(i.object); C.showPopup(i.object.at, p[0], p[1], p[2]); } } }));
         out.push(new deck.ColumnLayer({ id: 'mx-trunks', data: Tv, diskResolution: 6, radius: 0.35, extruded: true, getPosition: function (t) { return t.at; }, getElevation: function (t) { return t.h * 0.42 * (z >= 17 ? 1 : z >= 16 ? 1.3 : 1.7); }, getFillColor: [110, 80, 55] }));
       } else if (z >= 14) {
-        out.push(dots('mx-trees', trees().filter(function (t) { return t.health < 0.15; }), function (t) { return rgb(treeState(t)); }, 4, treePop));
+        out.push(dots('mx-trees', C.memo('mxTp', 1, function () { return trees().filter(function (t) { return t.health < 0.15; }); }), function (t) { return rgb(treeState(t)); }, 4, treePop));
       }
     }
     if (vis('poShow')) {
-      out.push(dots('mx-units', units().map(function (u) { return { u: u, at: unitAt(u) }; }), function () { return [30, 60, 150]; }, 8, function (x) { return [x.u.id + ' · ' + x.u.kind, [['Status', 'On patrol'], ['Open tasks nearby', tasks().filter(function (t) { return t.st !== 'Done' && m(t.at, x.at) < 1500; }).length]], 'Synthetic unit on the real road network']; }));
-      out.push(dots('mx-tasks', tasks().filter(function (t) { return t.st !== 'Done'; }), function (t) { return rgb(t.st === 'New' ? 'heavy' : 'moderate'); }, 5, taskPop));
+      out.push(dots('mx-units', C.memo('mxU', Math.floor(state.t), function () { return units().map(function (u) { return { u: u, at: unitAt(u) }; }); }), function () { return [30, 60, 150]; }, 8, function (x) { return [x.u.id + ' · ' + x.u.kind, [['Status', 'On patrol'], ['Open tasks nearby', tasks().filter(function (t) { return t.st !== 'Done' && m(t.at, x.at) < 1500; }).length]], 'Synthetic unit on the real road network']; }));
+      out.push(dots('mx-tasks', C.memo('mxK', Math.floor(state.t / 60), function () { return tasks().filter(function (t) { return t.st !== 'Done'; }); }), function (t) { return rgb(t.st === 'New' ? 'heavy' : 'moderate'); }, 5, taskPop));
     }
     if (vis('psShow')) {
       out.push(dots('mx-space', spacePermits(), function (p) { return p.over ? rgb('heavy') : rgb('info'); }, 5, spPop));
       var ph = marketPhase(), E = C.edges();
       if (new Date().getDay() !== 0 && (ph === 'Setting up' || ph === 'Open' || ph === 'Cleaning')) {
         var M = markets();
-        out.push(new deck.PathLayer({ id: 'mx-market', data: M.reduce(function (a, mk) { return a.concat(mk.edges.map(function (i) { return { p: E[i].path, mk: mk }; })); }, []), pickable: true, getPath: function (d) { return d.p; }, widthUnits: 'pixels', getWidth: 8, getColor: ph === 'Cleaning' ? [40, 120, 200, 200] : [150, 90, 210, 210], capRounded: true,
+        out.push(new deck.PathLayer({ id: 'mx-market', data: C.memo('mxM', Math.floor(state.t / 3600), function () { return M.reduce(function (a, mk) { return a.concat(mk.edges.map(function (i) { return { p: E[i].path, mk: mk }; })); }, []); }), pickable: true, getPath: function (d) { return d.p; }, widthUnits: 'pixels', getWidth: 8, getColor: ph === 'Cleaning' ? [40, 120, 200, 200] : [150, 90, 210, 210], capRounded: true,
           onClick: function (i) { if (i.object) { var p = mkPop(i.object.mk); C.showPopup(i.coordinate, p[0], p[1], p[2]); } } }));
       }
     }
     if (vis('coShow') && $('coBeach')) { out.push(dots('mx-beach', beaches(), function (b) { var f = b.crowd / b.cap; return b.lost ? rgb('severe') : f > 0.85 ? rgb('heavy') : [30, 160, 210]; }, 9, beachPop)); }
     if (scen && open()) {
       var E2 = C.edges(), col = scen.ms === 'close' ? [208, 59, 59, 220] : scen.ms === 'buslane' ? [200, 40, 40, 200] : scen.ms === 'z30' ? [240, 170, 30, 220] : scen.ms === 'trees' ? [40, 150, 80, 220] : [40, 120, 200, 220];
-      out.push(new deck.PathLayer({ id: 'mx-scen', data: scen.r.edges.map(function (i) { return E2[i].path; }), pickable: true, getPath: function (p) { return p; }, widthUnits: 'pixels', getWidth: 9, getColor: col, capRounded: true,
+      out.push(new deck.PathLayer({ id: 'mx-scen', data: C.memo('mxS', scen.r.name + scen.ms, function () { return scen.r.edges.map(function (i) { return E2[i].path; }); }), pickable: true, getPath: function (p) { return p; }, widthUnits: 'pixels', getWidth: 9, getColor: col, capRounded: true,
         onClick: function (i) { C.showPopup(i.coordinate, 'Scenario · ' + esc(scen.r.name), scen.rows.slice(0, 4).map(function (r) { return [r[0], r[1] + ' → ' + r[2]]; }), 'Estimates; see the Scenario planning card'); } }));
     }
     return out;
