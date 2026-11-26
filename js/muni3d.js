@@ -21,7 +21,7 @@
   function box(id) { var b = $(id); return !b || b.checked; }
   function zoom() { var mp = T.getMap(); return mp ? mp.getZoom() : 12; }
   function muniOpen() { return K.tabOpen('muni') || box('showMuniAll') && $('showMuniAll') && $('showMuniAll').checked; }
-  function on() { return box('showMuni3d') && muniOpen() && zoom() >= 15; }
+  function on() { return box('showMuni3d') && muniOpen() && zoom() >= 14.7; }
 
   /* ============================== meshes (metres; front along +X) ============================== */
   function hexa(out, x0, x1, y0, y1, z0, z1) {
@@ -200,7 +200,7 @@
     if (z3) {
       var sc = scale(), t = Math.floor(state.t / 60);
       if (box('showBins')) {
-        var B = g.bins().filter(function (b) { return inView(b.at); }), bp = { data: B, getPosition: function (b) { return b.at; }, getOrientation: function (b) { return [0, (b.i || 0) * 37 % 180, 0]; }, sizeScale: sc };
+        var MK = Math.floor(state.t / 60) + ':' + Object.keys(g.emptied).length, VK = C.viewKey(), B = C.memo('m3B', VK + MK, function () { return g.bins().filter(function (b) { return inView(b.at); }); }), bp = { data: B, getPosition: function (b) { return b.at; }, getOrientation: function (b) { return [0, (b.i || 0) * 37 % 180, 0]; }, sizeScale: sc };
         out.push(new deck.SimpleMeshLayer(Object.assign({ id: 'm3-bins', mesh: BIN, pickable: true, getColor: function (b) { return BIN_COL[b.kind] || [80, 90, 100]; },
           onClick: function (i) { var b = i.object; if (b) { var f = g.fill(b); C.showPopup(b.at, b.id + ' · ' + b.kind + ' bin', [['Fill now', Math.round(f) + '%'], ['Sensor', g.sensorOk(b, +b.id.slice(1) - 1000) ? 'Online, reporting every 15 min' : 'Offline'], ['Street', esc(b.street)], ['Next collection', f >= 75 ? 'Today' : 'Scheduled round']], 'Synthetic IoT bin sensor'); } } }, bp)));
         var binClick = function (i) { var b = i.object; if (b) { var f = g.fill(b); C.showPopup(b.at, b.id + ' · ' + b.kind + ' bin', [['Fill now', Math.round(f) + '%'], ['Sensor', g.sensorOk(b, +b.id.slice(1) - 1000) ? 'Online, reporting every 15 min' : 'Offline'], ['Street', esc(b.street)], ['Next collection', f >= 75 ? 'Today' : 'Scheduled round']], 'Synthetic IoT bin sensor'); } };
@@ -211,7 +211,7 @@
           getColor: function (b, o) { var f = g.fill(b); return !g.sensorOk(b, o.index) ? [130, 130, 140, 200] : f >= 75 ? [255, 70, 50, 140 + 115 * Math.abs(Math.sin(pulse))] : [60, 220, 120, 220]; }, updateTriggers: { getColor: Math.round(pulse * 4) } }));
       }
       if (box('showFleet')) {
-        var F = g.fleetNow().filter(function (x) { return inView(x.at, 0.01); });
+        var F = C.memo('m3F', Math.floor(state.t) + ':' + C.viewKey() + ':' + (T.muni3d.vehicleFilter ? T.muni3d.vehicleFilter() : ''), function () { return g.fleetNow().filter(function (x) { return inView(x.at, 0.01); }); });
         ['truck', 'sweeper', 'other'].forEach(function (kind) {
           var data = F.filter(function (x) { return kind === 'truck' ? /truck/i.test(x.v.type) : kind === 'sweeper' ? /sweeper/i.test(x.v.type) : !/truck|sweeper/i.test(x.v.type); }); if (!data.length) { return; }
           var ms = meshFor(data[0].v.type), fp = { data: data, getPosition: function (x) { return x.at; }, getOrientation: function (x) { return [0, x.yaw, 0]; }, sizeScale: sc, updateTriggers: { getPosition: state.t, getOrientation: state.t } };
@@ -221,12 +221,12 @@
         out.push(new deck.PointCloudLayer({ id: 'm3-fleet-light', data: F, pickable: true, onClick: function (i) { if (i.object) { var p = g.vehPopup(i.object); C.showPopup(i.object.at, p[0], p[1], p[2]); } }, pointSize: 9, sizeUnits: 'pixels', getPosition: function (x) { return [x.at[0], x.at[1], 3.6 * sc]; }, getColor: [255, 170, 30, 160 + 95 * Math.abs(Math.sin(pulse * 2))], updateTriggers: { getColor: Math.round(pulse * 8), getPosition: state.t } }));
       }
       if (box('showLamps')) {
-        var L = g.lamps().filter(function (l) { return inView(l.at); }), st = function (l) { return g.lampState(l); }, blink = Math.sin(pulse * 3) > 0;
+        var L = C.memo('m3L', C.viewKey(), function () { return g.lamps().filter(function (l) { return inView(l.at); }); }), st = function (l) { return g.lampState(l); }, blink = Math.sin(pulse * 3) > 0;
         var lampClick = function (i) { var l = i.object; if (l) { var s = st(l); C.showPopup(l.at, l.id + ' · street light', [['State', { on: 'On, full power', dim: 'On, dimmed to 50% (quiet road)', off: 'Off (daylight)', fault: 'Fault: not responding' }[s]], ['Lamp', l.led ? 'LED, dimmable' : 'Sodium'], ['Power now', s === 'on' ? (l.led ? '90 W' : '150 W') : s === 'dim' ? '45 W' : '0 W'], ['Road', esc(l.road)]], 'Synthetic lighting controller'); } };
         out.push(new deck.ColumnLayer({ id: 'm3-poles', data: L, diskResolution: 6, radius: 0.35 * sc, extruded: true, getPosition: function (l) { return l.at; }, getElevation: 9 * sc, getFillColor: [96, 104, 116], pickable: true, onClick: lampClick }));
         out.push(new deck.PointCloudLayer({ id: 'm3-lamp-heads', data: L, pickable: true, onClick: lampClick, pointSize: 11, sizeUnits: 'pixels', getPosition: function (l) { return [l.at[0], l.at[1], 9 * sc]; },
           getColor: function (l) { var s = st(l); return s === 'on' ? [255, 226, 130, 255] : s === 'dim' ? [230, 190, 100, 200] : s === 'fault' ? (blink ? [255, 50, 40, 255] : [90, 20, 20, 160]) : [170, 175, 185, 200]; }, updateTriggers: { getColor: t + ':' + blink } }));
-        out.push(new deck.ScatterplotLayer({ id: 'm3-lamp-pools', data: L.filter(function (l) { var s = st(l); return s === 'on' || s === 'dim'; }), radiusUnits: 'meters', getRadius: 7 * sc, getPosition: function (l) { return l.at; },
+        out.push(new deck.ScatterplotLayer({ id: 'm3-lamp-pools', data: C.memo('m3P', C.viewKey() + ':' + t, function () { return L.filter(function (l) { var s = st(l); return s === 'on' || s === 'dim'; }); }), radiusUnits: 'meters', getRadius: 7 * sc, getPosition: function (l) { return l.at; },
           getFillColor: function (l) { return st(l) === 'on' ? [255, 214, 110, 70] : [255, 214, 110, 35]; }, updateTriggers: { getFillColor: t } }));
       }
       if (box('showDma')) {
@@ -237,7 +237,7 @@
       if (box('showDma')) { out.push(new deck.ScatterplotLayer({ id: 'm3-dma-pt', data: g.dmas(), pickable: true, radiusUnits: 'pixels', getRadius: 7, getPosition: function (d) { return d.at; }, getFillColor: function (d) { return d.leak >= 2.5 ? [208, 59, 59] : d.leak >= 1.5 ? [236, 131, 40] : [40, 120, 200]; }, stroked: true, getLineColor: [255, 255, 255], lineWidthUnits: 'pixels', getLineWidth: 2,
         onClick: function (i) { var d = i.object; if (d) { C.showPopup(d.at, d.id + ' · metered area', [['Night flow', '×' + d.leak.toFixed(1) + ' of expected'], ['Properties', num(d.props)], ['Action', d.leak >= 1.5 ? 'Send a leak-detection crew' : 'None']], 'Synthetic meters'); } } })); }
       if (box('showEnv') && T.environment) {
-        var S = T.environment.sensors().map(function (s) { var r = T.environment.readingAt(s, state.t); return { s: s, r: r, at: [s.lon, s.lat] }; });
+        var S = C.memo('m3S', t, function () { return T.environment.sensors().map(function (s) { var r = T.environment.readingAt(s, state.t); return { s: s, r: r, at: [s.lon, s.lat] }; }); });
         out.push(new deck.ColumnLayer({ id: 'm3-aq', data: S, diskResolution: 12, radius: 14, extruded: true, pickable: true, getPosition: function (x) { return x.at; }, getElevation: function (x) { return x.r.aqi * 1.6; },
           getFillColor: function (x) { return (x.r.band && x.r.band.color || [120, 120, 120]).concat([230]); }, updateTriggers: { getElevation: t, getFillColor: t },
           onClick: function (i) { var x = i.object; if (x) { C.showPopup(x.at, x.s.name, [['Air quality index', Math.round(x.r.aqi) + ' · ' + (x.r.band ? x.r.band.label : '')], ['PM2.5', x.r.pm25.toFixed(0) + ' µg/m³'], ['NO₂', x.r.no2.toFixed(0) + ' µg/m³'], ['Noise', x.r.noise.toFixed(0) + ' dB']], 'Column height shows the index; synthetic sensor'); } } }));
@@ -245,7 +245,7 @@
           getFillColor: function (x) { return (x.r.band && x.r.band.color || [120, 120, 120]).concat([Math.min(90, 20 + x.r.aqi / 2)]); }, updateTriggers: { getFillColor: t, getRadius: t } }));
       }
       if (bldOn && !(T.getMap() && T.getMap().getLayer('itw-buildings')) && C.buildingsData && C.buildingsData()) {
-        out.push(new deck.PolygonLayer({ id: 'm3-energy', data: C.buildingsData().filter(function (b) { return inView(b.ring[0], 0.005); }), extruded: true, getPolygon: function (b) { return b.ring; }, getElevation: function (b) { return b.h + 0.4; },
+        out.push(new deck.PolygonLayer({ id: 'm3-energy', data: C.memo('m3E', C.viewKey(), function () { return C.buildingsData().filter(function (b) { return inView(b.ring[0], 0.005); }); }), extruded: true, getPolygon: function (b) { return b.ring; }, getElevation: function (b) { return b.h + 0.4; },
           getFillColor: function (b) { return energyColour(b.h).concat([235]); }, updateTriggers: { getFillColor: Math.floor(state.t / 3600) } }));
       }
     }
@@ -271,7 +271,7 @@
   function sel(id, label, opts, def) { return '<label class="inline-field mp-f"><span>' + label + '</span><select id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(o[0]) === String(def) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }
   function chk(id, label, on0) { return '<label class="check"><input id="' + id + '" type="checkbox"' + (on0 ? ' checked' : '') + '><span>' + label + '</span></label>'; }
   function viewBtn(id) { return '<button type="button" class="btn small mu-3d" id="' + id + '">View in 3D</button>'; }
-  function fly(at, z, pitch) { z = Math.min(z || 16, window.innerWidth < 720 ? 15.4 : 16.2); var mp = T.getMap(); if (!mp || !at) { return; } var tick = $('showMuni3d'); if (tick && !tick.checked) { tick.checked = true; tick.dispatchEvent(new Event('change', { bubbles: true })); } mp.easeTo({ center: at, zoom: z || 17.2, pitch: pitch || 62, bearing: mp.getBearing() || -25, duration: 1600 }); }
+  function fly(at, z, pitch) { z = Math.min(z || 15, window.innerWidth < 720 ? 14.8 : 15); var mp = T.getMap(); if (!mp || !at) { return; } var tick = $('showMuni3d'); if (tick && !tick.checked) { tick.checked = true; tick.dispatchEvent(new Event('change', { bubbles: true })); } mp.easeTo({ center: at, zoom: z || 17.2, pitch: pitch || 62, bearing: mp.getBearing() || -25, duration: 1600 }); }
   var ILL = {
     bin: '<svg viewBox="0 0 120 70"><path d="M30 58l28 10 28-10V26L58 16 30 26z" fill="#2e7846"/><path d="M58 36v32l28-10V26z" fill="#245e37"/><path d="M27 24l31-11 31 11-31 11z" fill="#3f9a5d"/><rect x="88" y="30" width="7" height="28" rx="2" fill="#1d2a22"/><rect x="88" y="40" width="7" height="18" rx="2" fill="#ee8a2c"/><circle cx="58" cy="10" r="4" fill="#ff4632"/></svg>',
     truck: '<svg viewBox="0 0 120 70"><path d="M14 46l44 16 30-11V24L44 8 14 19z" fill="#2878c8"/><path d="M58 30v32l30-11V24z" fill="#1f5f9f"/><path d="M14 19l30-11 44 16-30 11z" fill="#4a96e0"/><path d="M88 32l18 6v16l-18 6z" fill="#e8edf3"/><circle cx="34" cy="58" r="5" fill="#1c1f24"/><circle cx="72" cy="62" r="5" fill="#1c1f24"/><circle cx="98" cy="60" r="4" fill="#1c1f24"/><rect x="40" y="2" width="8" height="5" rx="2" fill="#ffaa1e"/></svg>',

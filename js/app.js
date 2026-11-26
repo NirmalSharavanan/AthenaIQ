@@ -355,7 +355,7 @@
       });
       (function () {   // remember where the pointer was released on the map, for pop-up anchoring
         var down = null, el = map.getCanvasContainer();
-        el.addEventListener('pointerdown', function (e) { down = [e.clientX, e.clientY]; }, true);
+        el.addEventListener('pointerdown', function (e) { down = [e.clientX, e.clientY]; if (orbiting) { setOrbit(false); } }, true);   // touching the map stops the orbit, so objects hold still to be clicked
         el.addEventListener('pointerup', function (e) { if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6) { return; } var r = el.getBoundingClientRect(), pt = { x: e.clientX - r.left, y: e.clientY - r.top }; try { lastClick = { t: Date.now(), pt: pt, lngLat: map.unproject([pt.x, pt.y]) }; } catch (e1) { lastClick = null; } }, true);
       })();
       // Selections are centred in the part of the map that is not covered by the panel, and go in closer.
@@ -369,7 +369,8 @@
             if (o && o.center && typeof o.zoom === 'number' && !o.padding) {
               var pad = viewPadding(), el = map.getContainer(), w = el.clientWidth || 1, h = el.clientHeight || 1;
               var shrink = Math.min((w - pad.left - pad.right) / w, (h - pad.top - pad.bottom) / h);
-              var z = o.zoom >= 13.5 && !o.boosted ? Math.min(cap, o.zoom + boost) : o.zoom;
+              var muniOpen = window.IntelliTwin && window.IntelliTwin.kit && window.IntelliTwin.kit.tabOpen('muni');
+              var z = o.zoom >= 13.5 && !o.boosted && !muniOpen ? Math.min(cap, o.zoom + boost) : o.zoom;   // no extra zoom in Municipality
               if (st.autoZoomForPanel !== false && o.zoom >= 13.5 && shrink < 0.95) { z += Math.log2(Math.max(0.4, shrink)); }
               o = Object.assign({}, o, { zoom: z, padding: pad });
             }
@@ -472,7 +473,8 @@
   function flyToPoint(lon, lat, zoom) {
     if (!map) { return; }
     // Lists ask for street zoom; cap it so the object and its surroundings fit on screen (closer on large screens).
-    var cap = window.innerWidth < 720 ? 15 : 15.8;
+    var muni = window.IntelliTwin && window.IntelliTwin.kit && window.IntelliTwin.kit.tabOpen('muni');
+    var cap = muni ? (window.innerWidth < 720 ? 14.2 : 14.6) : (window.innerWidth < 720 ? 15 : 15.8);   // Municipality shows a little more of the area around an object
     map.flyTo({ center: [lon, lat], zoom: Math.min(zoom || 14, cap), duration: 1000 });
   }
   function locate(g) {
@@ -1021,6 +1023,9 @@
   window.IntelliTwin = {
     state: state, getMap: function () { return map; }, getOverlay: function () { return overlay; },
     core: {
+      // Keep a layer's data array the same object until its key changes, so deck.gl does not rebuild it every frame.
+      memo: (function () { var cache = {}; return function (name, key, fn) { var e = cache[name]; if (e && e.k === key) { return e.v; } var v = fn(); cache[name] = { k: key, v: v }; return v; }; })(),
+      viewKey: function () { if (!map) { return ''; } var b = map.getBounds(); return [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].map(function (x) { return Math.round(x * 400); }).join(',') + ':' + Math.round(map.getZoom() * 4); },
       CFG: CFG, $: $, num: num, pad: pad, clock: clock, level: level, LEVEL_LABEL: LEVEL_LABEL, CLASS_NAME: CLASS_NAME, SLOT: SLOT, SLOTS: SLOTS, DAY: DAY,
       meta: function () { return meta; }, buildingsData: function () { return buildings; }, edges: function () { return edges; }, names: function () { return names; }, groups: function () { return groups; },
       majorRoads: function () { return majorRoads; }, signals: function () { return signals; }, day: function () { return day; }, events: function () { return ev; },
@@ -1063,6 +1068,7 @@
       setTime: function (tod) { if (state.mode === 'live') { setMode('hist'); } setPlaying(false); jumpTo(tod); updateModeUI(true); return ''; },
       setTab: showTab,
       orbit: function (on) { setOrbit(on); },
+
       tilt: function (on) { clickIf('tilt', on); },
       play: function (on) { if (state.mode === 'live' && !on) { setMode('hist'); } setPlaying(on); },
       live: function () { setMode('live'); },

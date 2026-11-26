@@ -529,8 +529,8 @@ button.kpi.mu-go:hover, button.kpi.mu-go:focus-visible { outline: 2px solid var(
 .mu-mod-h { display: flex; width: 100%; justify-content: space-between; align-items: center; background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; text-align: left; }
 .mu-mod-n { font-weight: 700; font-size: 14px; }
 .mu-mod-c { font-size: 11px; opacity: .7; }
-.mu-mod-c::after { content: ' cards ▾'; }
-.mu-mod-h[aria-expanded="false"] .mu-mod-c::after { content: ' cards ▸'; }
+.mu-mod-c::after { content: ' ▾'; }
+.mu-mod-h[aria-expanded="false"] .mu-mod-c::after { content: ' ▸'; }
 .mu-mod-u { font-size: 12px; margin: 6px 0 2px; opacity: .85; }
 .mu-mod-b { font-size: 12px; margin: 0; }
 .panel section.mu-folded { display: none !important; }
@@ -557,3 +557,19 @@ button.kpi.mu-go:hover, button.kpi.mu-go:focus-visible { outline: 2px solid var(
 .mu-opts .check { margin: 2px 0; }
 section.mu-flash { box-shadow: 0 0 0 3px var(--accent, #2f7d5b); transition: box-shadow .3s; }
 @media (max-width: 720px) { .mu-legend { left: 8px; bottom: auto; top: 64px; max-width: 200px; max-height: 35vh; } }
+
+/* Municipality: back to overview */
+.panel-head .mu-back { margin-left: auto; margin-right: 6px; }
+.panel-head .mu-back[hidden] { display: none; }
+.mu-up { margin-left: auto; margin-right: 8px; border: 0; background: rgba(0,0,0,.06); border-radius: 999px; padding: 2px 9px; font: inherit; font-size: 11px; cursor: pointer; color: inherit; }
+
+/* planner buttons wrap; tidy early-warning table */
+.mp-planner .btn-col.row, .mu-3drow, .btn-col.row { flex-wrap: wrap; }
+#ewTable th { font-weight: 600; }
+#ewTable th .small { font-weight: 400; display: block; }
+
+/* module header: name left, count and Overview right, no wrapping */
+.mu-mod-h { gap: 8px; }
+.mu-mod-n { flex: 1 1 auto; min-width: 0; }
+.mu-mod-c, .mu-up { flex: none; white-space: nowrap; }
+.mu-up { margin: 0; }
