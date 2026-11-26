@@ -529,8 +529,8 @@ button.kpi.mu-go:hover, button.kpi.mu-go:focus-visible { outline: 2px solid var(
 .mu-mod-h { display: flex; width: 100%; justify-content: space-between; align-items: center; background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; text-align: left; }
 .mu-mod-n { font-weight: 700; font-size: 14px; }
 .mu-mod-c { font-size: 11px; opacity: .7; }
-.mu-mod-c::after { content: ' cards ▾'; }
-.mu-mod-h[aria-expanded="false"] .mu-mod-c::after { content: ' cards ▸'; }
+.mu-mod-c::after { content: ' ▾'; }
+.mu-mod-h[aria-expanded="false"] .mu-mod-c::after { content: ' ▸'; }
 .mu-mod-u { font-size: 12px; margin: 6px 0 2px; opacity: .85; }
 .mu-mod-b { font-size: 12px; margin: 0; }
 .panel section.mu-folded { display: none !important; }
@@ -567,3 +567,9 @@ section.mu-flash { box-shadow: 0 0 0 3px var(--accent, #2f7d5b); transition: box
 .mp-planner .btn-col.row, .mu-3drow, .btn-col.row { flex-wrap: wrap; }
 #ewTable th { font-weight: 600; }
 #ewTable th .small { font-weight: 400; display: block; }
+
+/* module header: name left, count and Overview right, no wrapping */
+.mu-mod-h { gap: 8px; }
+.mu-mod-n { flex: 1 1 auto; min-width: 0; }
+.mu-mod-c, .mu-up { flex: none; white-space: nowrap; }
+.mu-up { margin: 0; }

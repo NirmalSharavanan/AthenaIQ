@@ -34,7 +34,7 @@
       '</div><label class="check"><input id="showMuniAll" type="checkbox"><span>Keep municipal layers on the map in every menu</span></label>');
   }
   function header(md) {
-    return section('mu-' + md[0], 'mu-mod', '<button type="button" class="mu-mod-h" aria-expanded="true"><span class="mu-mod-n">' + md[1] + '</span><span class="mu-mod-c">' + md[4].filter(function (id) { return $(id); }).length + '</span></button>' +
+    return section('mu-' + md[0], 'mu-mod', '<button type="button" class="mu-mod-h" aria-expanded="true"><span class="mu-mod-n">' + md[1] + '</span><span class="mu-mod-c">' + (function (n) { return n + (n === 1 ? ' card' : ' cards'); })(md[4].filter(function (id) { return $(id); }).length) + '</span></button>' +
       '<p class="mu-mod-u">' + md[2] + '</p><p class="mu-mod-b"><strong>Benefit:</strong> ' + md[3] + '</p>');
   }
   function refresh() {

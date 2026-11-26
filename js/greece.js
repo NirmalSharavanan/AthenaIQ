@@ -31,7 +31,7 @@
     if (at) { at.parentNode.insertBefore(sec, at.nextSibling); } else { document.querySelector('.panel').appendChild(sec); }
     return sec;
   }
-  function list(id, items) { var ol = $(id); if (!ol) { return; } ol.innerHTML = ''; items.forEach(function (li) { ol.appendChild(li); }); if (!items.length) { ol.innerHTML = '<li class="muted">Nothing to show.</li>'; } }
+  function list(id, items) { var ol = $(id); if (!ol) { return; } ol.innerHTML = ''; items.forEach(function (li) { ol.appendChild(li); }); if (!items.length) { ol.innerHTML = '<li class="muted">Nothing needs attention right now.</li>'; } }
   function row(dot, title, sub, right, at, z) { return C.listButton(dot, title, sub, right, function () { if (at) { C.flyTo(at[0], at[1], z || 15); } }); }
   function bars(id, rows) { var mx = Math.max.apply(null, rows.map(function (r) { return r[1]; }).concat([1])); set(id, rows.map(function (r) { return C.barRow(esc(r[0]), r[2] || '', r[3] != null ? r[3] : num(r[1]), r[1] / mx); }).join('')); }
   function hideCard(id) { var s = document.getElementById(id); if (s) { s.setAttribute('data-tab', 'retired'); s.hidden = true; } }
