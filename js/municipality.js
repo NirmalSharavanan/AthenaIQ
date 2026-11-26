@@ -9,15 +9,17 @@
   var T = window.IntelliTwin, C = T.core, $ = C.$;
   // [id, name, key use cases, expected benefit, card ids, [summary label, element id holding the figure]]
   var MODULES = [
-    ['waste', 'Intelligent waste management', 'Smart bins, fill-level monitoring, collection route optimisation, fleet tracking, illegal dumping detection', 'Lower operating costs and better sanitation', ['grWs', 'grFl', 'mwDump'], ['Bins over 75% full', 'grWsFull']],
-    ['plan', 'Urban planning and digital twin', '3D city, GIS integration, land use, infrastructure mapping, construction monitoring', 'Data-driven urban planning', ['upTwin'], ['Construction sites', 'upSites']],
+    ['waste', 'Intelligent waste management', 'Smart bins, fill-level monitoring, collection route optimisation, fleet tracking, illegal dumping detection', 'Lower operating costs and better sanitation', ['grWs', 'grFl', 'rcRec', 'mwDump'], ['Bins over 75% full', 'grWsFull']],
+    ['plan', 'Urban planning and digital twin', '3D city, GIS integration, land use, infrastructure mapping, construction monitoring', 'Data-driven urban planning', ['upTwin', 'spScen'], ['Construction sites', 'upSites']],
     ['safety', 'Public safety and early warning', 'Flood detection, environmental monitoring, emergency alerts, fire detection, incident management', 'Proactive emergency response', ['ewWarn', 'grRg'], ['Alerts now', 'ewOn']],
     ['infra', 'Smart infrastructure and lighting', 'Adaptive street lighting, energy monitoring, pothole detection, structural health, predictive maintenance', 'Energy savings and lower maintenance costs', ['grLt', 'inPot'], ['Street-light faults', 'grLtFault']],
-    ['permit', 'Intelligent inspections and permitting', 'AI-assisted inspections, building permits, unauthorised construction detection, digital field inspections', 'Better regulatory compliance', ['ipPermit'], ['Permits in progress', 'ipRev']],
+    ['permit', 'Intelligent inspections and permitting', 'AI-assisted inspections, building permits, unauthorised construction detection, digital field inspections', 'Better regulatory compliance', ['ipPermit', 'psSpace'], ['Permits in progress', 'ipRev']],
     ['mob', 'Intelligent mobility and parking', 'Traffic optimisation, smart parking, congestion monitoring, adaptive signals, parking violations', 'Better mobility and less congestion', ['mbMob'], ['Congested roads', 'mbJam']],
-    ['env', 'Environmental intelligence', 'Weather, air quality, noise, water quality, temperature and carbon emissions', 'Environmental sustainability', ['wxCard', 'envAir', 'envSens', 'tgAq', 'ccEm', 'evWater'], ['Weather', 'wxNow']],
+    ['env', 'Environmental intelligence', 'Weather, air quality, noise, water quality, temperature and carbon emissions', 'Environmental sustainability', ['wxCard', 'gnTree', 'envAir', 'envSens', 'tgAq', 'ccEm', 'evWater'], ['Weather', 'wxNow']],
     ['util', 'Smart utilities management', 'Water leakage detection, smart metering, electricity use, utility asset monitoring, water supply', 'Resource optimisation', ['grLk', 'utMeter', 'grDr'], ['Likely water leaks', 'grLkBad']],
     ['cit', 'Citizen engagement and services', 'Citizen reporting, complaint management, service requests, SLA monitoring', 'Higher citizen satisfaction', ['grRp'], ['Requests open', 'csOpen']],
+    ['police', 'Municipal police', 'Patrols, parking and pavement enforcement, noise, street trading, public-space checks', 'Faster response and fairer enforcement', ['mpPol'], ['Tasks open', 'poOpen']],
+    ['coast', 'Beaches and coast', 'Crowding, lifeguards, bathing water, accessible ramps, lost children', 'Safer, cleaner beaches', ['coBeach'], ['People on the beach', 'coPeople']],
     ['asset', 'Municipal asset management', 'Asset inventory, GIS-based tracking, maintenance scheduling, lifecycle management', 'Better operational efficiency', ['amAsset'], ['Service due this week', 'amDue']]
   ];
   var TITLE_ID = { 'Air and noise now': 'envAir', 'Sensors, worst air first': 'envSens' };
@@ -26,7 +28,7 @@
   function scrollTo(el) { var box = el && el.parentElement; while (box && box.scrollHeight <= box.clientHeight + 2) { box = box.parentElement; } if (el && box) { box.scrollTop += el.getBoundingClientRect().top - box.getBoundingClientRect().top - 8; } }
   function section(id, cls, html) { var s = document.createElement('section'); s.className = cls; s.id = id; s.setAttribute('data-tab', 'muni'); s.hidden = true; s.innerHTML = html; return s; }
   function summary() {
-    return section('muNow', 'card', '<div class="card-head"><h2>Municipality now</h2><span class="muted">Ten modules · tap one to open it</span></div><div class="mu-tiles">' +
+    return section('muNow', 'card', '<div class="card-head"><h2>Municipality now</h2><span class="muted">' + MODULES.length + ' modules · tap one to open it</span></div><div class="mu-tiles">' +
       MODULES.map(function (md) { return '<button type="button" class="mu-tile" data-go="mu-' + md[0] + '"><span class="mu-t-name">' + md[1] + '</span><span class="mu-t-k">' + md[5][0] + '</span><span class="mu-t-v" data-src="' + md[5][1] + '">–</span></button>'; }).join('') +
       '</div><label class="check"><input id="showMuniAll" type="checkbox"><span>Keep municipal layers on the map in every menu</span></label>');
   }
@@ -40,6 +42,7 @@
   }
 
   C.onReady(function () {
+    MODULES = MODULES.filter(function (md) { return md[4].some(function (id) { return $(id); }); });   // e.g. no coast module inland
     // name the environment cards that came without an id
     Array.prototype.forEach.call(document.querySelectorAll('.panel section[data-tab="env"]'), function (s) { var h = s.querySelector('.card-head h2'), id = h && TITLE_ID[h.textContent.trim()]; if (id && !s.id) { s.id = id; } });
     // Duplicates folded away: the synthetic stream card repeats the river gauges; service requests join the citizen reports card;
