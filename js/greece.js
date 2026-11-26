@@ -404,7 +404,8 @@
     var out = [], o = K.tabOpen;
     var is3d = T.muni3d && T.muni3d.on();
     if (muni('showBins') && !is3d) {
-      out.push(dots('gr-bins', bins(), function (b) { var f = fill(b); return rgb(f >= 95 ? 'severe' : f >= 75 ? 'heavy' : f >= 50 ? 'moderate' : 'free'); }, 4, function (b) { return [b.id + ' · ' + b.kind, [['Fill', Math.round(fill(b)) + '%'], ['Street', b.street], ['Emptied', '05:00']], 'Synthetic bin level']; }));
+      var zNow = T.getMap() ? T.getMap().getZoom() : 14;   // below street zoom show only what needs action, so points do not overlap
+      out.push(dots('gr-bins', zNow >= 15.5 ? bins() : bins().filter(function (b) { return fill(b) >= 75; }), function (b) { var f = fill(b); return rgb(f >= 95 ? 'severe' : f >= 75 ? 'heavy' : f >= 50 ? 'moderate' : 'free'); }, 4, function (b) { return [b.id + ' · ' + b.kind, [['Fill', Math.round(fill(b)) + '%'], ['Street', b.street], ['Emptied', '05:00']], 'Synthetic bin level']; }));
     }
     if (muni('showFleet')) {
       if (!is3d) { out.push(dots('gr-fleet', fleetNow(), function (x) { return x.v.col; }, 7, vehPopup)); }
@@ -416,7 +417,7 @@
       out.push(dots('gr-dma-pt', dmas(), function (d) { return rgb(d.leak >= 2.5 ? 'severe' : d.leak >= 1.5 ? 'heavy' : 'info'); }, 6, function (d) { return [d.id + ' · metered area', [['Night flow', '×' + d.leak.toFixed(1) + ' of expected'], ['Properties', num(d.props)], ['Action', d.leak >= 1.5 ? 'Send a leak-detection crew' : 'None']], 'Synthetic meter data']; }));
     }
     if (muni('showLamps') && !is3d) {
-      out.push(dots('gr-lamps', lamps(), function (l) { var s = lampState(l); return s === 'fault' ? rgb('severe') : s === 'dim' ? [200, 170, 60] : s === 'on' ? [255, 220, 90] : rgb('off'); }, 3, function (l) { return [l.id, [['State', lampState(l)], ['Type', l.led ? 'LED, dimmable' : 'Sodium'], ['Road', l.road]], 'Synthetic lamp state']; }));
+      out.push(dots('gr-lamps', (T.getMap() && T.getMap().getZoom() >= 15.5) ? lamps() : lamps().filter(function (l) { return lampState(l) === 'fault'; }), function (l) { var s = lampState(l); return s === 'fault' ? rgb('severe') : s === 'dim' ? [200, 170, 60] : s === 'on' ? [255, 220, 90] : rgb('off'); }, 3, function (l) { return [l.id, [['State', lampState(l)], ['Type', l.led ? 'LED, dimmable' : 'Sodium'], ['Road', l.road]], 'Synthetic lamp state']; }));
     }
     if (o('fines')) {
       var t = tickets([0, 1, 2, 3, 4], CITY_OFF, 0.01, SEED + 3).streets.slice(0, 40);

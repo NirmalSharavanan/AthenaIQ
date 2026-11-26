@@ -534,3 +534,26 @@ button.kpi.mu-go:hover, button.kpi.mu-go:focus-visible { outline: 2px solid var(
 .mu-mod-u { font-size: 12px; margin: 6px 0 2px; opacity: .85; }
 .mu-mod-b { font-size: 12px; margin: 0; }
 .panel section.mu-folded { display: none !important; }
+
+/* Municipality UX: pop-up actions, pick list, key, data badges */
+.mu-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line, rgba(0,0,0,.12)); }
+.mu-pick { display: flex; flex-direction: column; gap: 4px; margin: 6px 0; }
+.mu-pick .btn { text-align: left; justify-content: flex-start; }
+.mu-legend { position: absolute; left: 12px; bottom: 86px; z-index: 5; max-width: 260px; max-height: 50vh; overflow: auto; background: var(--surface, #fff); color: var(--text, #1c2430); border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.18); padding: 8px 10px; font-size: 12px; }
+.mu-leg-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.mu-leg-x { background: none; border: 0; font-size: 16px; cursor: pointer; color: inherit; line-height: 1; }
+.mu-leg-g { margin: 4px 0 6px; }
+.mu-leg-g strong { display: block; font-size: 11px; margin-bottom: 2px; }
+.mu-leg-g span { display: inline-flex; align-items: center; gap: 4px; margin: 1px 8px 1px 0; }
+.mu-leg-g i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 1px solid rgba(255,255,255,.8); box-shadow: 0 0 0 1px rgba(0,0,0,.15); }
+.mu-badge { margin-left: auto; border: 0; border-radius: 999px; padding: 2px 9px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.mu-b-synthetic { background: #fff1d6; color: #8a5a00; }
+.mu-b-estimated { background: #e8f0fb; color: #1f5f9f; }
+.mu-b-live-synthetic { background: #e6f4ec; color: #22683f; }
+.mu-b-live-data { background: #dff3e8; color: #1b6b3b; }
+.mu-b-about-the-data { background: var(--surface-2); color: inherit; }
+.card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.mu-opts { margin-top: 6px; }
+.mu-opts .check { margin: 2px 0; }
+section.mu-flash { box-shadow: 0 0 0 3px var(--accent, #2f7d5b); transition: box-shadow .3s; }
+@media (max-width: 720px) { .mu-legend { left: 8px; bottom: auto; top: 64px; max-width: 200px; max-height: 35vh; } }

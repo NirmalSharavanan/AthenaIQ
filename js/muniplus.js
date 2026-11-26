@@ -260,7 +260,7 @@
           onClick: function (i) { if (i.object) { var p = treePop(i.object); C.showPopup(i.object.at, p[0], p[1], p[2]); } } }));
         out.push(new deck.ColumnLayer({ id: 'mx-trunks', data: Tv, diskResolution: 6, radius: 0.35, extruded: true, getPosition: function (t) { return t.at; }, getElevation: function (t) { return t.h * 0.42 * (z >= 17 ? 1 : z >= 16 ? 1.3 : 1.7); }, getFillColor: [110, 80, 55] }));
       } else if (z >= 14) {
-        out.push(dots('mx-trees', trees().filter(function (t) { return t.health < 0.3; }), function (t) { return rgb(treeState(t)); }, 4, treePop));
+        out.push(dots('mx-trees', trees().filter(function (t) { return t.health < 0.15; }), function (t) { return rgb(treeState(t)); }, 4, treePop));
       }
     }
     if (vis('poShow')) {
@@ -291,5 +291,5 @@
     C.onTab(function () { render(); C.redraw(); });
     C.onMinute(render);
   });
-  T.muniplus = { render: render, trees: trees, units: units };
+  T.muniplus = { render: render, trees: trees, units: units, markets: markets, phase: marketPhase, beaches: beaches };
 })();

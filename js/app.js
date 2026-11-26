@@ -621,7 +621,13 @@
         onClick: function (info) { if (info.object) { accidentPopup(info.object); } }
       }));
     }
-    overlay.setProps({ layers: layers });
+    layers = layers.filter(Boolean);
+    var core = window.IntelliTwin && window.IntelliTwin.core;
+    if (core && core.layerFilter) { layers = layers.filter(function (l) { try { return core.layerFilter(l); } catch (e) { return true; } }); }
+    // Areas (zones, rings, routes, haze) draw first so points on top of them stay clickable.
+    var AREA = /^(roads|asphalt|buildings|shuttle-zones|freight-zone|bus-routes|tg-orr|gr-(air|nofly|sh|fire|ring|dma|route|evac|closed)$|m3-(dma|aq-haze|lamp-pools)$|mx-(scen|market)$|mp-(routes|trail)$)/;
+    var areas = [], rest = []; layers.forEach(function (l) { (AREA.test(l.id) ? areas : rest).push(l); });
+    overlay.setProps({ layers: areas.concat(rest) });
   }
   /* ---------- clustering: nearby symbols become one numbered bubble until the map is zoomed in ---------- */
   // Groups points that fall in the same screen cell (cellPx wide) at this zoom. Returns [{ at, n, items }].
