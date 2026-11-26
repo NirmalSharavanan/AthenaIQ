@@ -23,7 +23,7 @@ echo "::add-mask::$token"
 # Show the claims AWS checks against the role's trust policy (never the token itself).
 payload=$(cut -d. -f2 <<<"$token" | tr '_-' '/+')
 while [ $((${#payload} % 4)) -ne 0 ]; do payload="$payload="; done
-base64 -d <<<"$payload" 2>/dev/null | jq -c '{sub, aud, repository, ref}' || true
+base64 -d <<<"$payload" 2>/dev/null | jq -c '{iss, sub, aud, repository, ref, repository_owner, repository_visibility, iat, nbf, exp}' || true
 creds=$(aws sts assume-role-with-web-identity \
   --role-arn "arn:aws:iam::$ACCOUNT:role/athenaiq-github-$KIND" \
   --role-session-name "github-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
